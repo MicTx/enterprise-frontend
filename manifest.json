@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "skill": "enterprise-frontend",
+  "version": "0.3.0",
+  "runtime": [
+    "SKILL.md",
+    "AGENTS.md",
+    "agents",
+    "examples",
+    "references"
+  ]
+}

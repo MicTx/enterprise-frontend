@@ -1,0 +1,6 @@
+interface:
+  display_name: "Enterprise Frontend"
+  short_description: "Reference-driven enterprise frontend adaptation and verification"
+  default_prompt: "Use $enterprise-frontend to inspect the affected target behavior, reuse the smallest complete boundary, and verify the result."
+policy:
+  allow_implicit_invocation: true

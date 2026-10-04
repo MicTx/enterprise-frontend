@@ -1,0 +1,83 @@
+{
+  "skill_name": "enterprise-frontend",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "这个仓库已经有客户管理页。请新增供应商管理页，功能包括关键词/状态筛选、分页、新增、编辑、禁用、删除和权限控制。不要重新设计整套前端，要与现有产品一致并直接实现。",
+      "expected_output": "Inspects the repository, selects the existing customer-management flow as the closest analogue, adapts a complete vertical slice (route/menu/access/page/service/query key/types/tests), preserves the target theme/request/state/modal conventions, and verifies the real workflow.",
+      "files": [],
+      "expectations": [
+        "Inspects target-local authority before choosing a design",
+        "Uses the closest proven implementation by job and interaction rather than inventing a generic page",
+        "Covers the full vertical slice, not only the visible page component",
+        "Preserves target architecture and styling conventions",
+        "Runs repository-defined checks and verifies critical browser interactions when available"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "把一个成熟后台项目作为参考，把当前半成品前端补成可用系统。当前项目已有后端 API 和品牌，不允许照搬参考项目的业务、角色和文案。请实施迁移。",
+      "expected_output": "Performs an adoption workflow: inventories target and reference, classifies capabilities as reuse/adapt/replace/bridge/omit/remove, preserves target API and brand, migrates foundations in dependency order, lands representative vertical slices, checks source residue, and verifies build and browser flows.",
+      "files": [],
+      "expectations": [
+        "Creates an evidence-based target/reference capability matrix",
+        "Preserves target APIs, brand, and owned integration seams",
+        "Migrates foundations in dependency order instead of blindly copying a tree",
+        "Removes reference-specific routes, roles, names, assets, and dead dependencies",
+        "Verifies a representative end-to-end path before considering the migration complete"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "现有地图工作台在窄屏下地图被挤没了，右侧参数面板出现双滚动。请参考仓库里另一个正常的地图工作区修好，不要强行改成普通卡片列表。",
+      "expected_output": "Selects the working map workspace as the analogue, traces its viewport allocation and resize behavior, repairs shrink/overflow ownership without imposing a generic card grid, preserves target map infrastructure, and verifies geometry and interactions at relevant viewports.",
+      "files": [],
+      "expectations": [
+        "Chooses the map-workspace analogue rather than a visually generic page",
+        "Keeps the map/canvas as the primary surface",
+        "Repairs the complete size and shrink chain and assigns one intentional vertical scroll owner",
+        "Preserves the existing map engine and target styling system",
+        "Uses browser geometry and interaction evidence at desktop and narrow viewports"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "给这个已有设计系统的 Ant Design 项目加一个审批列表。项目卡片圆角是 16px、页面间距 24px、没有页面标题，并使用自己的 CSS Modules 和请求封装。请按项目现状实现。",
+      "expected_output": "Respects the target project's established 16px radius, 24px spacing, headerless page pattern, CSS Modules, and request wrapper; uses Ant Design facts only for version-sensitive APIs; does not inject fallback tokens or universal copy/layout rules.",
+      "files": [],
+      "expectations": [
+        "Treats target theme and layout conventions as authoritative",
+        "Does not overwrite project choices with bundled fallback dimensions or page-title rules",
+        "Reuses the target request wrapper and CSS Modules strategy",
+        "Implements approval-specific permissions, states, mutations, feedback, and confirmation",
+        "Queries Ant Design documentation only where version-sensitive evidence is needed"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "把列表筛选区的“清空”按钮改成“重置筛选”，并同步它的无障碍名称。重置行为保持不变。",
+      "expected_output": "Inspects the affected control, locale/accessibility bindings and relevant tests; makes a local change preserving reset behavior. Does not audit unrelated services/auth or create a new vertical slice, migration matrix, or design system. Runs relevant and repository-required checks without duplicating equivalent evidence.",
+      "files": [],
+      "expectations": [
+        "Uses the smallest affected component and test boundary, not a whole-repository inventory",
+        "Updates visible and accessible names consistently while preserving reset behavior",
+        "Does not add unrelated service, permission, routing or architecture changes",
+        "Avoids mandatory analogue searches, API lookups and process reports that cannot affect this change",
+        "Verifies the changed labels and unchanged behavior with relevant evidence and required repository checks"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "新增通知偏好设置页。项目已有设置路由、表单组件、权限封装、请求层和真实的偏好读写 API，但没有相似的业务页面，也没有提供外部参考仓库。请直接实现。",
+      "expected_output": "Uses established primitives and actual preference contracts to build the smallest complete settings journey without requiring a missing analogue. Connects route/access/data/form/mutation feedback and tests, preserves target integrations, and verifies loading/error/retry/save behavior.",
+      "files": [],
+      "expectations": [
+        "Recognizes that no complete analogue exists and proceeds from target-owned primitives and contracts",
+        "Does not stall for an external example or invent a backend API",
+        "Implements the needed route, permission, data and form integration",
+        "Covers loading, error/retry, validation, pending, save feedback and state refresh",
+        "Verifies the complete changed journey without replacing unrelated infrastructure"
+      ]
+    }
+  ]
+}
