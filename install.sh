@@ -1,226 +1,200 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# install.sh — enterprise-frontend skill 宿主无关安装器（D15：仅接受用户指定目录，
+# 无任何宿主自动发现/自动全局安装）。
+#
+# 依赖：bash >=3.2、python3 >=3.9、coreutils（mkdir/mv/rm/mktemp/dirname/diff/find）。
+# 行为契约：候选暂存 → 内容 diff 幂等检测 → 既有安装移备份（默认开，落目标侧）→
+# 原子 mv 就位 → 装后校验 → 任一步失败回滚；回滚失败保留备份并如实报告。
+set -u
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_NAME="enterprise-frontend"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGER="$SCRIPT_DIR/scripts/package_skill.py"
-DESTINATION_CHECKER='import pathlib, sys
-root = pathlib.Path(sys.argv[2]).resolve()
-raw = pathlib.Path(sys.argv[1]).expanduser()
-destination = raw.parent.resolve() / raw.name
-if destination == root or root in destination.parents or destination in root.parents:
-    raise SystemExit("destination must not be the source repository or one of its ancestors/descendants")
-print(destination)'
-CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
-CLAUDE_SKILLS_DIR="${CLAUDE_HOME:-$HOME/.claude}/skills"
-BACKUP_ROOT="${BACKUP_ROOT:-$SCRIPT_DIR/.install-backups}"
-
-INSTALL_CODEX=1
-INSTALL_CLAUDE=1
-DRY_RUN=0
-FORCE=0
-BACKUP=1
-EXTRAS_MODE="auto"
-ONLY_MODE=0
+DEFAULT_SKILL_DIR="$SCRIPT_DIR/$SKILL_NAME"
 
 usage() {
-  cat <<'EOF'
-Install the enterprise-frontend runtime bundle.
-
-Default: Codex + Claude Code + detected extra agent tools.
-
-Usage:
-  ./install.sh [options]
-
-Options:
-  --codex-only       Install only for Codex
-  --claude-only      Install only for Claude Code
-  --all              Install for every known target
-  --no-extras        Install only for Codex and Claude Code
-  --force            Replace an existing matching installation
-  --no-backup        Replace without preserving the previous installation
-  --dry-run          Print target paths without writing
-  -h, --help         Show this help
-
-Environment:
-  CODEX_HOME         Override the Codex home directory
-  CLAUDE_HOME        Override the Claude Code home directory
-  BACKUP_ROOT        Override the local backup directory
-EOF
+  cat <<'USAGE'
+用法: ./install.sh <目标目录> [选项]
+  --skill-dir <path>   源 skill 目录（默认: 脚本所在目录下的 enterprise-frontend/）
+  --force              强制替换内容不同（或已损坏）的既有安装
+  --no-backup          替换时不保留旧安装备份
+  --dry-run            只打印将执行的动作，不写盘
+  -h | --help          本帮助
+退出码: 0 = 成功或已最新；1 = 安装失败（含已回滚）；2 = 用法/前置校验失败
+依赖: bash >=3.2、python3 >=3.9、coreutils（mkdir/mv/rm/mktemp/dirname/diff/find）
+USAGE
 }
 
-while [[ $# -gt 0 ]]; do
+die_usage() {
+  echo "ERROR: $1" >&2
+  usage >&2
+  exit 2
+}
+
+TARGET_DIR=""
+SKILL_DIR=""
+FORCE=0
+NO_BACKUP=0
+DRY_RUN=0
+
+while [ $# -gt 0 ]; do
   case "$1" in
-    --codex-only)
-      INSTALL_CODEX=1
-      INSTALL_CLAUDE=0
-      ONLY_MODE=1
+    --skill-dir)
+      [ $# -ge 2 ] || die_usage "--skill-dir 需要一个路径参数"
+      SKILL_DIR="$2"
+      shift 2
       ;;
-    --claude-only)
-      INSTALL_CODEX=0
-      INSTALL_CLAUDE=1
-      ONLY_MODE=1
+    --force)
+      FORCE=1
+      shift
       ;;
-    --all) EXTRAS_MODE="all" ;;
-    --no-extras) EXTRAS_MODE="none" ;;
-    --force) FORCE=1 ;;
-    --no-backup) BACKUP=0 ;;
-    --dry-run) DRY_RUN=1 ;;
+    --no-backup)
+      NO_BACKUP=1
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
       ;;
+    -*)
+      die_usage "未知选项: $1"
+      ;;
     *)
-      echo "Unknown option: $1" >&2
-      usage >&2
-      exit 2
+      if [ -n "$TARGET_DIR" ]; then
+        die_usage "多余的位置参数: $1"
+      fi
+      TARGET_DIR="$1"
+      shift
       ;;
   esac
-  shift
 done
 
-check_dependencies() {
-  local missing=()
-  local command_name
-  for command_name in python3 diff mv rm mkdir dirname mktemp; do
-    if ! command -v "$command_name" >/dev/null 2>&1; then
-      missing+=("$command_name")
-    fi
-  done
-  if [[ ${#missing[@]} -gt 0 ]]; then
-    echo "Missing required commands: ${missing[*]}" >&2
-    exit 1
-  fi
-  if [[ ! -f "$PACKAGER" ]]; then
-    echo "Missing runtime packager: $PACKAGER" >&2
-    exit 1
-  fi
-}
+[ -n "$TARGET_DIR" ] || die_usage "缺少位置参数 <目标目录>"
+[ -n "$SKILL_DIR" ] || SKILL_DIR="$DEFAULT_SKILL_DIR"
+[ -d "$SKILL_DIR" ] || die_usage "源 skill 目录不存在: $SKILL_DIR"
+[ -f "$SKILL_DIR/SKILL.md" ] || die_usage "源 skill 目录缺 SKILL.md: $SKILL_DIR"
 
-extra_targets() {
-  printf '%s\t%s\n' \
-    "copilot"  "$HOME/.copilot/skills" \
-    "gemini"   "$HOME/.gemini/skills" \
-    "windsurf" "$HOME/.codeium/windsurf/skills" \
-    "cline"    "$HOME/.cline/skills" \
-    "goose"    "$HOME/.config/goose/skills" \
-    "opencode" "$HOME/.config/opencode/skills" \
-    "kiro"     "$HOME/.kiro/skills" \
-    "roo"      "$HOME/.roo/skills" \
-    "agents"   "$HOME/.agents/skills" \
-    "pi"       "$HOME/.pi/agent/skills"
-}
+# 目标与源相同或互为祖先/后代 → 拒绝（python3 内联 realpath 前缀检查）
+if ! python3 - "$TARGET_DIR" "$SKILL_DIR" <<'PYEOF'
+import os, sys
+t = os.path.realpath(sys.argv[1])
+s = os.path.realpath(sys.argv[2])
+def nested(a, b):
+    a = a.rstrip(os.sep) + os.sep
+    b = b.rstrip(os.sep) + os.sep
+    return b.startswith(a)
+sys.exit(0 if not (nested(t, s) or nested(s, t)) else 1)
+PYEOF
+then
+  die_usage "目标目录与源 skill 目录相同或互为祖先/后代"
+fi
 
-install_one() (
-  local label="$1"
-  local skills_dir="$2"
-  local destination="$skills_dir/$SKILL_NAME"
-  local destination_dir candidate_root="" candidate backup_dir="" rollback_path=""
+INSTALL_DIR="$TARGET_DIR/$SKILL_NAME"
 
-  if ! destination="$(python3 -B -c "$DESTINATION_CHECKER" "$destination" "$SCRIPT_DIR")"; then
-    echo "Could not resolve installation destination: $destination" >&2
-    return 1
-  fi
-  destination_dir="$(dirname "$destination")"
-
-  echo "Installing $SKILL_NAME for $label: $destination"
-  if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "[dry-run] python3 $PACKAGER --dest $destination"
-    return 0
-  fi
-
-  mkdir -p "$destination_dir"
-  candidate_root="$(mktemp -d "$destination_dir/.enterprise-frontend-candidate.XXXXXX")"
-  candidate="$candidate_root/$SKILL_NAME"
-  trap 'rm -rf "${candidate_root:-}"' EXIT
-  python3 "$PACKAGER" --dest "$candidate" >/dev/null
-
-  if [[ -d "$destination" && ! -L "$destination" ]] && diff -qr "$candidate" "$destination" >/dev/null 2>&1; then
-    if [[ "$FORCE" -eq 0 ]]; then
-      echo "Already up to date: $destination"
-      return 0
-    fi
-  fi
-
-  if [[ -e "$destination" || -L "$destination" ]]; then
-    if [[ "$BACKUP" -eq 1 ]]; then
-      # Never move an installation into itself; resolve backup parents first.
-      if ! python3 -c 'import pathlib, sys
-backup, destination = (pathlib.Path(p).resolve() for p in sys.argv[1:])
-if backup == destination or destination in backup.parents:
-    raise SystemExit("backup root must not be inside the installation")' "$BACKUP_ROOT" "$destination"; then
-        return 1
-      fi
-      mkdir -p "$BACKUP_ROOT"
-      backup_dir="$(mktemp -d "$BACKUP_ROOT/$label-$SKILL_NAME.XXXXXX")/previous"
-      rollback_path="$backup_dir"
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "dry-run: 源            $SKILL_DIR"
+  echo "dry-run: 安装落点      $INSTALL_DIR"
+  if [ -d "$INSTALL_DIR" ]; then
+    if [ "$NO_BACKUP" -eq 0 ]; then
+      echo "dry-run: 将备份旧安装  $TARGET_DIR/.install-backup.$SKILL_NAME.*（默认保留备份）"
     else
-      rollback_path="$destination_dir/.$SKILL_NAME.rollback.$$"
-      if [[ -e "$rollback_path" || -L "$rollback_path" ]]; then
-        echo "Refusing to overwrite rollback path: $rollback_path" >&2
-        return 1
-      fi
+      echo "dry-run: 将不保留旧安装备份（--no-backup）"
     fi
-    mv "$destination" "$rollback_path"
-    if [[ "$BACKUP" -eq 1 ]]; then
-      echo "Backed up previous installation: $backup_dir"
-    fi
+  else
+    echo "dry-run: 目标尚无旧安装（首装）"
   fi
+  echo "dry-run: 未写盘"
+  exit 0
+fi
 
-  if ! mv "$candidate" "$destination"; then
-    if [[ -e "$destination" || -L "$destination" ]]; then
-      rm -rf "$destination"
-    fi
-    if [[ -n "$rollback_path" && ( -e "$rollback_path" || -L "$rollback_path" ) ]]; then
-      echo "Installation failed; restoring previous installation: $destination" >&2
-      if ! mv "$rollback_path" "$destination"; then
-        echo "Previous installation could not be restored; preserved at: $rollback_path" >&2
-      fi
-    fi
-    return 1
-  fi
-  if [[ ! -f "$destination/SKILL.md" || ! -d "$destination/references" ]]; then
-    echo "Installation verification failed: $destination" >&2
-    rm -rf "$destination"
-    if [[ -n "$rollback_path" && ( -e "$rollback_path" || -L "$rollback_path" ) ]]; then
-      echo "Restoring previous installation: $destination" >&2
-      if ! mv "$rollback_path" "$destination"; then
-        echo "Previous installation could not be restored; preserved at: $rollback_path" >&2
-      fi
-    fi
-    return 1
-  fi
-  if [[ "$BACKUP" -eq 0 && -n "$rollback_path" ]]; then
-    rm -rf "$rollback_path"
-  fi
-  trap - EXIT
-  rm -rf "$candidate_root"
+mkdir -p "$TARGET_DIR" || { echo "ERROR: 无法创建目标目录: $TARGET_DIR" >&2; exit 1; }
 
-  echo "Installed $label skill: $destination"
-)
-
-main() {
-  check_dependencies
-
-  if [[ "$INSTALL_CODEX" -eq 1 ]]; then
-    install_one "codex" "$CODEX_SKILLS_DIR"
-  fi
-  if [[ "$INSTALL_CLAUDE" -eq 1 ]]; then
-    install_one "claude" "$CLAUDE_SKILLS_DIR"
-  fi
-
-  if [[ "$ONLY_MODE" -eq 0 && "$EXTRAS_MODE" != "none" ]]; then
-    while IFS=$'\t' read -r label directory; do
-      [[ -z "${directory:-}" ]] && continue
-      if [[ "$EXTRAS_MODE" == "all" || -d "$(dirname "$directory")" ]]; then
-        install_one "$label" "$directory"
-      else
-        echo "Skipping $label (tool home not detected)"
-      fi
-    done < <(extra_targets)
-  fi
-
-  echo "Restart installed agent tools to reload the skill."
+cleanup_stage() {
+  [ -n "${STAGE:-}" ] && [ -d "$STAGE" ] && rm -rf "$STAGE"
 }
 
-main
+restore_backup() {
+  # 回滚：恢复旧安装；失败时保留备份路径并如实报告
+  if [ -n "$BACKUP" ] && [ -d "$BACKUP" ]; then
+    rm -rf "$INSTALL_DIR"
+    if mv "$BACKUP" "$INSTALL_DIR"; then
+      echo "已回滚旧安装。" >&2
+    else
+      echo "ERROR: 回滚失败；旧安装备份保留于: $BACKUP" >&2
+    fi
+  fi
+}
+
+# 1) 候选暂存（目标父目录 mktemp，保证 mv 同盘原子）
+STAGE="$(mktemp -d "$TARGET_DIR/.install-staging.XXXXXX")" || { echo "ERROR: mktemp 失败" >&2; exit 1; }
+BACKUP=""
+
+if ! cp -R "$SKILL_DIR/." "$STAGE/$SKILL_NAME/"; then
+  echo "ERROR: 源复制到暂存失败" >&2
+  restore_backup
+  cleanup_stage
+  exit 1
+fi
+
+# 2) 暂存净化与拒绝 symlink（打包/安装面不携带系统差异物与链接逃逸）
+# 依赖树与内部证据档案不入交付面（与 manifest.runtime 闭式清单同口径）
+find "$STAGE" -type d \( -name 'node_modules' -o -name 'dist' \) -prune -exec rm -rf {} +
+find "$STAGE" \( -name '.DS_Store' -o -name '*.pyc' \) -delete
+find "$STAGE" -type d -name '__pycache__' -prune -exec rm -rf {} +
+rm -rf "$STAGE/$SKILL_NAME/library" "$STAGE/$SKILL_NAME/LICENSE-LIBRARY" \
+      "$STAGE/$SKILL_NAME/scripts/index_library.py" \
+      "$STAGE/$SKILL_NAME/scripts/verify_snapshot.py" \
+      "$STAGE/$SKILL_NAME/scripts/tests"
+if find "$STAGE" -type l -print -quit | grep -q .; then
+  echo "ERROR: 源包含 symlink，拒绝安装" >&2
+  restore_backup
+  cleanup_stage
+  exit 1
+fi
+
+# 3) 内容 diff 幂等检测（相同且未 --force → already up to date）
+if [ -d "$INSTALL_DIR" ] && [ "$FORCE" -eq 0 ]; then
+  if diff -r -q "$INSTALL_DIR" "$STAGE/$SKILL_NAME" >/dev/null 2>&1; then
+    cleanup_stage
+    echo "already up to date"
+    exit 0
+  fi
+fi
+
+# 4) 既有安装移备份（默认开；备份落目标目录一侧，不写源目录）
+if [ -d "$INSTALL_DIR" ]; then
+  if [ "$NO_BACKUP" -eq 0 ]; then
+    BACKUP="$TARGET_DIR/.install-backup.$SKILL_NAME.$(date +%Y%m%d%H%M%S).$$"
+    if ! mv "$INSTALL_DIR" "$BACKUP"; then
+      echo "ERROR: 旧安装移备份失败" >&2
+      restore_backup
+      cleanup_stage
+      exit 1
+    fi
+  else
+    rm -rf "$INSTALL_DIR"
+  fi
+fi
+
+# 5) 原子 mv 就位
+if ! mv "$STAGE/$SKILL_NAME" "$INSTALL_DIR"; then
+  echo "ERROR: 安装就位失败" >&2
+  restore_backup
+  cleanup_stage
+  exit 1
+fi
+cleanup_stage
+
+# 6) 装后校验（SKILL.md 与 manifest.json 存在）
+if [ ! -f "$INSTALL_DIR/SKILL.md" ] || [ ! -f "$INSTALL_DIR/manifest.json" ]; then
+  echo "ERROR: 装后校验失败（SKILL.md / manifest.json 缺失）" >&2
+  restore_backup
+  exit 1
+fi
+
+echo "installed: $INSTALL_DIR"
+[ -n "$BACKUP" ] && echo "backup: $BACKUP"
+exit 0

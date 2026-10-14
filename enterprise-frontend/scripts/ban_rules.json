@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "doc_source": "references/engineering.md#全局禁令表-b1b7唯一真源",
+  "rules": [
+    {
+      "id": "B1",
+      "title": "页面/组件代码不直接 import axios；HTTP 走框架 request 或统一 apiClient",
+      "kind": "import_module",
+      "scan": true,
+      "applies_to": ["code"],
+      "params": {
+        "modules": ["axios"]
+      }
+    },
+    {
+      "id": "B2",
+      "title": "不用 react-router-dom 做页面路由/导航（命名导出黑名单）；MemoryRouter+Route+Routes 仅限组件内嵌渲染，允许",
+      "kind": "import_named_from",
+      "scan": true,
+      "applies_to": ["code"],
+      "params": {
+        "module": "react-router-dom",
+        "names": ["BrowserRouter", "HashRouter", "Link", "NavLink", "useNavigate", "useLocation", "useSearchParams", "useHistory"]
+      }
+    },
+    {
+      "id": "B3",
+      "title": "不用 import.meta.env；环境配置走框架 config/代理通道",
+      "kind": "pattern",
+      "scan": true,
+      "applies_to": ["code"],
+      "params": {
+        "patterns": ["import\\.meta\\.env"]
+      }
+    },
+    {
+      "id": "B4",
+      "title": "不安装 ESLint/Prettier；质量工具唯一 Biome（依赖名黑名单：精确 eslint/prettier，前缀 eslint-/prettier-/@eslint/；仅限直接声明，lockfile 传递依赖不在此列）",
+      "kind": "package_json_dep",
+      "scan": true,
+      "applies_to": ["deps"],
+      "params": {
+        "exact": ["eslint", "prettier"],
+        "prefixes": ["eslint-", "prettier-", "@eslint/"]
+      }
+    },
+    {
+      "id": "B5",
+      "title": "不引入第二地图引擎（模块/依赖名黑名单：精确 maplibre-gl/ol/cesium/leaflet/mapbox-gl（ol 仅精确或 ol/ 子路径，禁子串匹配）+ 前缀 @maplibre//@cesium//@mapbox/；清单本表为真源，扩充须同步 engineering.md B5 行）",
+      "kind": "import_module",
+      "scan": true,
+      "applies_to": ["code", "deps"],
+      "params": {
+        "modules": ["maplibre-gl", "ol", "cesium", "leaflet", "mapbox-gl"],
+        "prefixes": ["@maplibre/", "@cesium/", "@mapbox/"]
+      }
+    },
+    {
+      "id": "B6",
+      "title": "地图 SDK 静态资产必须同源同步（构建/安装期同步脚本），禁运行时 CDN 引用",
+      "kind": "pattern",
+      "scan": true,
+      "applies_to": ["code", "style"],
+      "params": {
+        "patterns": [
+          "js\\.arcgis\\.com",
+          "arcgis\\.com/downloads",
+          "(?:(?:unpkg|jsdelivr|cdnjs)\\.(?:com|net|cloudflare\\.com))/[^\"'\\s]*arcgis"
+        ]
+      }
+    },
+    {
+      "id": "B7",
+      "title": "业务页面不硬编码地图 overlay 颜色/透明度/线宽；overlay 样式走唯一真源（mapStyles 类文件）",
+      "kind": "none",
+      "scan": false,
+      "applies_to": [],
+      "params": {}
+    }
+  ]
+}

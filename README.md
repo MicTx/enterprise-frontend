@@ -1,134 +1,143 @@
 # enterprise-frontend
 
-参考驱动的企业前端 agent skill:在 React / Ant Design 存量代码库上做扩展、迁移与评审。
+[中文](README.md) | [English](README.en.md)
 
-**简体中文** | [English](./README.en.md)
+**约束驱动的企业级中后台前端规范** —— 把一套在生产环境验证过的技术栈、设计语言
+与工程纪律，蒸馏为 AI 编码会话可直接执行的**硬约束清单**。
 
-## 目录
-
-- [这是什么](#这是什么)
-- [安装](#安装)
-- [使用](#使用)
-- [仓库地图](#仓库地图)
-- [维护与评估](#维护与评估)
-- [许可](#许可)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-lightgrey)](./LICENSE)
 
 ## 这是什么
 
-AI 编程 agent 在存量企业前端里加一个页面,常见结果是:页面能跑,风格是别人的。agent 按通用最佳实践从零生成,自带一套请求封装、状态管理和样式写法;评审的人要逐行分辨哪些是仓库既有约定、哪些是新发明。
+`enterprise-frontend` 不是组件库，也不是脚手架。它是一个**面向 AI 编码会话的
+前端工程规范（skill）**，由三部分组成：
 
-enterprise-frontend 把顺序倒过来:先在目标仓库里找一条走得通的同类用户旅程,照着它改。新页面从第一天起就继承仓库的路由、权限、请求与反馈写法,改动收敛在这条旅程内部。适用对象是后台系统、仪表盘、CRUD 页面、设置页、地图工作台这类 React / Ant Design(含 Pro Components)代码库;机制不挑栈,内置参考资料偏 Ant Design。
+1. **约束规范**——`SKILL.md` 八层主文 + 九篇 `references/` 域文档：禁令、模式、
+   接线纪律与自查钩子，全部写成「必须怎么做」，而不是「可以参考」。
+2. **起始模板**——`template/` 非地图基座合规骨架（五真源 + 统一请求通道 +
+   内容壳 + 质量门），新项目冷启动从复制模板开始，出厂即门禁全绿。
+3. **工具链**——禁令扫描、安装器与打包器，全部仅依赖 Python 3 标准库，
+   接收方可以逐条复现验收。
 
-三种模式:
+它同时服务两类读者：**AI 会话**把它当作执行规范（装载即生效），**人类工程师**
+把它当作一份企业前端工程约束手册。
 
-| 模式 | 场景 |
-|---|---|
-| **Adopt** | 初始化地基,或按参考仓库做整体迁移 |
-| **Extend** | 新增或改造一条用户旅程,交付一条完整的纵切片 |
-| **Align** | 评审或修复:先行为与集成,再交互、布局与可访问性,最后视觉细节 |
+## 三条设计原则
 
-和相邻 skill 的分工:
+| 原则 | 含义 |
+| --- | --- |
+| **禁令硬执行** | B1–B7 禁令（不直连 axios、不绕框架路由、不装 ESLint/Prettier、不引第二地图引擎、资产同源……）在任何目标仓库、任何现状下都不让步 |
+| **真源跟随** | 设计 token、路由/导航/权限结构**跟随目标仓库的真源**——改真源，不开平行体系；新建项目无真源时才使用规范默认值 |
+| **验收可复现** | 规范只讲模式不讲版本号、不引外部来源；验收 = 静态禁令扫描 + 质量命令（lint / tsc / test）+ 逐条自查钩子，命令输出即证据 |
 
-| Skill | 管什么 |
-|---|---|
-| Anthropic `frontend-design` | 从零开始的设计与美学:布局、排版、视觉表达 |
-| Ant Design 官方 `antd-skill` | 组件 API 与版本知识 |
-| 本仓库 | 存量企业前端工程:在既有约定内扩展、迁移、评审 |
+## 适用面与场景
 
-它不做的事,先说清:
+适用于**通用企业中后台**前端；地图/GIS 是条件加载章节，非地图任务零负担。
+SKILL.md Workflow 按序判定四个场景，`references/scenario-coverage.md`
+给出每个场景的必读锚点与自查钩子：
 
-- 不安装任何前端运行时依赖,不改目标仓库的技术选型;
-- 不拿内置资料压目标仓库:仓库的约定、主题与已装版本始终优先,内置默认只兜底没有答案的问题;
-- 结构校验(工具链)验证的是打包与安装契约,不是模型效果;行为评测方法见 [`evals/README.md`](./evals/README.md),当前场景集尚未作为执行的基准跑过。
+| 场景 | 侧重 |
+| --- | --- |
+| 非地图 CRUD | 列表/表单/详情、布局骨架、四态承载、接线与数据层 |
+| 地图工作台 | 图层选型与预算、框选/绘制/受控选择、告警与图例、资产同源 |
+| 存量页面修改 | 最小完整变更、真源跟随、禁令回归、四态回归 |
+| 规范审查 | 禁令自扫、文档引用完整性、四态与接线复查 |
 
-想知道每条规则为什么长这样,读 [`docs/why-reference-driven.md`](./docs/why-reference-driven.md);agent 侧完整规则在 [`SKILL.md`](./SKILL.md)。
+## 快速开始
 
-## 安装
+### 安装
 
-要求 Bash 3+、Python 3.9+、常规 Unix 工具,和一个支持 skill 的编程 agent。本 skill 不安装任何前端依赖。
-
-```bash
-git clone https://github.com/MicTx/enterprise-frontend.git
-cd enterprise-frontend
-./install.sh
-```
-
-默认目标:Codex、Claude Code 加检测到的兼容工具,含 Pi(`~/.pi/agent/skills/enterprise-frontend`)。
-
-```bash
-./install.sh --codex-only    # 或 --claude-only
-./install.sh --all           # 所有支持的目标
-./install.sh --dry-run       # 只打印目标,不写盘
-./install.sh --help          # 全部选项与环境变量覆盖
-```
-
-已存在的安装先备份到 gitignore 的 `.install-backups/` 目录,再替换;每个目标独立暂存与恢复,安装不是全目标事务。细节与开关见 `./install.sh --help`。Windows 原生 PowerShell 见 [`docs/windows.md`](./docs/windows.md)。
-
-要分发可安装归档而不是整个仓库:
+宿主无关——不探测任何特定宿主目录，只安装到你指定的位置：
 
 ```bash
-python3 scripts/build_release.py
+# 解包后在归档根目录执行（源 = 归档内 enterprise-frontend/ 目录）
+./install.sh <目标目录>
+
+./install.sh <目标目录> --dry-run   # 预览动作，不写盘
+./install.sh <目标目录> --force     # 内容不同也强制替换
+./install.sh --help                 # 完整用法与退出码
 ```
 
-产物落在 gitignore 的 `dist/`,附带校验和与发布说明;接收方解压后运行 `./install.sh`。发布流程见 [`RELEASE.md`](./RELEASE.md)。
+安装落点固定为 `<目标目录>/enterprise-frontend/`；重复安装相同内容输出
+`already up to date`；替换旧安装默认保留备份。依赖：bash ≥3.2、
+python3 ≥3.9、coreutils。
 
-验证目标已装好,然后重启 agent:
+**从零新建项目**：不装 skill，而是复制随包的 `template/` 起始模板（五真源 +
+统一请求通道 + 内容壳，已合规）——`cp -r template/ my-admin` 后按模板 README
+执行 `npm install`。详见 `template/README.md`。
+
+### 在宿主会话中使用
+
+把 `<目标目录>/enterprise-frontend` 所在路径加入你的 AI 编码宿主的 skill 搜索面，
+新开会话后自然语言描述任务即可触发（部分宿主支持显式 `$enterprise-frontend`
+或 `/enterprise-frontend` 前缀）。会话将按 Workflow 判定场景 → 设计推理（新页面/新功能先产出形态·布局·
+组件组成设计）→ 按路由表读取对应规范 → 执行约束 → 按自查钩子收尾。
+
+### 验证安装
 
 ```bash
-test -f ~/.claude/skills/enterprise-frontend/SKILL.md
-# Codex 目标改用 ~/.codex/skills/enterprise-frontend/SKILL.md
+cd <目标目录>/enterprise-frontend
+python3 scripts/ban_scan.py references/   # 禁令自扫 → RESULT: clean
 ```
 
-## 使用
+## 规范体系
 
-直接提前端需求即可;`$enterprise-frontend` 或 `/enterprise-frontend` 是可选的显式调用。
+入口是 `SKILL.md`（八层骨架：Identity/Mission → Success Definition → Workflow →
+Decision Rules → Boundaries → Anti-Patterns → Review Loop → References），
+其中条件加载路由表规定了「什么任务读哪篇」：
 
-```text
-参考客户管理页的完整流程,新增供应商管理。
-从这个参考仓库迁移未完成的前端,保留我们的 API 和品牌。
-修掉地图工作台在窄屏下的溢出,不要换它的页面骨架。
+| 文档 | 域 | 何时读 |
+| --- | --- | --- |
+| `references/design-reasoning.md` | 页面设计推理：需求 → 页面形态/布局/卡片-内容组件组成 + 三张最小骨架模式卡片 | 新页面/新功能实现前先读 |
+| `references/general-pages.md` | 页面规范：布局骨架、CRUD 模式、四态承载、路由弹层、菜单接线 | 任何页面/组件/布局工作（默认先读） |
+| `references/data-layer.md` | 请求与服务端状态：双通道、SSE、401 收敛、queryKeys 真源 | 涉及取数、缓存、登录态 |
+| `references/design-tokens.md` | 设计 token 与主题：清单、why 注释、布局参数、真源跟随 | 涉及颜色/间距/主题/样式选型 |
+| `references/engineering.md` | 工程规约：质量纪律、**全局禁令表 B1–B7（唯一真源）**、四步接线、构建环境 | 质量门、禁令、接线、构建环境 |
+| `references/map-layers.md` | 地图图层：选型矩阵、生命周期、渲染预算与显式降级 | 任务涉及地图/空间数据（条件加载） |
+| `references/map-interaction.md` | 地图交互：框选/绘制/选择/高亮、告警与图例、资产同源、引擎唯一入口 | 地图交互与资产（条件加载） |
+| `references/testing-guide.md` | 测试设计指南：五形态用例设计 + mock 模式 + 场景化清单 | 编写/评审测试 |
+| `references/scenario-coverage.md` | 四场景映射矩阵：场景 → 必读锚点 → 自查钩子 | 场景判定后取行 |
+
+禁令表 B1–B7 的完整定义（检查级、黑名单字面量）唯一真源在
+`references/engineering.md`；`SKILL.md` 只持 ID 与一句话语义；扫描规则表
+`scripts/ban_rules.json` 与其同源。
+
+## 工具链
+
+| 工具 | 职责 | 自测 |
+| --- | --- | --- |
+| `scripts/ban_scan.py` + `ban_rules.json` | 禁令静态检查（最小化：模式匹配，注释行豁免；规则表与规范禁令表同源，B7 显式不扫） | `python3 scripts/tests/test_ban_scan.py` |
+| `install.sh` | 宿主无关安装器（暂存 → 幂等检测 → 备份 → 原子就位 → 校验 → 回滚） | `python3 scripts/tests/test_install_sh.py` |
+| `scripts/build_package.py` | 按 manifest v2 组装发布树与 tar.gz/zip 归档 + 清单 | `python3 scripts/tests/test_build_package.py` |
+
+禁令自扫：`python3 scripts/ban_scan.py <目标路径>`——对规范文档与模板自扫应恒为
+clean；扫描面天然排除文档与测试夹具。
+
+## 打包与分发
+
+```bash
+python3 scripts/build_package.py          # 产出 dist/（发布树 + tar.gz + zip + SHA256SUMS + 清单）
+python3 scripts/build_package.py --expect-version 1.0.0
 ```
 
-完整页面改编示例见 [`examples/adapt-existing-slice.md`](./examples/adapt-existing-slice.md)。遇到陌生或版本敏感的 Ant Design API,查 [`references/antd-facts.md`](./references/antd-facts.md);目标仓库的已装版本优先于内置离线镜像。
+排除即缺省：`manifest.json` 的 `runtime` 是闭式清单，不列清单即不入包——内部规划
+记录、证据档案与测试夹具（如 `scripts/tests/`）天然排除。产物布局与校验规则见
+`scripts/build_package.py` 模块文档。
 
-## 仓库地图
+## 维护速查
 
-```text
-README.md / README.en.md       双语仓库说明
-SKILL.md / AGENTS.md           agent 运行规则 / 入口
-agents/openai.yaml             host 元数据
-examples/adapt-existing-slice.md
-references/
-  adaptation-playbook.md       复杂迁移决策
-  verification.md              测试/浏览器/残留检查方法
-  default-profile.md           未决产品选择的默认值
-  antd-facts.md                版本感知的 API 查证
-  antd/llms-index.md           离线索引
-  antd/llms-full.txt           不可变版本化镜像
-manifest.json                  runtime 发布边界与版本
-install.sh                     多工具安装器
-scripts/
-  package_skill.py             确定性 runtime 打包
-  build_release.py             版本化 dist 打包
-  validate_project.py          结构/引用/打包/评测/索引校验
-  index_antd.py                离线索引再生与检查
-  test_tooling.py              打包/校验/安装回归
-evals/                         场景定义与对比记录
-docs/
-  windows.md                   Windows 原生 / WSL 安装
-  why-reference-driven.md      设计依据(中文)
-CONTRIBUTING.md                维护与校验命令
-RELEASE.md                     版本化产物与发布清单
-CHANGELOG.md                   变更历史
-LICENSE                        PolyForm Noncommercial 1.0.0
-```
+| 动作 | 命令 |
+| --- | --- |
+| 禁令扫描 | `python3 scripts/ban_scan.py <路径>` |
+| 打包 | `python3 scripts/build_package.py` |
+| 全部测试 | 依次运行 `scripts/tests/` 下三套 unittest |
 
-只有 `manifest.json` 列出的条目会安装;脚本、评测、文档和 Git 状态都留在 runtime 之外。
+## 许可与分发
 
-## 维护与评估
+本仓库自著内容（`SKILL.md`、`references/`、`template/`、`scripts/`、安装器与
+门面文档）以 [PolyForm Noncommercial 1.0.0](LICENSE) 授权（SPDX:
+`PolyForm-Noncommercial-1.0.0`）——非商业使用自由，**商业使用需另行书面授权**。
 
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) 管维护与校验命令。[`evals/README.md`](./evals/README.md) 讲行为评测方法,[`evals/evals.json`](./evals/evals.json) 持有场景。结构校验不是模型效果结果。
+分发渠道：私有 Gitea 真源与随行压缩包；任何公开快照须另行授权。
 
-## 许可
-
-代码按 [PolyForm Noncommercial 1.0.0](./LICENSE)(SPDX: `PolyForm-Noncommercial-1.0.0`)授权:非商业用途可自由使用、修改与分发;商业使用需另行取得书面授权。
+变更历史见 [CHANGELOG](CHANGELOG.md)。

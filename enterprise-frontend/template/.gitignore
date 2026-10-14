@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.umi/
+.umi-production/
+.umi-test/
+.install-backups/
+.DS_Store

@@ -1,134 +1,165 @@
 # enterprise-frontend
 
-Reference-driven agent skill for extending, migrating, and reviewing enterprise frontends on React / Ant Design.
+[中文](README.md) | [English](README.en.md)
 
-[简体中文](./README.md) | **English**
+**A constraint-driven spec for enterprise admin frontends** — a production-
+proven stack, design language, and engineering discipline distilled into a
+**hard-constraint checklist** that AI coding sessions execute directly.
 
-## Table of contents
-
-- [What this is](#what-this-is)
-- [Install](#install)
-- [Use](#use)
-- [Repository map](#repository-map)
-- [Maintain and evaluate](#maintain-and-evaluate)
-- [License](#license)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-lightgrey)](./LICENSE)
 
 ## What this is
 
-Ask an AI coding agent to add a page inside an existing enterprise frontend, and a common result is: the page runs, but it looks foreign. The agent generates from generic best practices, bringing its own request wrappers, state management, and styling; reviewers then separate line by line what follows repository conventions and what is newly invented.
+`enterprise-frontend` is not a component library or a scaffold. It is a
+**frontend engineering spec (a skill) for AI coding sessions**, made of three
+parts:
 
-enterprise-frontend reverses the order: first find a proven similar user journey inside the target repository, then adapt it. The new page inherits the repository's routing, permissions, request, and feedback conventions from day one, and the change stays inside that journey. It targets admin systems, dashboards, CRUD pages, settings, and map workbenches on React / Ant Design (including Pro Components) codebases; the mechanism is stack-agnostic, while the bundled reference material leans toward Ant Design.
+1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus nine
+   `references/` domain documents: bans, patterns, wiring discipline, and
+   self-check hooks, all written as "do this", never as "you could consider".
+2. **The starter template** — `template/`, a compliant non-map base skeleton
+   (five sources of truth + unified request channel + content shell + quality
+   gates). New projects start by copying the template; it ships green on all
+   gates.
+3. **The toolchain** — ban scanning, an installer, and a packager, all
+   depending only on the Python 3 standard library, so recipients can
+   reproduce every acceptance check.
 
-Three modes:
+It serves two readers at once: **AI sessions** treat it as an executable spec
+(load it and it applies), while **human engineers** use it as an enterprise
+frontend engineering constraint handbook.
 
-| Mode | When |
-|---|---|
-| **Adopt** | Initialize foundations, or migrate wholesale from a reference repository |
-| **Extend** | Add or change a user journey, delivering one complete vertical slice |
-| **Align** | Review or repair: behavior and integration first, then interaction/layout/accessibility, then visual detail |
+## Three design principles
 
-How it divides work with neighboring skills:
+| Principle | Meaning |
+| --- | --- |
+| **Bans execute globally** | The B1–B7 bans (no direct axios, no bypassing the framework router, no ESLint/Prettier, no second map engine, co-located assets, …) hold in any target repository regardless of its current state |
+| **Follow the source of truth** | Design tokens and routing/menu/permission structure **follow the target repository's sources of truth** — change the source, never fork a parallel system; spec defaults apply only when a project has none |
+| **Reproducible acceptance** | The spec speaks in patterns, never version numbers, and cites no external sources; acceptance = static ban scan + quality commands (lint / tsc / test) + per-item self-check hooks, with command output as the evidence |
 
-| Skill | Owns |
-|---|---|
-| Anthropic `frontend-design` | Design and aesthetics from scratch: layout, typography, visual expression |
-| Ant Design official `antd-skill` | Component API and version knowledge |
-| This repository | Existing-frontend engineering: extend, migrate, and review within established conventions |
+## Scope and scenarios
 
-What it does not do, stated up front:
+Applies to **generic enterprise admin frontends**; maps/GIS is a conditional
+chapter that non-map tasks never load. The SKILL.md Workflow classifies four
+scenarios in order, and `references/scenario-coverage.md` maps each to its
+required anchors and self-check hooks:
 
-- It installs no frontend runtime dependency and changes no target-repository technology choice.
-- Bundled material never outranks the target repository: its conventions, theme, and installed versions win; bundled defaults only answer questions the repository leaves open.
-- Structural validation (the tooling) checks packaging and installation contracts, not model performance; the behavioral evaluation method lives in [`evals/README.md`](./evals/README.md), and the current scenario set has not been run as an executed benchmark.
+| Scenario | Focus |
+| --- | --- |
+| Non-map CRUD | Lists/forms/details, layout skeleton, four-state coverage, wiring, data layer |
+| Map workbench | Layer selection and budgets, box-select/draw/controlled selection, alerts and legends, asset co-origin |
+| Legacy page modification | Smallest complete change, source-of-truth following, ban regression, four-state regression |
+| Spec review | Ban self-scan, document reference integrity, four-state and wiring recheck |
 
-To understand why each rule has its shape, read [`docs/why-reference-driven.md`](./docs/why-reference-driven.md) (Chinese); the full agent-side rules live in [`SKILL.md`](./SKILL.md).
+## Quick start
 
-## Install
+### Install
 
-Requires Bash 3+, Python 3.9+, standard Unix utilities, and a skill-aware coding agent. This skill installs no frontend dependency.
-
-```bash
-git clone https://github.com/MicTx/enterprise-frontend.git
-cd enterprise-frontend
-./install.sh
-```
-
-Default targets: Codex, Claude Code, and detected compatible tools, including Pi at `~/.pi/agent/skills/enterprise-frontend`.
-
-```bash
-./install.sh --codex-only    # or --claude-only
-./install.sh --all           # every supported target
-./install.sh --dry-run       # print targets without writing
-./install.sh --help          # all options and environment overrides
-```
-
-Existing installations get a backup under the gitignored `.install-backups/` directory before replacement; each target stages and restores on its own, and installation is not an all-target transaction. Details and switches are in `./install.sh --help`. For native PowerShell, follow [`docs/windows.md`](./docs/windows.md).
-
-To send an installable archive instead of the repository:
+Host-agnostic — no host directory is auto-detected; it installs where you
+point it:
 
 ```bash
-python3 scripts/build_release.py
+# From the archive root (source = the bundled enterprise-frontend/ directory)
+./install.sh <target-dir>
+
+./install.sh <target-dir> --dry-run   # preview actions, no writes
+./install.sh <target-dir> --force     # replace even when content differs
+./install.sh --help                   # full usage and exit codes
 ```
 
-Artifacts land in the gitignored `dist/` with checksums and release notes; recipients extract and run `./install.sh`. The release checklist is [`RELEASE.md`](./RELEASE.md).
+The install location is always `<target-dir>/enterprise-frontend/`;
+re-installing identical content prints `already up to date`; replacing an old
+install keeps a backup by default. Requires bash >= 3.2, python3 >= 3.9,
+coreutils.
 
-Verify the selected target and restart the agent:
+**Starting a project from scratch**: skip installing the skill and copy the
+bundled `template/` starter instead (five sources of truth + unified request
+channel + content shell, already compliant) — `cp -r template/ my-admin`,
+then follow the template README (`npm install`).
+
+### Using it in a host session
+
+Add the parent path of `<target-dir>/enterprise-frontend` to your AI host's
+skill search path and describe tasks in natural language in a new session
+(some hosts also accept an explicit `$enterprise-frontend` or
+`/enterprise-frontend` prefix). The session classifies the scenario per the
+Workflow → runs the design-reasoning step (new pages/features produce a
+form·layout·composition design first) → reads the routed spec documents →
+applies the constraints → closes with the self-check hooks.
+
+### Verify the install
 
 ```bash
-test -f ~/.claude/skills/enterprise-frontend/SKILL.md
-# For Codex, use ~/.codex/skills/enterprise-frontend/SKILL.md instead.
+cd <target-dir>/enterprise-frontend
+python3 scripts/ban_scan.py references/   # ban self-scan → RESULT: clean
 ```
 
-## Use
+## The spec system
 
-Natural frontend requests are sufficient; `$enterprise-frontend` or `/enterprise-frontend` is optional.
+The entry point is `SKILL.md` (eight layers: Identity/Mission → Success
+Definition → Workflow → Decision Rules → Boundaries → Anti-Patterns → Review
+Loop → References). Its conditional-loading routing table defines which task
+reads which document:
 
-```text
-Add supplier management by adapting the existing customer-management flow.
-Migrate this incomplete frontend from the reference, preserving our APIs and brand.
-Fix this map workbench's narrow-screen overflow without replacing its shell.
+| Document | Domain | When to read |
+| --- | --- | --- |
+| `references/design-reasoning.md` | Page design reasoning: requirement → page form/layout/card-content composition + three minimal pattern cards | Read before implementing any new page/feature |
+| `references/general-pages.md` | Page spec: layout skeleton, CRUD patterns, four-state coverage, route modals, menu wiring | Any page/component/layout work (read first by default) |
+| `references/data-layer.md` | Requests & server state: dual-channel, SSE, 401 convergence, queryKeys source of truth | Fetching, caching, login state |
+| `references/design-tokens.md` | Design tokens & theme: inventory, why-comments, layout parameters, truth-source following | Colors, spacing, theming, style choices |
+| `references/engineering.md` | Engineering rules: quality discipline, **the global ban table B1–B7 (single source of truth)**, four-step wiring, build environment | Quality gates, bans, wiring, build environment |
+| `references/map-layers.md` | Map layers: selection matrix, lifecycle, render budgets & explicit degradation | Tasks involving maps/spatial data (conditional) |
+| `references/map-interaction.md` | Map interaction: box-select/draw/selection/highlight, alerts & legends, asset co-origin, single engine entry | Map interaction and assets (conditional) |
+| `references/testing-guide.md` | Test design guide: five test forms + mock patterns + per-scenario checklists | Writing/reviewing tests |
+| `references/scenario-coverage.md` | Four-scenario matrix: scenario → anchors → self-check hooks | After scenario classification |
+
+The full B1–B7 definitions (check level, blacklist literals) live only in
+`references/engineering.md`; `SKILL.md` carries the IDs and one-line
+semantics; the scan rule table `scripts/ban_rules.json` shares the same
+source.
+
+## Toolchain
+
+| Tool | Role | Self-test |
+| --- | --- | --- |
+| `scripts/ban_scan.py` + `ban_rules.json` | Ban static check (minimal by design: pattern matching with comment-line exemption; the rule table shares a single source with the spec's ban table; B7 explicitly unscanned) | `python3 scripts/tests/test_ban_scan.py` |
+| `install.sh` | Host-agnostic installer (staging → idempotence check → backup → atomic move → validation → rollback) | `python3 scripts/tests/test_install_sh.py` |
+| `scripts/build_package.py` | Assembles the release tree and tar.gz/zip archives per manifest v2 + manifest listing | `python3 scripts/tests/test_build_package.py` |
+
+Ban self-scan: `python3 scripts/ban_scan.py <target>` — scanning the spec
+documents and the template must always come back clean; the scan surface
+naturally excludes documents and test fixtures.
+
+## Packaging and distribution
+
+```bash
+python3 scripts/build_package.py          # produces dist/ (tree + tar.gz + zip + SHA256SUMS + listing)
+python3 scripts/build_package.py --expect-version 1.0.0
 ```
 
-See [`examples/adapt-existing-slice.md`](./examples/adapt-existing-slice.md) for a worked page adaptation. For unfamiliar or version-sensitive Ant Design APIs, use [`references/antd-facts.md`](./references/antd-facts.md); the target's installed version outranks the bundled offline mirror.
+Exclusion is the default: the `runtime` list in `manifest.json` is closed —
+what is not listed is not packaged; internal planning surfaces, evidence
+archives, and test fixtures (such as `scripts/tests/`) are excluded by
+construction. Output layout and validation rules are documented in the
+`scripts/build_package.py` module docstring.
 
-## Repository map
+## Maintenance quick reference
 
-```text
-README.md / README.en.md       bilingual repository documentation
-SKILL.md / AGENTS.md           agent operating model / entry
-agents/openai.yaml             host metadata
-examples/adapt-existing-slice.md
-references/
-  adaptation-playbook.md       complex migration decisions
-  verification.md              test/browser/residue method
-  default-profile.md           unresolved product choices only
-  antd-facts.md                version-aware API lookup
-  antd/llms-index.md           offline navigation
-  antd/llms-full.txt           immutable versioned mirror
-manifest.json                  runtime publication boundary and version
-install.sh                     multi-tool installer
-scripts/
-  package_skill.py             deterministic runtime packager
-  build_release.py             versioned dist/ packager
-  validate_project.py          structure, references, bundle, eval and index checks
-  index_antd.py                offline index regeneration/check
-  test_tooling.py              packaging/validation/installation regressions
-evals/                         scenario definitions and comparison records
-docs/
-  windows.md                   native Windows / WSL installation
-  why-reference-driven.md      design rationale (Chinese)
-CONTRIBUTING.md                maintenance and validation commands
-RELEASE.md                     versioned artifacts and publish checklist
-CHANGELOG.md                   change history
-LICENSE                        PolyForm Noncommercial 1.0.0
-```
+| Action | Command |
+| --- | --- |
+| Ban scan | `python3 scripts/ban_scan.py <path>` |
+| Package | `python3 scripts/build_package.py` |
+| All tests | run the three unittest suites under `scripts/tests/` |
 
-Only the entries in `manifest.json` are installed; scripts, evals, documentation, and Git state stay outside the runtime bundle.
+## License & distribution
 
-## Maintain and evaluate
+The repository's authored content (`SKILL.md`, `references/`, `template/`,
+`scripts/`, the installer, and facade docs) is licensed under
+[PolyForm Noncommercial 1.0.0](LICENSE) (SPDX:
+`PolyForm-Noncommercial-1.0.0`) — free for noncommercial use;
+**commercial use requires separate written authorization**.
 
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) owns maintenance and validation commands. [`evals/README.md`](./evals/README.md) explains behavioral evaluation; [`evals/evals.json`](./evals/evals.json) owns the scenarios. Structural validation is not a model-performance result.
+Distribution channel: a private Gitea source of truth plus the accompanying
+archive; any public snapshot requires separate authorization.
 
-## License
-
-Code is licensed under [PolyForm Noncommercial 1.0.0](./LICENSE) (SPDX: `PolyForm-Noncommercial-1.0.0`): free to use, modify, and distribute for noncommercial purposes; commercial use requires separate written authorization.
+See [CHANGELOG](CHANGELOG.md) for the change history.

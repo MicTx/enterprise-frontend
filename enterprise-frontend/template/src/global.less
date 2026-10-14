@@ -1,0 +1,25 @@
+/* 全局层只留字体、高度链、骨架类（样式四层优先级见 design-tokens 篇）。 */
+
+html,
+body,
+#root {
+  height: 100dvh;
+  margin: 0;
+}
+
+/* 内容壳锁视口：壳占满内容区高度；页面级滚动仅 exception 声明后恢复。 */
+.page-shell {
+  height: calc(100dvh - 56px);
+  overflow: hidden;
+}
+
+.page-shell--exception {
+  height: auto;
+  min-height: calc(100dvh - 56px);
+  overflow: visible;
+}
+
+.page-shell .ant-pro-page-container-children-container {
+  height: 100%;
+  overflow: hidden;
+}

@@ -1,12 +1,17 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "skill": "enterprise-frontend",
-  "version": "0.3.0",
+  "version": "1.1.0",
+  "requires": {
+    "python": ">=3.9",
+    "bash": ">=3.2"
+  },
   "runtime": [
     "SKILL.md",
     "AGENTS.md",
-    "agents",
-    "examples",
-    "references"
+    "references",
+    "template",
+    "scripts/ban_scan.py",
+    "scripts/ban_rules.json"
   ]
 }
