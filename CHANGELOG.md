@@ -4,6 +4,34 @@ This file records current released design decisions. Git history is the source f
 
 The format follows Keep a Changelog headings so the packaging step can extract version notes.
 
+## [Unreleased]
+
+## [1.2.0] - 2026-10-30
+
+### Added
+
+- **界面删减**：general-pages 新增 §界面删减（删除对象 / 删除试读 / 保留清单 / 自查钩子）——
+  新增或触碰的界面不留多余标语、说明文字与次要标签，删后读不懂则重新设计布局、不补文字；
+  design-reasoning 设计产物契约增「删减检验」行。
+- **三方体验账**：engineering 新增 §三方体验账——每次改动对用户（UX）、开发者（DX）、
+  AI Agent（AX）逐方记账，三方都变好、现有功能零破坏，任一方变差即未完成。
+- **入口接线**：SKILL.md 的 Success Definition / Anti-Patterns / Review Loop 同步记入两条
+  约束，scenario-coverage 增 4 行；八层与 B1–B7 契约不变，不新增 B 禁令。
+- **文档结构契约测试**：`scripts/tests/test_spec_docs.py`，锁住八层标题、B-ID 三方同源、
+  链接与锚点可解析、篇数与原则数声明、规范层来源线索零泄漏，以及两条约束的接线。
+
+### Fixed
+
+- **模板构建兼容**：Umi 配置启用 `esbuildMinifyIIFE`，避免多 chunk 压缩后的 esbuild helper
+  命名冲突，出厂 `npm run build` 恢复通过。
+- **打包器只收已跟踪文件**：`build_package.py` 在 git 工作树顶层按已跟踪文件收集目录条目，
+  被 `.gitignore` 忽略的本地生成物、锁文件与 `.DS_Store` 不再入包；目录内未跟踪且未忽略的
+  文件使构建以 exit 2 失败，避免无声漏包或本地状态进入发布载荷。
+- **发布隐私门禁与产物卫生**：组装后的发布树逐文件扫描家目录绝对路径、仓库 git 远端里的
+  私有主机名与常见凭据格式，命中即 exit 2，只报文件、行号与规则名；tar 条目不再带构建者的
+  用户名与 uid；每次构建先清理 `dist/` 旧产物，失败不留归档；manifest 的 skill 名或版本号
+  格式不对时拒绝构建。
+
 ## [1.1.0] - 2026-10-14
 
 ### Changed

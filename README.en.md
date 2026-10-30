@@ -29,13 +29,15 @@ It serves two readers at once: **AI sessions** treat it as an executable spec
 (load it and it applies), while **human engineers** use it as an enterprise
 frontend engineering constraint handbook.
 
-## Three design principles
+## Five design principles
 
 | Principle | Meaning |
 | --- | --- |
 | **Bans execute globally** | The B1–B7 bans (no direct axios, no bypassing the framework router, no ESLint/Prettier, no second map engine, co-located assets, …) hold in any target repository regardless of its current state |
 | **Follow the source of truth** | Design tokens and routing/menu/permission structure **follow the target repository's sources of truth** — change the source, never fork a parallel system; spec defaults apply only when a project has none |
 | **Reproducible acceptance** | The spec speaks in patterns, never version numbers, and cites no external sources; acceptance = static ban scan + quality commands (lint / tsc / test) + per-item self-check hooks, with command output as the evidence |
+| **Subtract the interface** | New or touched UI carries no filler slogans, explanatory copy, or decorative tags; if it cannot be read once they are gone, the layout is wrong — redesign it, never patch it with words (keep-list: four-state copy, validation, units, status tags, accessible names) |
+| **Three-party experience ledger** | Every change must improve the user (UX), the developer (DX), and the AI agent (AX) while breaking nothing; a regression for any party, or cost shifted onto another, is not done — evidence is command output |
 
 ## Scope and scenarios
 
@@ -104,10 +106,10 @@ reads which document:
 | Document | Domain | When to read |
 | --- | --- | --- |
 | `references/design-reasoning.md` | Page design reasoning: requirement → page form/layout/card-content composition + three minimal pattern cards | Read before implementing any new page/feature |
-| `references/general-pages.md` | Page spec: layout skeleton, CRUD patterns, four-state coverage, route modals, menu wiring | Any page/component/layout work (read first by default) |
+| `references/general-pages.md` | Page spec: layout skeleton, CRUD patterns, four-state coverage, interface subtraction, route modals, menu wiring | Any page/component/layout work (read first by default) |
 | `references/data-layer.md` | Requests & server state: dual-channel, SSE, 401 convergence, queryKeys source of truth | Fetching, caching, login state |
 | `references/design-tokens.md` | Design tokens & theme: inventory, why-comments, layout parameters, truth-source following | Colors, spacing, theming, style choices |
-| `references/engineering.md` | Engineering rules: quality discipline, **the global ban table B1–B7 (single source of truth)**, four-step wiring, build environment | Quality gates, bans, wiring, build environment |
+| `references/engineering.md` | Engineering rules: quality discipline, **the global ban table B1–B7 (single source of truth)**, four-step wiring, the three-party experience ledger, build environment | Quality gates, bans, wiring, build environment, per-change ledger |
 | `references/map-layers.md` | Map layers: selection matrix, lifecycle, render budgets & explicit degradation | Tasks involving maps/spatial data (conditional) |
 | `references/map-interaction.md` | Map interaction: box-select/draw/selection/highlight, alerts & legends, asset co-origin, single engine entry | Map interaction and assets (conditional) |
 | `references/testing-guide.md` | Test design guide: five test forms + mock patterns + per-scenario checklists | Writing/reviewing tests |
@@ -134,14 +136,31 @@ naturally excludes documents and test fixtures.
 
 ```bash
 python3 scripts/build_package.py          # produces dist/ (tree + tar.gz + zip + SHA256SUMS + listing)
-python3 scripts/build_package.py --expect-version 1.0.0
+python3 scripts/build_package.py --expect-version 1.2.0
 ```
 
 Exclusion is the default: the `runtime` list in `manifest.json` is closed —
 what is not listed is not packaged; internal planning surfaces, evidence
 archives, and test fixtures (such as `scripts/tests/`) are excluded by
-construction. Output layout and validation rules are documented in the
+construction. When built from a git worktree root, directory entries take only
+tracked files: generated files ignored by `.gitignore` (such as `.umi*`) are
+not packaged, and an untracked, unignored file makes the build fail (exit 2)
+instead of being silently left out.
+
+The assembled release tree then passes a privacy gate: an absolute home
+directory path, a private host name from the repository's git remotes, or a
+common credential format fails the build (exit 2), reporting only file, line,
+and rule name, never the matched text. Private host names come from the git
+remotes, so that rule does nothing in a clone whose remotes are all public.
+Each build first removes its own earlier outputs from `dist/` and leaves no
+archive behind when it fails; tar entries carry no builder user name or uid.
+Output layout and validation rules are documented in the
 `scripts/build_package.py` module docstring.
+
+Release assets are built from a clean shallow clone of the version tag in the
+private Gitea source of truth, not from `dist/` in a development worktree: the
+build reads working-tree files, so uncommitted edits to tracked files would be
+packaged.
 
 ## Maintenance quick reference
 
@@ -149,7 +168,8 @@ construction. Output layout and validation rules are documented in the
 | --- | --- |
 | Ban scan | `python3 scripts/ban_scan.py <path>` |
 | Package | `python3 scripts/build_package.py` |
-| All tests | run the three unittest suites under `scripts/tests/` |
+| All tests | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
+| Doc structure contract | `python3 -I scripts/tests/test_spec_docs.py` (eight layers / B-ID agreement / links and anchors / wiring of the two experience constraints) |
 
 ## License & distribution
 

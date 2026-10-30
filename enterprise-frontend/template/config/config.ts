@@ -80,6 +80,7 @@ const requestConfig = {
 
 export default defineConfig({
   hash: true,
+  esbuildMinifyIIFE: true,
   routes,
   ignoreMomentLocale: true,
   fastRefresh: true,

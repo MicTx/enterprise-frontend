@@ -22,13 +22,15 @@
 它同时服务两类读者：**AI 会话**把它当作执行规范（装载即生效），**人类工程师**
 把它当作一份企业前端工程约束手册。
 
-## 三条设计原则
+## 五条设计原则
 
 | 原则 | 含义 |
 | --- | --- |
 | **禁令硬执行** | B1–B7 禁令（不直连 axios、不绕框架路由、不装 ESLint/Prettier、不引第二地图引擎、资产同源……）在任何目标仓库、任何现状下都不让步 |
 | **真源跟随** | 设计 token、路由/导航/权限结构**跟随目标仓库的真源**——改真源，不开平行体系；新建项目无真源时才使用规范默认值 |
 | **验收可复现** | 规范只讲模式不讲版本号、不引外部来源；验收 = 静态禁令扫描 + 质量命令（lint / tsc / test）+ 逐条自查钩子，命令输出即证据 |
+| **界面做减法** | 新增或触碰的界面不留多余标语、说明文字与次要标签；删后读不懂说明布局有问题，直接重新设计，不补字（保留清单：四态文案、校验、单位、状态 Tag、可访问名称） |
+| **三方体验账** | 每次改动同时让用户（UX）、开发者（DX）、AI Agent（AX）变好，现有功能零破坏；任一方变差或成本转嫁他方均不算完成，证据是命令输出 |
 
 ## 适用面与场景
 
@@ -89,10 +91,10 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 | 文档 | 域 | 何时读 |
 | --- | --- | --- |
 | `references/design-reasoning.md` | 页面设计推理：需求 → 页面形态/布局/卡片-内容组件组成 + 三张最小骨架模式卡片 | 新页面/新功能实现前先读 |
-| `references/general-pages.md` | 页面规范：布局骨架、CRUD 模式、四态承载、路由弹层、菜单接线 | 任何页面/组件/布局工作（默认先读） |
+| `references/general-pages.md` | 页面规范：布局骨架、CRUD 模式、四态承载、界面删减、路由弹层、菜单接线 | 任何页面/组件/布局工作（默认先读） |
 | `references/data-layer.md` | 请求与服务端状态：双通道、SSE、401 收敛、queryKeys 真源 | 涉及取数、缓存、登录态 |
 | `references/design-tokens.md` | 设计 token 与主题：清单、why 注释、布局参数、真源跟随 | 涉及颜色/间距/主题/样式选型 |
-| `references/engineering.md` | 工程规约：质量纪律、**全局禁令表 B1–B7（唯一真源）**、四步接线、构建环境 | 质量门、禁令、接线、构建环境 |
+| `references/engineering.md` | 工程规约：质量纪律、**全局禁令表 B1–B7（唯一真源）**、四步接线、三方体验账、构建环境 | 质量门、禁令、接线、构建环境、改动收尾记账 |
 | `references/map-layers.md` | 地图图层：选型矩阵、生命周期、渲染预算与显式降级 | 任务涉及地图/空间数据（条件加载） |
 | `references/map-interaction.md` | 地图交互：框选/绘制/选择/高亮、告警与图例、资产同源、引擎唯一入口 | 地图交互与资产（条件加载） |
 | `references/testing-guide.md` | 测试设计指南：五形态用例设计 + mock 模式 + 场景化清单 | 编写/评审测试 |
@@ -117,12 +119,22 @@ clean；扫描面天然排除文档与测试夹具。
 
 ```bash
 python3 scripts/build_package.py          # 产出 dist/（发布树 + tar.gz + zip + SHA256SUMS + 清单）
-python3 scripts/build_package.py --expect-version 1.0.0
+python3 scripts/build_package.py --expect-version 1.2.0
 ```
 
 排除即缺省：`manifest.json` 的 `runtime` 是闭式清单，不列清单即不入包——内部规划
-记录、证据档案与测试夹具（如 `scripts/tests/`）天然排除。产物布局与校验规则见
-`scripts/build_package.py` 模块文档。
+记录、证据档案与测试夹具（如 `scripts/tests/`）天然排除。在 git 工作树顶层构建时，
+目录条目只收已跟踪文件：被 `.gitignore` 忽略的生成物（如 `.umi*`）不入包，未跟踪且
+未忽略的文件使构建失败（exit 2），避免无声漏包。
+
+组装后的发布树先过隐私门禁：家目录绝对路径、仓库 git 远端里的私有主机名、常见凭据格式
+任一命中即 exit 2，只报文件、行号与规则名，不回显内容。私有主机名从 git 远端推导，在只有
+公共远端的 clone 上构建时这条规则不生效。每次构建先删除 `dist/` 下本工具的旧产物，构建失败
+不留归档；tar 条目不带构建者的用户名与 uid。产物布局与校验规则见 `scripts/build_package.py`
+模块文档。
+
+发布附件从私有 Gitea 真源的版本标签做干净浅克隆后构建，不用开发工作树的 `dist/`：构建读取
+工作树文件，已跟踪文件的未提交改动也会入包。
 
 ## 维护速查
 
@@ -130,7 +142,8 @@ python3 scripts/build_package.py --expect-version 1.0.0
 | --- | --- |
 | 禁令扫描 | `python3 scripts/ban_scan.py <路径>` |
 | 打包 | `python3 scripts/build_package.py` |
-| 全部测试 | 依次运行 `scripts/tests/` 下三套 unittest |
+| 全部测试 | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
+| 文档结构契约 | `python3 -I scripts/tests/test_spec_docs.py`（八层 / B-ID 同源 / 链接锚点 / 两条体验约束接线） |
 
 ## 许可与分发
 
