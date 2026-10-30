@@ -64,6 +64,20 @@
 - 主题形态：navTheme `light`（浅色）；本规范不强制暗色模式，目标仓库
   自行决策。
 
+## 动效与交互状态
+
+真源：目标仓库动效 token（Ant Design 类的 `motionDurationFast/Mid/Slow`、
+`motionEaseOut/InOut` 等）；存量仓库已有动效配置时沿用，不引入第二套。
+
+- 交互反馈用短时长，布局/位置变化用中/长时长；具体值跟真源，不在页面散落缓动
+  字面量。
+- 只动画 `transform` / `opacity`；不动画 `width` / `height` / `top` / `left`。
+- 滚动揭示用 `IntersectionObserver` 或框架 viewport 原语；禁止未节流的 scroll
+  监听；揭示一次，不回放。
+- `prefers-reduced-motion: reduce` 时移除位移/缩放，保留必要透明度变化。
+- hover / active / focus-visible / disabled 由组件 token 承载；focus ring 不得移除。
+- 动效只服务层级、反馈与状态变化；不以逐词渐变/长时间揭示掩盖内容结构。
+
 ## 样式四层优先级
 
 优先级从高到低：**原子 CSS（Tailwind 类）→ CSS-in-JS（antd-style）→ CSS Modules →
@@ -94,6 +108,8 @@
 
 - 禁令与质量规则裁决 → SKILL.md Decision Rules（分层总表）。
 - 禁用态视觉与四态承载 → [general-pages](general-pages.md)。
+- 交互态与可访问基线 → [general-pages](general-pages.md#交互态与可访问基线)。
+- 公开页面动效与视觉方向 → [public-pages](public-pages.md#视觉方向)。
 - 样式分层与质量门 → [engineering](engineering.md)。
 - SKILL.md References 层路由表指向本篇。
 

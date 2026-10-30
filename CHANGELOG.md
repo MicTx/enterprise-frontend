@@ -6,6 +6,23 @@ The format follows Keep a Changelog headings so the packaging step can extract v
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-31
+
+### Added
+
+- **公开页面章节**：新增 `references/public-pages.md`（条件加载）——单一转化目标、
+  页面结构与布局、转化文案、内容真实性、视觉方向、交互态与动效、SEO/AEO 与上线
+  清单。公开落地页/营销页/活动页/定价对比页为条件叠加页面类型，不改变四个中后台
+  核心场景，中后台任务不读该章节。
+- **横切交付纪律**：`general-pages` 新增「交互态与可访问基线」与「内容真实性」
+  （hover/active/focus-visible、skip link、aria、alt、不交付占位文案/不伪造证据）；
+  `design-tokens` 新增「动效与交互状态」真源（transform/opacity、reduced-motion、
+  IntersectionObserver、动效 token 跟随）。
+- **接线与门面**：`SKILL.md` 增加公开页条件路由/成功定义/决策规则/反模式/复核项；
+  `design-reasoning`、`scenario-coverage`、`testing-guide` 同步条件叠加；
+  README 双语、AGENTS 与文档结构契约测试同步。上游 MIT 许可声明落根级
+  `THIRD_PARTY_NOTICES.md`，规范正文不携带外部来源线索。
+
 ## [1.2.0] - 2026-10-30
 
 ### Added

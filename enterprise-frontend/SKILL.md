@@ -5,13 +5,15 @@ description: >-
   dashboard / admin console / workbench / enterprise frontend 的新建、扩展、迁移、审查——
   CRUD 页面、列表页、表单页、详情页、权限、菜单、路由、布局、页面设计、界面删减（去标语 /
   说明文字 / 次要标签）、数据流、主题与设计 token、前端初始化、技术栈迁移、UI 迁移、
-  一致性审查、前端代码审查——
+  一致性审查、前端代码审查；以及企业自有公开落地页 / 营销页 / 活动页 / 定价对比页——
   默认执行本规范硬约束清单，而非自由发挥；含 Ant Design Pro / ProComponents /
   ProTable / ProForm / Umi / Umi Max / React Query / map / GIS 前端场景。
   Use for any enterprise admin frontend work: admin dashboards, CRUD pages,
   forms, detail views, routing, menus, permissions, data layer, theming,
-  migration, and consistency review. The spec is a hard-constraint checklist,
-  not advisory reference material.
+  migration, and consistency review; also use for public landing pages,
+  marketing pages, campaign pages, and pricing/comparison pages in the same
+  codebase. The spec is a hard-constraint checklist, not advisory reference
+  material.
 ---
 
 # 企业级前端约束规范（enterprise-frontend）
@@ -22,8 +24,9 @@ description: >-
 默认执行本规范的标准约束清单。规范是硬约束清单，不是参考建议——禁令一律硬执行，
 约定跟随目标仓库真源；目标仓库的现实不构成放宽禁令的理由。
 
-- **适用面**：通用企业中后台。地图 / GIS 为条件加载章节（见 References 路由表），
-  非地图任务不读地图文档。
+- **适用面**：通用企业中后台；公开落地页 / 营销页 / 活动页 / 定价对比页为**条件叠加
+  页面类型**（见 References 路由表），中后台任务不读公开页文档。地图 / GIS 同样是
+  条件加载章节，非地图任务不读地图文档。
 - **标准栈**（模式级，版本无关）：Umi Max 类元框架 + React + TypeScript strict；
   Ant Design + ProComponents；Tailwind CSS 类原子样式 + CSS-in-JS 主题 + CSS Modules 分层；
   框架路由与请求层；React Query 服务端状态；Biome + `tsc --noEmit` + Jest 质量门；
@@ -49,6 +52,9 @@ description: >-
 6. **质量命令通过**：lint（Biome）+ 类型检查（`tsc --noEmit`）+ 测试全绿。
 7. **无越界断言**：完成判定以静态约束检查与质量命令为准；不以文档检查声称
    UI 视觉、交互或运行时效果实测通过。
+8. **公开页面（条件项）**：命中公开落地页/营销页时，单一转化目标、内容真实性与证据
+   边界、视觉方向与动效、交互态、SEO 与上线清单齐备（`references/public-pages.md`）；
+   中后台任务不适用。
 
 ## Workflow
 
@@ -57,8 +63,10 @@ description: >-
    2. 地图 / GIS 场景（空间数据、图层、地图交互、地图资产）；
    3. 存量页面修改（目标仓库已有页面，小步改）；
    4. 规范审查（对既有前端做一致性审查）。
+   公开访客页面（落地页 / 营销页 / 活动页 / 定价对比页）是**条件叠加页面类型**，不改变
+   上述四个核心场景的主分类；命中时额外读 `references/public-pages.md`，中后台任务不读。
 2. **按条件加载路由表读对应 references/ 文档**（见 References 层）；地图场景额外读
-   两篇地图文档，非地图场景不读。
+   两篇地图文档；公开页面额外读公开页文档；非对应场景不读。
 3. **设计推理（新页面 / 新功能必经）**：按 `references/design-reasoning.md` 的四步
    程序产出设计产物——页面形态、布局模式、卡片-内容组件组成（含四态方案）、删减检验
    与真源接线增量；实现与 Review Loop 以此为对照基准。
@@ -80,6 +88,8 @@ description: >-
 
 - 新建项目：全量按规范标准栈与默认 token 落地，不留「渐进适配」口子。
 - 存量修改：最小完整变更；禁令面内的存量违规代码在触碰时顺手修正，不扩大战线。
+- 公开页面：视觉方向可不同于中后台，但必须收敛到单一品牌/主题真源；不把营销页的
+  字体/配色/间距规则反向套进中后台。
 - 冲突时序：目标仓库真源 > 规范默认值 > 通用直觉；禁令 > 一切仓库现实。
 - 表述纪律：规范只讲模式不讲版本号；条文自洽，不引用外部仓库路径。
 
@@ -107,6 +117,10 @@ description: >-
    可访问树同时变长。删除试读读不懂时重新设计布局，不补文字。
 8. **只改善用户 / 开发者 / AI Agent 三方中的一方** → 成本被转嫁：说明文字挪进
    Tooltip、为界面干净删掉可访问名称、为过测试放宽断言。任一方变差即未完成。
+9. **把公开页面规则套进中后台** → 每个列表页都加 hero、主 CTA、FAQ，任务路径变长、
+   界面膨胀。公开页文档只在命中公开访客页面时加载。
+10. **用占位文案、死链或虚构证据交付公开页** → 页面看似完成却不可上线；示例必须标注，
+    生产证据必须真实，缺失写「待补证据」。
 
 ## Review Loop
 
@@ -122,7 +136,9 @@ description: >-
    删除试读；保留项各落在保留清单一条，读不懂处已重新设计布局而非补字。
 7. **三方体验账**：交付说明按 engineering §三方体验账 填 UX / DX / AX / 零破坏四行；
    任一方变差或公开契约变动即未通过。
-8. 未通过项回改后重跑；不带未解释的红项交付。
+8. **公开页面自查（条件项）**：命中公开页时按 public-pages 核对单一主 CTA、内容真实性、
+   交互态、SEO 与上线清单；未命中则跳过。
+9. 未通过项回改后重跑；不带未解释的红项交付。
 
 ## References
 
@@ -132,6 +148,7 @@ description: >-
 | --- | --- |
 | 新页面 / 新功能：从需求推理页面形态、布局与卡片-内容组件组成（实现前必读） | `references/design-reasoning.md` |
 | 任何页面 / 组件 / 布局工作（默认先读）；标语、说明文字、标签的界面删减 | `references/general-pages.md` |
+| 公开落地页 / 营销页 / 活动页 / 定价对比页（仅此时读；中后台不读） | `references/public-pages.md` |
 | 请求、数据获取、缓存、登录态、SSE | `references/data-layer.md` |
 | 颜色、间距、字号、主题、样式方案选择 | `references/design-tokens.md` |
 | 质量门、禁令、新页面接线、构建环境；每次改动收尾的三方体验账 | `references/engineering.md` |

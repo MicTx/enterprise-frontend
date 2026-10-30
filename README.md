@@ -12,7 +12,7 @@
 `enterprise-frontend` 不是组件库，也不是脚手架。它是一个**面向 AI 编码会话的
 前端工程规范（skill）**，由三部分组成：
 
-1. **约束规范**——`SKILL.md` 八层主文 + 九篇 `references/` 域文档：禁令、模式、
+1. **约束规范**——`SKILL.md` 八层主文 + 十篇 `references/` 域文档：禁令、模式、
    接线纪律与自查钩子，全部写成「必须怎么做」，而不是「可以参考」。
 2. **起始模板**——`template/` 非地图基座合规骨架（五真源 + 统一请求通道 +
    内容壳 + 质量门），新项目冷启动从复制模板开始，出厂即门禁全绿。
@@ -34,8 +34,10 @@
 
 ## 适用面与场景
 
-适用于**通用企业中后台**前端；地图/GIS 是条件加载章节，非地图任务零负担。
-SKILL.md Workflow 按序判定四个场景，`references/scenario-coverage.md`
+适用于**通用企业中后台**前端；地图/GIS 是条件加载章节，非地图任务零负担。企业自有的
+公开落地页/营销页/活动页/定价对比页作为**条件叠加页面类型**接入，不改变四个中后台
+核心场景的判定，中后台任务不读公开页文档。
+SKILL.md Workflow 按序判定四个核心场景，`references/scenario-coverage.md`
 给出每个场景的必读锚点与自查钩子：
 
 | 场景 | 侧重 |
@@ -44,6 +46,9 @@ SKILL.md Workflow 按序判定四个场景，`references/scenario-coverage.md`
 | 地图工作台 | 图层选型与预算、框选/绘制/受控选择、告警与图例、资产同源 |
 | 存量页面修改 | 最小完整变更、真源跟随、禁令回归、四态回归 |
 | 规范审查 | 禁令自扫、文档引用完整性、四态与接线复查 |
+
+公开页面（落地页/营销页/活动页/定价对比页）是条件叠加工作面：策略、内容真实性、
+交互态、动效、SEO 与上线清单见 `references/public-pages.md`，只在命中时读取。
 
 ## 快速开始
 
@@ -92,13 +97,14 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 | --- | --- | --- |
 | `references/design-reasoning.md` | 页面设计推理：需求 → 页面形态/布局/卡片-内容组件组成 + 三张最小骨架模式卡片 | 新页面/新功能实现前先读 |
 | `references/general-pages.md` | 页面规范：布局骨架、CRUD 模式、四态承载、界面删减、路由弹层、菜单接线 | 任何页面/组件/布局工作（默认先读） |
+| `references/public-pages.md` | 公开页面：单一转化目标、页面结构、文案与内容真实性、视觉方向、交互态与动效、SEO 与上线清单 | 公开落地页/营销页/活动页/定价对比页（仅此时读） |
 | `references/data-layer.md` | 请求与服务端状态：双通道、SSE、401 收敛、queryKeys 真源 | 涉及取数、缓存、登录态 |
 | `references/design-tokens.md` | 设计 token 与主题：清单、why 注释、布局参数、真源跟随 | 涉及颜色/间距/主题/样式选型 |
 | `references/engineering.md` | 工程规约：质量纪律、**全局禁令表 B1–B7（唯一真源）**、四步接线、三方体验账、构建环境 | 质量门、禁令、接线、构建环境、改动收尾记账 |
 | `references/map-layers.md` | 地图图层：选型矩阵、生命周期、渲染预算与显式降级 | 任务涉及地图/空间数据（条件加载） |
 | `references/map-interaction.md` | 地图交互：框选/绘制/选择/高亮、告警与图例、资产同源、引擎唯一入口 | 地图交互与资产（条件加载） |
 | `references/testing-guide.md` | 测试设计指南：五形态用例设计 + mock 模式 + 场景化清单 | 编写/评审测试 |
-| `references/scenario-coverage.md` | 四场景映射矩阵：场景 → 必读锚点 → 自查钩子 | 场景判定后取行 |
+| `references/scenario-coverage.md` | 四个核心场景 + 公开页面条件叠加矩阵：场景 → 必读锚点 → 自查钩子 | 场景判定后取行 |
 
 禁令表 B1–B7 的完整定义（检查级、黑名单字面量）唯一真源在
 `references/engineering.md`；`SKILL.md` 只持 ID 与一句话语义；扫描规则表
@@ -119,7 +125,7 @@ clean；扫描面天然排除文档与测试夹具。
 
 ```bash
 python3 scripts/build_package.py          # 产出 dist/（发布树 + tar.gz + zip + SHA256SUMS + 清单）
-python3 scripts/build_package.py --expect-version 1.2.0
+python3 scripts/build_package.py --expect-version 1.3.0
 ```
 
 排除即缺省：`manifest.json` 的 `runtime` 是闭式清单，不列清单即不入包——内部规划
@@ -143,7 +149,7 @@ python3 scripts/build_package.py --expect-version 1.2.0
 | 禁令扫描 | `python3 scripts/ban_scan.py <路径>` |
 | 打包 | `python3 scripts/build_package.py` |
 | 全部测试 | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
-| 文档结构契约 | `python3 -I scripts/tests/test_spec_docs.py`（八层 / B-ID 同源 / 链接锚点 / 两条体验约束接线） |
+| 文档结构契约 | `python3 -I scripts/tests/test_spec_docs.py`（八层 / B-ID 同源 / 链接锚点 / 公开页条件接线 / 两条体验约束接线） |
 
 ## 许可与分发
 
@@ -153,4 +159,5 @@ python3 scripts/build_package.py --expect-version 1.2.0
 
 分发渠道：私有 Gitea 真源与随行压缩包；任何公开快照须另行授权。
 
-变更历史见 [CHANGELOG](CHANGELOG.md)。
+公开页面方法的第三方 MIT 许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，不进入
+规范正文。变更历史见 [CHANGELOG](CHANGELOG.md)。

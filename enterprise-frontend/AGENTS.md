@@ -6,5 +6,8 @@ Read `SKILL.md` for the full contract: eight-layer workflow, the conditional-loa
 
 地图/GIS 约束为条件加载章节：仅地图场景任务按路由表读取对应文档。
 
+公开落地页/营销页/活动页/定价对比页为条件叠加页面类型：仅命中公开页面时读取
+`references/public-pages.md`，中后台任务不读；四个核心场景判定不变。
+
 每次改动另受两条全局硬约束：界面删减（`references/general-pages.md`）与三方体验账
 （`references/engineering.md`，UX / DX / AX 三方都变好、现有功能零破坏）。

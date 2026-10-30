@@ -1,7 +1,8 @@
 # 场景覆盖矩阵（scenario-coverage）
 
-> 四场景 → 规范条目映射矩阵（顺序：非地图 CRUD → 地图工作台 → 存量页面修改 →
-> 规范审查）。SKILL.md Workflow 判定场景后读本篇，按行取必读锚点与自查钩子。
+> 四个核心场景 + 公开页面条件叠加 → 规范条目映射矩阵（顺序：非地图 CRUD → 地图
+> 工作台 → 存量页面修改 → 规范审查；公开页面为条件叠加，不改变四场景主分类）。
+> SKILL.md Workflow 判定场景后读本篇，按行取必读锚点与自查钩子。
 > 矩阵只做映射不复制条文——约束条文的单一真源在各规范文档与
 > [engineering](engineering.md) 禁令表。
 
@@ -16,7 +17,8 @@
 - **界面删减与三方体验账同样恒全局适用**：前者作用于本次新增或触碰的界面，后者作用于
   每次改动的交付说明；二者是语义判定、不入 B 禁令与扫描规则表，矩阵只在各场景给入口行。
 - 工作面之间不互斥：一个任务可同时命中多个工作面，逐行取用；地图场景额外叠加
-  两篇地图文档（SKILL.md 路由表条件加载）。
+  两篇地图文档（SKILL.md 路由表条件加载）；公开访客页面额外叠加公开页文档，中后台
+  任务不读。
 - 自查钩子中的 `<目标>` 代指本轮改动面路径（目录或文件）；规范审查场景的钩子
   即本仓工具（ban_scan）的执行命令。
 
@@ -36,6 +38,20 @@
 | 界面删减 | [general-pages](references/general-pages.md#界面删减) | 删除试读；读不懂则重新设计布局不补字；保留清单（四态文案 / 校验 / 单位 / 状态 Tag / 可访问名称） | — | `grep -rn -e "<Tag" -e "<Badge" -e "subTitle=" -e "tooltip=" -e "description=" -e 'type="secondary"' <目标>`（候选清单，逐处试读） |
 | 测试编写 | [testing-guide](references/testing-guide.md#测试形态与用例设计) | 五形态用例设计 + mock 模式 | — | `npm run test:ci`（目标仓质量门） |
 | 三方体验账 | [engineering](references/engineering.md#三方体验账) | UX / DX / AX 逐方记账；不转嫁；零破坏证据为命令输出 | — | `npm run lint && npm run test:ci`（目标仓质量门）+ 交付说明四行 |
+
+### 公开页面（条件叠加）
+
+仅在任务面向公开访客（落地页 / 营销页 / 活动页 / 定价对比页）时取用；不改变四个
+核心场景的判定，也不把以下规则带入中后台。
+
+| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
+| --- | --- | --- | --- | --- |
+| 转化策略与结构 | [public-pages](references/public-pages.md#页面策略) | 一页一 offer / 一受众 / 一主行动；首屏单主 CTA；主张—证据—行动闭环 | B1/B2/B3 仍全局适用 | 对照页面大纲逐段检查主 CTA 唯一性与证据位置 |
+| 文案与内容真实性 | [public-pages](references/public-pages.md#内容真实性) | 真实草稿；示例标注；不伪造客户/证言/指标；缺失证据写「待补证据」 | — | `grep -rn -e "lorem" -e "TODO" -e "标题写这里" <目标>`（候选清单，逐处试读） |
+| 视觉方向与动效 | [public-pages](references/public-pages.md#视觉方向) + [design-tokens](references/design-tokens.md#动效与交互状态) | 单一视觉真源；只动画 transform/opacity；reduced-motion；IntersectionObserver | B7 仍适用（地图 overlay 另有真源） | `grep -n -e "addEventListener('scroll'" -e "prefers-reduced-motion" <目标>`（反例/正例抽查） |
+| SEO 与上线清单 | [public-pages](references/public-pages.md#seo-与上线清单) | index/noindex 决策；title/meta；FAQ 真实问答；404/法务/alt/skip link | B1–B7 全量 | `grep -n -e "<title" -e "description" -e "alt=" <目标>`（入口文件抽查） |
+| 交互态与可访问 | [general-pages](references/general-pages.md#交互态与可访问基线) | hover/active/focus-visible/disabled；focus ring 不移除；无死链 | — | `grep -n -e "focus-visible" -e "aria-current" -e "aria-label" <目标>` |
+| 三方体验账 | [engineering](references/engineering.md#三方体验账) | 公开页同样逐方记账；零破坏证据为命令输出 | — | `npm run lint && npm run test:ci`（目标仓质量门）+ 交付说明四行 |
 
 ### 地图工作台
 
@@ -80,5 +96,6 @@
 | 存量页面修改 | 最小变更原则 | 「最小完整变更/顺手修正不扩战线」的裁决语义归属 SKILL.md Decision Rules 分层表，references 不设对应节 | non_actionable | SKILL.md#decision-rules（映射归属 SKILL.md，非规范缺口） |
 | 规范审查 | 工具使用说明 | ban_scan.py 的使用细节不设 references 专节 | non_actionable | SKILL.md#review-loop（工具落点已声明）；命令在本矩阵自查钩子列可执行，`--help` 即用法 |
 | 非地图 CRUD / 地图工作台 | 全工作面锚点 | 各文档章节已覆盖全部行；未发现缺失约束 | resolved_current | 本矩阵四场景节（锚点解析通过，见验收证据） |
+| 公开页面 | 条件叠加 | 策略/文案/视觉/SEO/交互态已回写 public-pages 与相关横切文档 | resolved_current | `references/public-pages.md` 与本节各行 |
 
 登记结论：**零 open 项**。

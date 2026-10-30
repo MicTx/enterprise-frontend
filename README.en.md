@@ -14,7 +14,7 @@ proven stack, design language, and engineering discipline distilled into a
 **frontend engineering spec (a skill) for AI coding sessions**, made of three
 parts:
 
-1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus nine
+1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus ten
    `references/` domain documents: bans, patterns, wiring discipline, and
    self-check hooks, all written as "do this", never as "you could consider".
 2. **The starter template** — `template/`, a compliant non-map base skeleton
@@ -42,7 +42,10 @@ frontend engineering constraint handbook.
 ## Scope and scenarios
 
 Applies to **generic enterprise admin frontends**; maps/GIS is a conditional
-chapter that non-map tasks never load. The SKILL.md Workflow classifies four
+chapter that non-map tasks never load. Public landing pages, marketing pages,
+campaign pages, and pricing/comparison pages are a **conditional overlay page
+type**: they do not change the four core admin scenarios, and admin tasks never
+load the public-page document. The SKILL.md Workflow classifies four core
 scenarios in order, and `references/scenario-coverage.md` maps each to its
 required anchors and self-check hooks:
 
@@ -52,6 +55,11 @@ required anchors and self-check hooks:
 | Map workbench | Layer selection and budgets, box-select/draw/controlled selection, alerts and legends, asset co-origin |
 | Legacy page modification | Smallest complete change, source-of-truth following, ban regression, four-state regression |
 | Spec review | Ban self-scan, document reference integrity, four-state and wiring recheck |
+
+Public pages (landing, marketing, campaign, pricing/comparison) are a
+conditional overlay: strategy, content realism, interaction states, motion,
+SEO, and launch checklist live in `references/public-pages.md` and load only
+when the task matches.
 
 ## Quick start
 
@@ -107,13 +115,14 @@ reads which document:
 | --- | --- | --- |
 | `references/design-reasoning.md` | Page design reasoning: requirement → page form/layout/card-content composition + three minimal pattern cards | Read before implementing any new page/feature |
 | `references/general-pages.md` | Page spec: layout skeleton, CRUD patterns, four-state coverage, interface subtraction, route modals, menu wiring | Any page/component/layout work (read first by default) |
+| `references/public-pages.md` | Public pages: one conversion goal, page structure, copy and content realism, visual direction, interaction states and motion, SEO and launch checklist | Public landing/marketing/campaign/pricing pages (conditional) |
 | `references/data-layer.md` | Requests & server state: dual-channel, SSE, 401 convergence, queryKeys source of truth | Fetching, caching, login state |
 | `references/design-tokens.md` | Design tokens & theme: inventory, why-comments, layout parameters, truth-source following | Colors, spacing, theming, style choices |
 | `references/engineering.md` | Engineering rules: quality discipline, **the global ban table B1–B7 (single source of truth)**, four-step wiring, the three-party experience ledger, build environment | Quality gates, bans, wiring, build environment, per-change ledger |
 | `references/map-layers.md` | Map layers: selection matrix, lifecycle, render budgets & explicit degradation | Tasks involving maps/spatial data (conditional) |
 | `references/map-interaction.md` | Map interaction: box-select/draw/selection/highlight, alerts & legends, asset co-origin, single engine entry | Map interaction and assets (conditional) |
 | `references/testing-guide.md` | Test design guide: five test forms + mock patterns + per-scenario checklists | Writing/reviewing tests |
-| `references/scenario-coverage.md` | Four-scenario matrix: scenario → anchors → self-check hooks | After scenario classification |
+| `references/scenario-coverage.md` | Four core scenarios + public-page overlay matrix: scenario → anchors → self-check hooks | After scenario classification |
 
 The full B1–B7 definitions (check level, blacklist literals) live only in
 `references/engineering.md`; `SKILL.md` carries the IDs and one-line
@@ -136,7 +145,7 @@ naturally excludes documents and test fixtures.
 
 ```bash
 python3 scripts/build_package.py          # produces dist/ (tree + tar.gz + zip + SHA256SUMS + listing)
-python3 scripts/build_package.py --expect-version 1.2.0
+python3 scripts/build_package.py --expect-version 1.3.0
 ```
 
 Exclusion is the default: the `runtime` list in `manifest.json` is closed —
@@ -169,7 +178,7 @@ packaged.
 | Ban scan | `python3 scripts/ban_scan.py <path>` |
 | Package | `python3 scripts/build_package.py` |
 | All tests | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
-| Doc structure contract | `python3 -I scripts/tests/test_spec_docs.py` (eight layers / B-ID agreement / links and anchors / wiring of the two experience constraints) |
+| Doc structure contract | `python3 -I scripts/tests/test_spec_docs.py` (eight layers / B-ID agreement / links and anchors / public-page conditional wiring / wiring of the two experience constraints) |
 
 ## License & distribution
 
@@ -182,4 +191,6 @@ The repository's authored content (`SKILL.md`, `references/`, `template/`,
 Distribution channel: a private Gitea source of truth plus the accompanying
 archive; any public snapshot requires separate authorization.
 
-See [CHANGELOG](CHANGELOG.md) for the change history.
+Third-party MIT notices for the public-page method live in
+[THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md) and are not part of the normative
+spec. See [CHANGELOG](CHANGELOG.md) for the change history.

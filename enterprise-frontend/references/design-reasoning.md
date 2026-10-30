@@ -33,6 +33,7 @@ SKILL.md Workflow 的「设计推理」步骤（场景判定与规范阅读之�
 | 空间数据浏览 / 操作 | 地图工作台（图层按 map-layers 选型矩阵） |
 | 长流程采集 / 向导（内容天然超屏） | 页面级滚动 + exception 显式声明 |
 | 长时任务状态推送 | 列表 / 详情 + SSE 进度 |
+| 单一转化目标 + 公开访客流量（落地页 / 营销页 / 活动页） | 公开页面（public-pages 条件章节） |
 
 ## 布局模式
 
@@ -43,9 +44,11 @@ SKILL.md Workflow 的「设计推理」步骤（场景判定与规范阅读之�
 | 卡片网格 | KPI 卡 + 图表卡组合 | 工作台 / 仪表盘 |
 | 主从（列表 + 抽屉） | 列表占满；详情 Drawer 覆盖，不占新路由 | 详情只读、需保留列表上下文 |
 | 剩余高度填充 | `useFillRemainingHeight` 填满内容区 | 表格 / 面板需吃掉剩余高度 |
+| 公开页分节（hero → 论证 → 异议 → 最终 CTA） | 页面级滚动 + 分节锚点（exception 显式声明） | 公开落地页 / 活动页 / 对比页 |
 
 布局纪律：页头槽位废黜（`pageHeaderRender={false}` 常开）；页面级滚动必须
-exception 显式声明——细则见 [general-pages](general-pages.md#布局骨架)。
+exception 显式声明——细则见 [general-pages](general-pages.md#布局骨架)。公开页面
+不走中后台内容壳与 CRUD 组件惯例，按 [public-pages](public-pages.md) 组织分节结构。
 
 ## 卡片-内容组件选型
 
@@ -60,6 +63,7 @@ exception 显式声明——细则见 [general-pages](general-pages.md#布局骨
 | 加载态 | Skeleton 骨架族 |
 | 错误兜底 | ErrorBoundary + 请求层统一错误 |
 | 警示 | Alert（区块内，非全局弹窗） |
+| 公开页区块 | section/容器 + 目标仓库品牌组件；不套用中后台 CRUD 组件 |
 
 每个卡片-内容区块必须给出**四态方案**（加载 / 空 / 错误 / 禁用），禁「只有
 成功态」——细则见 [general-pages](general-pages.md#四态一致承载)。
@@ -185,6 +189,8 @@ export default function ExampleDetailDrawer({ detail, loading, onClose }: {
 删减检验：<保留的标语/说明/次要标签各落在保留清单哪一条；删除试读读不懂处的布局重新设计>
 真源接线增量：routes 加 <路由项>；navViews 加 <菜单项>；access 加 <权限键>；
              queryKeys 加 <键>
+公开页面追加：offer / 受众 / 主行动 / 转化定义；证据与异议；index/noindex；
+             移动首屏；单一视觉真源
 禁令自查：ban_scan <目标路径> → RESULT: clean
 ```
 
@@ -198,9 +204,11 @@ Review Loop 复查时以设计产物为对照：组件组成缺四态、布局�
 - 请求通道与状态归属 → [data-layer](data-layer.md)；禁令与质量门 →
   [engineering](engineering.md)。
 - 地图形态的图层与预算约束 → [map-layers](map-layers.md)。
+- 公开页面策略、转化结构、SEO 与上线清单 → [public-pages](public-pages.md)（条件加载）。
 - 场景 → 工作面映射 → [scenario-coverage](scenario-coverage.md)。
 
 ## 验证边界声明
 
-模式卡片为规范提炼内容（形态契约），不是可运行示例。页面最终视觉效果与交互
+模式卡片为规范提炼内容（形态契约），不是可运行示例。公开页面的完整结构与文案
+契约在 [public-pages](public-pages.md)，本篇不复制第二份。页面最终视觉效果与交互
 表现为运行时行为，不在本篇验证范围；本规范不以文档存在代替运行证据。

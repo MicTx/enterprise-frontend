@@ -9,7 +9,8 @@
 工作前先读本篇，写任何标语、说明文字、标签前先过 [界面删减](#界面删减)；请求与数据面读
 [data-layer](data-layer.md)，样式 token 读 [design-tokens](design-tokens.md)，
 质量门、接线质量钩子与每次改动的三方体验账读 [engineering](engineering.md)，
-地图场景另读地图章节。
+地图场景另读地图章节；公开访客页面（落地页/营销页/活动页）另读
+[public-pages](public-pages.md)，中后台任务不读。
 
 ## 布局骨架
 
@@ -55,6 +56,22 @@
 - **审查口径**：页面审查时逐数据区块核对四态；缺任一态即规范违反，与禁令同级
   硬执行。
 
+## 交互态与可访问基线
+
+四态解决数据区块承载；可交互控件另需完整交互态，缺一即视为触碰面未完成：
+
+- **交互四态**：hover / active / focus-visible / disabled 齐备；focus ring 不得以
+  `outline: none` 移除。
+- **键盘可达**：Tab 顺序跟随阅读顺序；模态/Drawer 焦点困在内部并在关闭后归还；
+  长页面提供 skip link。
+- **链接无死链**：`href="#"` 必须是禁用态或真实目标；当前导航项用 `aria-current`
+  或等价标记。
+- **语义与名称**：nav/main/section 等 landmark；图标按钮有 `aria-label`；表单控件
+  有 label；图片有 alt（装饰图 `alt=""`）。
+- **动效**：遵循 [design-tokens](design-tokens.md#动效与交互状态)；
+  `prefers-reduced-motion` 下移除位移/缩放。
+- **审查口径**：以上只作用于本次新增或触碰的界面，不借机整页补齐存量。
+
 ## 界面删减
 
 - **删除对象**：标语和口号式副标题；复述标题、控件或字段名已表达之意的说明文字；
@@ -70,6 +87,9 @@
   逐处做一遍删除试读；保留的要说得出落在保留清单哪一条。
 - **与设计推理衔接**：新页面在 [design-reasoning](design-reasoning.md) 第 4 步产出
   「删减检验」，实现后对照。
+- **公开页面例外**：公开页面的价值主张、证据、异议处理、主 CTA、FAQ 属转化内容，
+  不按赘字删除；装饰性口号、重复说明、无信息标签仍删（细则见
+  [public-pages](public-pages.md#页面策略)）。
 
 **保留清单**（删减到此为止，越过即退化）：
 
@@ -81,6 +101,17 @@
   否则读屏用户与 AI Agent 的 role + name 定位一并失效。
 - 其他规范条文已要求的用户可见提示：地图超预算降级提示、图例与告警，路由弹层「已是最终页」提示。
 - 目标仓库明文要求的合规声明与业务术语。
+
+## 内容真实性
+
+- 不交付 lorem ipsum、「标题写这里」、TODO 占位；没有真实文案时写一版可审草稿。
+- 示例数据要可信且标注为示例；不把虚构客户、证言、指标或资质伪装成真实证据，
+  缺失时写「待补证据」。
+- 系统消息具体：确认说清对象与动作，错误说清原因与下一步；不用感叹号和卖萌语气。
+- 数字口径一致（时间范围、币种、单位），避免可疑整数堆砌。
+- 禁用空泛填充词（示例而非穷举）：revolutionize / supercharge / cutting edge /
+  effortless / world class；中文对应「颠覆/赋能/一站式/极致/无缝/引领未来」等，
+  用可验证结果替代。
 
 ## Route modal 终层规则
 
@@ -111,6 +142,7 @@
 - 每次改动的 UX / DX / AX 记账与零破坏证据 → [engineering](engineering.md#三方体验账)。
 - 请求通道、缓存、401 收敛、SSE → [data-layer](data-layer.md)（四态错误态的请求侧）。
 - 色彩/间距/控件高度 token、禁用态视觉 → [design-tokens](design-tokens.md)。
+- 公开页面策略、转化结构、SEO 与上线清单 → [public-pages](public-pages.md)（条件加载）。
 - 地图场景页面规范 → map-layers / map-interaction（条件加载）。
 - SKILL.md References 层路由表第一行指向本篇（默认首读）。
 
