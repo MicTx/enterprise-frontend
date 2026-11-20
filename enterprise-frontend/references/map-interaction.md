@@ -1,3 +1,10 @@
+---
+load_when: "地图交互、标注、高亮与资产同源约束，仅此时读"
+rule_ids: ["B5","B6","B7"]
+depends_on: ["map-layers.md","engineering.md","general-pages.md"]
+size_budget: 84
+---
+
 # 地图交互与资产（map-interaction）
 
 > 地图条件加载章节·下半：交互原则、地图信息组件模式、资产同源与引擎唯一入口。

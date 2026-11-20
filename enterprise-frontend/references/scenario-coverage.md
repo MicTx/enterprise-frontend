@@ -1,7 +1,14 @@
+---
+load_when: "SKILL.md Workflow 完成场景判定后读本篇，按场景取必读锚点与自查钩子、核对四场景覆盖缺口"
+rule_ids: []
+depends_on: ["engineering.md","design-reasoning.md","general-pages.md","data-layer.md","design-tokens.md","testing-guide.md","public-pages.md","map-layers.md","map-interaction.md","visual-review.md"]
+size_budget: 144
+---
+
 # 场景覆盖矩阵（scenario-coverage）
 
-> 四个核心场景 + 公开页面条件叠加 → 规范条目映射矩阵（顺序：非地图 CRUD → 地图
-> 工作台 → 存量页面修改 → 规范审查；公开页面为条件叠加，不改变四场景主分类）。
+> 四个核心场景 + 公开页面 / 视觉审查条件叠加 → 规范条目映射矩阵（顺序：地图工作台 →
+> 规范审查 → 存量页面修改 → 非地图 CRUD；公开页面与视觉审查为条件叠加，不改变四场景主分类）。
 > SKILL.md Workflow 判定场景后读本篇，按行取必读锚点与自查钩子。
 > 矩阵只做映射不复制条文——约束条文的单一真源在各规范文档与
 > [engineering](engineering.md) 禁令表。
@@ -18,19 +25,54 @@
   每次改动的交付说明；二者是语义判定、不入 B 禁令与扫描规则表，矩阵只在各场景给入口行。
 - 工作面之间不互斥：一个任务可同时命中多个工作面，逐行取用；地图场景额外叠加
   两篇地图文档（SKILL.md 路由表条件加载）；公开访客页面额外叠加公开页文档，中后台
-  任务不读。
+  任务不读；截图像素级审查 / 视觉回归 / e2e 修改意见任务额外叠加视觉审查文档，
+  纯代码任务不读。
 - 自查钩子中的 `<目标>` 代指本轮改动面路径（目录或文件）；规范审查场景的钩子
   即本仓工具（ban_scan）的执行命令。
+
+### 地图工作台
+
+| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
+| --- | --- | --- | --- | --- |
+| 新页面设计推理 | [design-reasoning](references/design-reasoning.md#页面形态判定矩阵) | 形态判定走地图工作台行；先设计后实现 | B5/B6/B7 高发场景先设计 | 设计产物 ↔ 实现对照复查 |
+| 图层选型 | [map-layers](references/map-layers.md#选型矩阵) | 五类触发场景对应路径；禁原生服务降级拼装 | B5 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
+| 生命周期 | [map-layers](references/map-layers.md#图层生命周期与清理) | 宿主统一管理；destroy 链完整；WGS84 坐标边界 | B7 | `grep -n -e "map\\.add" -e "map\\.remove" <目标>`（应零命中） |
+| 渲染预算 | [map-layers](references/map-layers.md#渲染预算与显式降级) | 三值预算（5000/300/200）；超预算显式降级；完成项移出地图 | — | `grep -n -e "MAX_TILES" -e "MAX_GRAPHICS" -e "MAX_LABELS" <目标>`（预算常量抽查） |
+| 框选/绘制/选择 | [map-interaction](references/map-interaction.md#交互原则) | 宿主附着器；五态状态机；受控选择契约；高亮走语义令牌 | B7 | `grep -nE "MAP_STYLES" <目标>`（overlay 样式真源抽查） |
+| 告警与图例 | [map-interaction](references/map-interaction.md#地图信息组件模式) | 页内覆盖层 Alert；分档色带 + 可访问性；pointer-events:none | — | 对照 basemap 告警 / 置信度图例组件既有形态 |
+| 资产与入口 | [map-interaction](references/map-interaction.md#资产同源与引擎唯一入口) | assets 同源；同步脚本前置；只从门面 import | B5/B6 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
+
+### 规范审查
+
+| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
+| --- | --- | --- | --- | --- |
+| 禁令审查 | [engineering](references/engineering.md#全局禁令表b1b7唯一真源) | B1–B6 机器扫；B7 结构推断不扫、人工复查 | 全量 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
+| 文档引用完整性 | [engineering](references/engineering.md#交叉引用) | 各篇互链与章节锚点逐条存在 | — | 抽取文档互链路径逐条 `test -e` |
+| 四态与接线复查 | [general-pages](references/general-pages.md#四态一致承载) | 逐区块四态；五真源 diff 无平行体系 | — | 四态 grep + 真源 diff（同上两行钩子） |
+| 设计产物审查 | [design-reasoning](references/design-reasoning.md#设计产物契约) | 新页面/新功能的设计产物（形态·布局·决策记录·组件组成·删减检验·真源接线增量）与实现逐项对照；偏离未回写即审查不通过 | — | 设计产物 ↔ 实现对照复查 |
+| 测试形态审查 | [testing-guide](references/testing-guide.md#反模式) | 同名同目录、有断言、四态覆盖、mock 未覆盖被测对象 | — | 对照反模式清单逐项复查 |
+| 体验约束审查 | [engineering](references/engineering.md#三方体验账) | 交付说明 UX / DX / AX / 零破坏四行齐备；界面删减结论：保留项各落保留清单一条 | — | `grep -rn -e "<Tag" -e "<Badge" -e "subTitle=" -e "tooltip=" -e "description=" -e 'type="secondary"' <目标>` |
+
+### 存量页面修改
+
+| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
+| --- | --- | --- | --- | --- |
+| 场景判定与最小变更 | [general-pages](references/general-pages.md#用途与触发场景) | 存量修改最小完整变更；禁令面内顺手修正不扩战线 | B1–B7 全量 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
+| 真源跟随 | [design-tokens](references/design-tokens.md#真源跟随规则) | 读目标仓库真源沿用；不开平行体系；偏离改真源带 why | — | `git diff <目标>`（无平行主题/散落硬编码） |
+| 菜单与深链 | [general-pages](references/general-pages.md#菜单与路由接线) | 隐藏菜单 ≠ 删除深链；双真源分离同步 | — | 对照 `config/routes.ts` ↔ `src/nav/navViews.ts` diff |
+| 四态回归 | [general-pages](references/general-pages.md#四态一致承载) | 触碰面逐数据区块核对四态 | — | `grep -n -e "Skeleton" -e "Empty" -e "ErrorBoundary" -e "disabled" <目标>` |
+| 禁令回归 | [engineering](references/engineering.md#全局禁令表b1b7唯一真源) | 全局硬执行，不因现状让步 | B1–B7 全量 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
+| 三方体验账 | [engineering](references/engineering.md#三方体验账) | 触碰面逐方记账；行为覆盖不减、断言不放宽；路由 path / queryKeys / 权限键 / 接口形状不变；界面删减只作用于触碰面 | — | `npm run lint && npm run test:ci`（目标仓质量门）+ `git diff <目标>`（无公开契约变动） |
 
 ### 非地图 CRUD
 
 | 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
 | --- | --- | --- | --- | --- |
-| 新页面接线 | [engineering](references/engineering.md#新页面四步接线流程) | 四步接线与验收物；接线质量钩子 | B2 | `python3 scripts/ban_scan.py <目标>` |
+| 新页面接线 | [engineering](references/engineering.md#新页面四步接线流程) | 四步接线与验收物；接线质量钩子 | B2 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
 | 新页面设计推理 | [design-reasoning](references/design-reasoning.md#页面形态判定矩阵) | 先产出形态·布局·组件组成设计产物，实现后逐项对照 | — | 设计产物 ↔ 实现对照复查 |
 | 布局与内容壳 | [general-pages](references/general-pages.md#布局骨架) | 页头槽位废黜；内容壳锁视口；高度链；页滚例外显式声明 | — | `grep -n "pageHeaderRender={false}" <目标>` |
 | 列表/表单/详情 | [general-pages](references/general-pages.md#CRUD-模式) | ProTable 列表（卡内滚）；Modal+Form 编辑；Descriptions 详情；Empty/Alert | — | 对照列表页 / 编辑弹层 / 详情抽屉既有形态 |
-| 请求与缓存 | [data-layer](references/data-layer.md#双通道请求) | 通道二选一；apiClient 双认证；不直连 axios | B1 | `python3 scripts/ban_scan.py <目标>` |
+| 请求与缓存 | [data-layer](references/data-layer.md#双通道请求) | 通道二选一；apiClient 双认证；不直连 axios | B1 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
 | 服务端状态 | [data-layer](references/data-layer.md#queryKeys-真源模式) | 单一真源键字典；四条键模式；invalidate 打 root | — | `grep -n "queryKeys\\." <目标>` |
 | 登录态与推送 | [data-layer](references/data-layer.md#401-统一收敛) | 401 恒处理；不建独立登录路由页；SSE 走框架 | — | `grep -n "login=1" <目标>` |
 | 主题与样式 | [design-tokens](references/design-tokens.md#真源跟随规则) | 真源跟随；禁双 token 体系；why 注释惯例 | — | `grep -nE "#[0-9a-fA-F]{6}" <目标>`（硬编码色值抽查） |
@@ -53,38 +95,17 @@
 | 交互态与可访问 | [general-pages](references/general-pages.md#交互态与可访问基线) | hover/active/focus-visible/disabled；focus ring 不移除；无死链 | — | `grep -n -e "focus-visible" -e "aria-current" -e "aria-label" <目标>` |
 | 三方体验账 | [engineering](references/engineering.md#三方体验账) | 公开页同样逐方记账；零破坏证据为命令输出 | — | `npm run lint && npm run test:ci`（目标仓质量门）+ 交付说明四行 |
 
-### 地图工作台
+### 视觉审查（条件叠加）
+
+仅在任务命中截图像素级审查 / 视觉走查 / 视觉回归复验 / e2e 修改意见时取用；
+不改变四个核心场景的判定，纯代码任务不读视觉审查文档。
 
 | 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
 | --- | --- | --- | --- | --- |
-| 新页面设计推理 | [design-reasoning](references/design-reasoning.md#页面形态判定矩阵) | 形态判定走地图工作台行；先设计后实现 | B5/B6/B7 高发场景先设计 | 设计产物 ↔ 实现对照复查 |
-| 图层选型 | [map-layers](references/map-layers.md#选型矩阵) | 五类触发场景对应路径；禁原生服务降级拼装 | B5 | `python3 scripts/ban_scan.py <目标>` |
-| 生命周期 | [map-layers](references/map-layers.md#图层生命周期与清理) | 宿主统一管理；destroy 链完整；WGS84 坐标边界 | B7 | `grep -n -e "map\\.add" -e "map\\.remove" <目标>`（应零命中） |
-| 渲染预算 | [map-layers](references/map-layers.md#渲染预算与显式降级) | 三值预算（5000/300/200）；超预算显式降级；完成项移出地图 | — | `grep -n -e "MAX_TILES" -e "MAX_GRAPHICS" -e "MAX_LABELS" <目标>`（预算常量抽查） |
-| 框选/绘制/选择 | [map-interaction](references/map-interaction.md#交互原则) | 宿主附着器；五态状态机；受控选择契约；高亮走语义令牌 | B7 | `grep -nE "MAP_STYLES" <目标>`（overlay 样式真源抽查） |
-| 告警与图例 | [map-interaction](references/map-interaction.md#地图信息组件模式) | 页内覆盖层 Alert；分档色带 + 可访问性；pointer-events:none | — | 对照 basemap 告警 / 置信度图例组件既有形态 |
-| 资产与入口 | [map-interaction](references/map-interaction.md#资产同源与引擎唯一入口) | assets 同源；同步脚本前置；只从门面 import | B5/B6 | `python3 scripts/ban_scan.py <目标>` |
-
-### 存量页面修改
-
-| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
-| --- | --- | --- | --- | --- |
-| 场景判定与最小变更 | [general-pages](references/general-pages.md#用途与触发场景) | 存量修改最小完整变更；禁令面内顺手修正不扩战线 | B1–B7 全量 | `python3 scripts/ban_scan.py <目标>` |
-| 真源跟随 | [design-tokens](references/design-tokens.md#真源跟随规则) | 读目标仓库真源沿用；不开平行体系；偏离改真源带 why | — | `git diff <目标>`（无平行主题/散落硬编码） |
-| 菜单与深链 | [general-pages](references/general-pages.md#菜单与路由接线) | 隐藏菜单 ≠ 删除深链；双真源分离同步 | — | 对照 `config/routes.ts` ↔ `src/nav/navViews.ts` diff |
-| 四态回归 | [general-pages](references/general-pages.md#四态一致承载) | 触碰面逐数据区块核对四态 | — | `grep -n -e "Skeleton" -e "Empty" -e "ErrorBoundary" -e "disabled" <目标>` |
-| 禁令回归 | [engineering](references/engineering.md#全局禁令表b1b7唯一真源) | 全局硬执行，不因现状让步 | B1–B7 全量 | `python3 scripts/ban_scan.py <目标>` |
-| 三方体验账 | [engineering](references/engineering.md#三方体验账) | 触碰面逐方记账；行为覆盖不减、断言不放宽；路由 path / queryKeys / 权限键 / 接口形状不变；界面删减只作用于触碰面 | — | `npm run lint && npm run test:ci`（目标仓质量门）+ `git diff <目标>`（无公开契约变动） |
-
-### 规范审查
-
-| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
-| --- | --- | --- | --- | --- |
-| 禁令审查 | [engineering](references/engineering.md#全局禁令表b1b7唯一真源) | B1–B6 机器扫；B7 结构推断不扫、人工复查 | 全量 | `python3 scripts/ban_scan.py <目标>` |
-| 文档引用完整性 | [engineering](references/engineering.md#交叉引用) | 各篇互链与章节锚点逐条存在 | — | 抽取文档互链路径逐条 `test -e` |
-| 四态与接线复查 | [general-pages](references/general-pages.md#四态一致承载) | 逐区块四态；五真源 diff 无平行体系 | — | 四态 grep + 真源 diff（同上两行钩子） |
-| 测试形态审查 | [testing-guide](references/testing-guide.md#反模式) | 同名同目录、有断言、四态覆盖、mock 未覆盖被测对象 | — | 对照反模式清单逐项复查 |
-| 体验约束审查 | [engineering](references/engineering.md#三方体验账) | 交付说明 UX / DX / AX / 零破坏四行齐备；界面删减结论：保留项各落保留清单一条 | — | `grep -rn -e "<Tag" -e "<Badge" -e "subTitle=" -e "tooltip=" -e "description=" -e 'type="secondary"' <目标>` |
+| 证据采集 | [visual-review](references/visual-review.md#证据采集协议) | 视口×粒度×状态三维矩阵；稳定协议与环境元数据；结构+坐标采集；DPR 双采样；动态区域排除 | B1–B7 仍全局适用 | 截图产物的视口 / DPR / 状态元数据逐格核对 |
+| 八维走查 | [visual-review](references/visual-review.md#八维走查清单) | 八维固定顺序走查；审查缺省值让位 token 真源；AI 味黑名单核对；装饰自减法 | — | 对照八维清单逐维核对审查产物 |
+| 发现准入与记录 | [visual-review](references/visual-review.md#偏差判定) + [visual-review](references/visual-review.md#发现记录与-e2e-修改意见格式) | 准入四门（功能 / 无障碍 / 布局破损 / 违反设计约定）；感知色差双阈值与 AA 豁免；动态区域掩码清单化；还原度分层验收；**三级证据级别（observation / runtime-confirmed / fix-reverified）**；finding 强制字段与 fix 双分层；修复值走真源不发明新值 | — | finding 字段齐备性与「模糊表述」复查；掩码清单登记核对 |
+| 修复与复验闭环 | [visual-review](references/visual-review.md#修复复验闭环) | 同参数同环境重截；前后对比排除误报；基线不可原地覆盖；复验裁判一致性（同一观察空间）；重试两级协议（采集稳定 + 判定，混合结果 flaky）；落地改动照常过质量门与三方体验账 | B1–B7 全量（落地改动面） | `npm run lint && npm run test:ci`（目标仓质量门）+ 交付说明四行 + 复验对比证据（含重试记录）+ `python3 <skill-root>/scripts/visual_review_check.py <证据包>`（退出码 0） |
 
 ## 覆盖缺口登记
 

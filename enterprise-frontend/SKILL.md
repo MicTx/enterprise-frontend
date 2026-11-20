@@ -5,15 +5,17 @@ description: >-
   dashboard / admin console / workbench / enterprise frontend 的新建、扩展、迁移、审查——
   CRUD 页面、列表页、表单页、详情页、权限、菜单、路由、布局、页面设计、界面删减（去标语 /
   说明文字 / 次要标签）、数据流、主题与设计 token、前端初始化、技术栈迁移、UI 迁移、
-  一致性审查、前端代码审查；以及企业自有公开落地页 / 营销页 / 活动页 / 定价对比页——
+  一致性审查、前端代码审查、截图像素级审查 / 视觉走查 / 视觉回归复验 /
+  e2e 修改意见；以及企业自有公开落地页 / 营销页 / 活动页 / 定价对比页——
   默认执行本规范硬约束清单，而非自由发挥；含 Ant Design Pro / ProComponents /
   ProTable / ProForm / Umi / Umi Max / React Query / map / GIS 前端场景。
   Use for any enterprise admin frontend work: admin dashboards, CRUD pages,
   forms, detail views, routing, menus, permissions, data layer, theming,
-  migration, and consistency review; also use for public landing pages,
-  marketing pages, campaign pages, and pricing/comparison pages in the same
-  codebase. The spec is a hard-constraint checklist, not advisory reference
-  material.
+  migration, and consistency review; also use for screenshot pixel-level
+  visual review, visual regression re-verification, and actionable e2e fix
+  advice; also use for public landing pages, marketing pages, campaign pages,
+  and pricing/comparison pages in the same codebase. The spec is a
+  hard-constraint checklist, not advisory reference material.
 ---
 
 # 企业级前端约束规范（enterprise-frontend）
@@ -33,13 +35,18 @@ description: >-
   ArcGIS SDK（仅地图场景，经唯一入口模块封装）。
 - **表述纪律**：条文自洽，只讲模式不讲版本号、不讲来源仓库；token 默认值见
   `references/design-tokens.md`，随目标仓库真源裁决。
+- **命令约定**：随包命令统一写成 `python3 <skill-root>/scripts/<工具>` 形态；
+  `<skill-root>`＝含 SKILL.md 的目录（接收方即安装落点 `<目标目录>/enterprise-frontend`），
+  命令里的目标路径相对目标仓库。
 
 ## Success Definition
 
 任务完成 = 以下全部成立，缺一即未完成：
 
-1. **禁令零违反**（B1–B7，全局硬执行）。ID 契约表见本文 References 层；
-   完整禁令表（检查级 / 黑名单字面量 / 证据路径）唯一真源是 `references/engineering.md`。
+1. **禁令无未豁免 error**（B1–B7，全局硬执行）；warn 与豁免命中必须按规则 / 路径 /
+   owner / expires 单独报告，不得把 `RESULT: clean` 表述为「禁令零违反」。ID 契约表见
+   本文 References 层；完整禁令表（检查级 / 黑名单字面量 / 证据路径）唯一真源是
+   `references/engineering.md`。
 2. **真源接线完整**：路由真源、导航真源、权限真源、query keys 真源、样式 token 真源
    五处同步，无平行体系（改真源，不复制默认值）。
 3. **四态承载齐备**：每个数据驱动区块有加载 / 空 / 错误 / 禁用态的一致承载方案，
@@ -51,22 +58,38 @@ description: >-
    （`references/engineering.md` §三方体验账）。
 6. **质量命令通过**：lint（Biome）+ 类型检查（`tsc --noEmit`）+ 测试全绿。
 7. **无越界断言**：完成判定以静态约束检查与质量命令为准；不以文档检查声称
-   UI 视觉、交互或运行时效果实测通过。
-8. **公开页面（条件项）**：命中公开落地页/营销页时，单一转化目标、内容真实性与证据
+   UI 视觉、交互或运行时效果实测通过。声称视觉 / 像素结论时，唯一合法证据面
+   是 `references/visual-review.md` 的截图证据协议产物（截图矩阵 + finding
+   记录 + 复验对比）。
+8. **设计产物对照实现**：新页面 / 新功能先按 `references/design-reasoning.md`
+   四步程序产出设计产物——形态、布局、决策记录、组件组成（含四态方案）、
+   删减检验与真源接线增量；实现逐项对照设计产物落地，偏离先回写设计产物
+   再动手（契约见 design-reasoning §设计产物契约）。
+9. **公开页面（条件项）**：命中公开落地页/营销页时，单一转化目标、内容真实性与证据
    边界、视觉方向与动效、交互态、SEO 与上线清单齐备（`references/public-pages.md`）；
    中后台任务不适用。
+10. **视觉审查（条件项）**：命中截图像素级审查 / 视觉回归 / e2e 修改意见任务时，
+   按 `references/visual-review.md` 协议产出审查产物——**审查证据包**
+   （`visual-review.json`，三级证据级别 `observation / runtime-confirmed /
+   fix-reverified`，字段契约见 visual-review §审查证据包）+ finding 记录 +
+   同参数复验对比；证据包经 `python3 <skill-root>/scripts/visual_review_check.py` 校验（退出码 0）
+   才算产物齐备；修复值走 token 真源，禁发明新值；未命中则不适用。
 
 ## Workflow
 
-1. **接收任务 → 判场景**（按序判定，命中即止）：
-   1. 非地图 CRUD（列表 / 表单 / 详情 / 布局 / 接线）——默认场景；
-   2. 地图 / GIS 场景（空间数据、图层、地图交互、地图资产）；
+1. **接收任务 → 判场景**（按序判定，命中即止；前三项均未命中时落在第 4 项默认场景）：
+   1. 地图 / GIS 场景（空间数据、图层、地图交互、地图资产）；
+   2. 规范审查（对既有前端做一致性审查）；
    3. 存量页面修改（目标仓库已有页面，小步改）；
-   4. 规范审查（对既有前端做一致性审查）。
+   4. 新建非地图 CRUD（列表 / 表单 / 详情 / 布局 / 接线）——默认场景。
    公开访客页面（落地页 / 营销页 / 活动页 / 定价对比页）是**条件叠加页面类型**，不改变
    上述四个核心场景的主分类；命中时额外读 `references/public-pages.md`，中后台任务不读。
-2. **按条件加载路由表读对应 references/ 文档**（见 References 层）；地图场景额外读
-   两篇地图文档；公开页面额外读公开页文档；非对应场景不读。
+   截图像素级审查 / 视觉走查 / 视觉回归 / e2e 修改意见任务是**条件叠加工作面**，
+   命中时额外读 `references/visual-review.md`，纯代码任务不读。
+2. **按条件加载路由表读对应 references/ 文档**（见 References 层）：判定场景后先读
+   `references/scenario-coverage.md`，按场景取必读锚点与自查钩子；地图场景额外读
+   两篇地图文档；公开页面额外读公开页文档；视觉审查任务额外读视觉审查文档；
+   非对应场景不读。
 3. **设计推理（新页面 / 新功能必经）**：按 `references/design-reasoning.md` 的四步
    程序产出设计产物——页面形态、布局模式、卡片-内容组件组成（含四态方案）、删减检验
    与真源接线增量；实现与 Review Loop 以此为对照基准。
@@ -81,15 +104,19 @@ description: >-
 | 层级 | 内容 | 裁决 |
 | --- | --- | --- |
 | 禁令与质量规则 | B1–B7、四态承载、界面删减、三方体验账、质量命令、真源同步纪律 | **全局硬执行**，不因目标仓库现状让步 |
-| token 与结构约定 | 色彩 / 圆角 / 高度 / 字号 / 间距、布局参数、目录组织 | **跟随目标仓库真源**：已有主题 / 路由 / 请求层 → 读其真源并沿用（改真源，不开平行体系）；新建项目无真源 → 用规范默认值（`references/design-tokens.md`） |
+| token 与结构约定 | 色彩 / 圆角 / 高度 / 字号 / 间距、布局参数、目录组织 | **跟随目标仓库真源**：已有主题 / 路由 / 请求层 → 读其真源并沿用（改真源，不开平行体系）；新建项目 → 复制随包 `template/`（token 真源 `template/src/theme/tokens.ts`）；无模板可复制时才用 `references/design-tokens.md` 清单做维度对照 |
 | 目标仓库自身规则 | 其 AGENTS / README / 约定文档 | 架构 / 主题 / 数据 / 权限约定优先于本规范的「跟随类」条款；**永不豁免禁令类条款** |
 
 规则细目：
 
-- 新建项目：全量按规范标准栈与默认 token 落地，不留「渐进适配」口子。
+- 新建项目：复制随包 `template/` 为唯一主路径（token 真源 `template/src/theme/tokens.ts`），
+  全量按规范标准栈落地，不留「渐进适配」口子；无模板可复制时才以
+  `references/design-tokens.md` 清单做维度对照。
 - 存量修改：最小完整变更；禁令面内的存量违规代码在触碰时顺手修正，不扩大战线。
 - 公开页面：视觉方向可不同于中后台，但必须收敛到单一品牌/主题真源；不把营销页的
   字体/配色/间距规则反向套进中后台。
+- 视觉审查：截图证据协议、八维走查与 finding 格式见 `references/visual-review.md`；
+  其数值阈值包为审查缺省值，目标仓库 token 真源已有取值时以真源为准。
 - 冲突时序：目标仓库真源 > 规范默认值 > 通用直觉；禁令 > 一切仓库现实。
 - 表述纪律：规范只讲模式不讲版本号；条文自洽，不引用外部仓库路径。
 
@@ -98,8 +125,9 @@ description: >-
 - 只管**前端工程约束**：页面 / 组件 / 状态 / 样式 / 路由 / 质量。不做后端规范、
   不做 CI/CD 平台规范、不做移动端规范。
 - 不替代目标仓库自身的 AGENTS / README 规则（优先级见 Decision Rules）。
-- 不做生成页面的 with/without 对照评测、不做 UI 效果或 skill 效能实测；
-  验证 = 静态约束检查 + 质量命令。
+- 不做生成页面的 with/without 对照评测、不做 skill 效能实测；常规任务验证 =
+  静态约束检查 + 质量命令。**视觉审查任务另以截图证据与审查产物为验收面**
+  （`references/visual-review.md` 协议），该证据面不扩展到其他任务类型。
 
 ## Anti-Patterns
 
@@ -121,24 +149,35 @@ description: >-
    界面膨胀。公开页文档只在命中公开访客页面时加载。
 10. **用占位文案、死链或虚构证据交付公开页** → 页面看似完成却不可上线；示例必须标注，
     生产证据必须真实，缺失写「待补证据」。
+11. **从代码猜效果、模糊表述或发明 token 值的截图审查** → 未读截图就下视觉结论、
+    finding 无坐标无量测值无规则依据、修复值不来自真源，审查产物不可执行且制造
+    平行体系；按 `references/visual-review.md` 观察纪律与记录格式回炉。
 
 ## Review Loop
 
 任务收尾自查清单（全部通过才交付）：
 
-1. **禁令自扫**：B1–B6 逐条静态检查（扫描工具落地前按 engineering.md B 表手工 grep）；
-   B7 按文档纪律人工复查（结构推断不自动化）。
+1. **禁令自扫**：B1–B6 机器项跑 `python3 <skill-root>/scripts/ban_scan.py <目标>`，退出码 0 且 warn/豁免命中
+   已按规则 / 路径 / owner / expires 单独报告才算通过（2 = 扫描面为空或读取失败，不算
+   干净）；engineering.md「正则不覆盖的人工复查项」与 B7 逐条人工复查。
 2. **真源接线复查**：路由 / 导航 / 权限 / query keys / token 五真源 diff，无平行体系。
 3. **四态承载复查**：新写数据驱动区块逐个确认加载 / 空 / 错误 / 禁用态承载。
-4. **产物净度**：构建或生成后 `git status --short` 无意外产物、无生成物混入。
-5. **文档引用完整性**：本次改动文档中出现的 `references/<路径>` 与章节锚点逐条存在。
-6. **界面删减自查**：对新增或触碰的界面跑 general-pages §界面删减 的候选钩子，逐处做
+4. **设计产物对照复查**：新页面 / 新功能逐项对照设计产物——形态、布局、决策
+   记录、组件组成（含四态方案）、删减检验、真源接线增量；实现与设计产物不一致处
+   已回改或回写设计记录，偏离逐条解释（design-reasoning §设计产物契约）。
+5. **产物净度**：构建或生成后 `git status --short` 无意外产物、无生成物混入。
+6. **文档引用完整性**：本次改动文档中出现的 `references/<路径>` 与章节锚点逐条存在。
+7. **界面删减自查**：对新增或触碰的界面跑 general-pages §界面删减 的候选钩子，逐处做
    删除试读；保留项各落在保留清单一条，读不懂处已重新设计布局而非补字。
-7. **三方体验账**：交付说明按 engineering §三方体验账 填 UX / DX / AX / 零破坏四行；
+8. **三方体验账**：交付说明按 engineering §三方体验账 填 UX / DX / AX / 零破坏四行；
    任一方变差或公开契约变动即未通过。
-8. **公开页面自查（条件项）**：命中公开页时按 public-pages 核对单一主 CTA、内容真实性、
+9. **公开页面自查（条件项）**：命中公开页时按 public-pages 核对单一主 CTA、内容真实性、
    交互态、SEO 与上线清单；未命中则跳过。
-9. 未通过项回改后重跑；不带未解释的红项交付。
+10. **视觉审查自查（条件项）**：命中视觉审查时按 visual-review 核对——每张截图已读回
+   看图、量测值来自脚本或源码、finding 强制字段齐备、修复值走真源、复验同参数同环境；
+   **证据包（visual-review.json）经 `python3 <skill-root>/scripts/visual_review_check.py`
+   校验通过（退出码 0）**；未命中则跳过。
+11. 未通过项回改后重跑；不带未解释的红项交付。
 
 ## References
 
@@ -155,6 +194,8 @@ description: >-
 | 测试编写与用例设计（四步接线第 4 步 / 回归锁定 / 测试评审） | `references/testing-guide.md` |
 | 任务涉及地图 / GIS / 空间数据 / 图层（仅此时读） | `references/map-layers.md` |
 | 地图交互、标注、高亮、资产同源约束（仅此时读） | `references/map-interaction.md` |
+| 截图像素级审查、视觉走查、视觉回归复验、e2e 修改意见（仅此时读；纯代码任务不读） | `references/visual-review.md` |
+| 完成场景判定后读；按场景取必读锚点与自查钩子（场景覆盖自查 / 覆盖缺口核对） | `references/scenario-coverage.md` |
 
 **B1–B7 禁令 ID 契约**（ID 固定不增删改义；一句话语义如下，完整表——检查级、
 黑名单字面量——唯一真源是 `references/engineering.md`，扫描规则表
@@ -163,7 +204,7 @@ description: >-
 | ID | 一句话语义 |
 | --- | --- |
 | B1 | 页面 / 组件代码不直接 import axios；HTTP 走框架 request 或统一 apiClient |
-| B2 | 不用 react-router-dom 做页面路由 / 导航；组件内嵌渲染场景（如路由弹层）允许 MemoryRouter |
+| B2 | 不用 react-router 族做页面路由 / 导航；组件内嵌渲染场景（如路由弹层）只允许 MemoryRouter 及与其同文件导入的 Route / Routes |
 | B3 | 不用 import.meta.env；环境配置走框架 config / 代理通道 |
 | B4 | 不安装 ESLint / Prettier；质量工具唯一 Biome |
 | B5 | 不引入第二地图引擎；地图能力唯一入口封装模块 |

@@ -7,7 +7,7 @@ export default async (): Promise<any> => {
   const config = await configUmiAlias(createConfig({ target: 'browser' }));
   return {
     ...config,
-    testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+    testPathIgnorePatterns: ['/node_modules/', '/dist/', '/e2e/'],
     setupFilesAfterEnv: [
       ...(config.setupFilesAfterEnv || []),
       './tests/setupTests.jsx',

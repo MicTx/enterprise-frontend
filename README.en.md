@@ -14,16 +14,17 @@ proven stack, design language, and engineering discipline distilled into a
 **frontend engineering spec (a skill) for AI coding sessions**, made of three
 parts:
 
-1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus ten
+1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus eleven
    `references/` domain documents: bans, patterns, wiring discipline, and
    self-check hooks, all written as "do this", never as "you could consider".
 2. **The starter template** — `template/`, a compliant non-map base skeleton
    (five sources of truth + unified request channel + content shell + quality
-   gates). New projects start by copying the template; it ships green on all
-   gates.
-3. **The toolchain** — ban scanning, an installer, and a packager, all
-   depending only on the Python 3 standard library, so recipients can
-   reproduce every acceptance check.
+   gates). New projects start by copying the bundled template; it ships green
+   on all gates.
+3. **The toolchain** — ban scanning, visual-evidence-package validation, an
+   installer, and a packager; the Python tools depend only on the Python 3
+   standard library, and the installer additionally needs bash >= 3.2 and
+   coreutils, so recipients can reproduce every acceptance check.
 
 It serves two readers at once: **AI sessions** treat it as an executable spec
 (load it and it applies), while **human engineers** use it as an enterprise
@@ -34,7 +35,7 @@ frontend engineering constraint handbook.
 | Principle | Meaning |
 | --- | --- |
 | **Bans execute globally** | The B1–B7 bans (no direct axios, no bypassing the framework router, no ESLint/Prettier, no second map engine, co-located assets, …) hold in any target repository regardless of its current state |
-| **Follow the source of truth** | Design tokens and routing/menu/permission structure **follow the target repository's sources of truth** — change the source, never fork a parallel system; spec defaults apply only when a project has none |
+| **Follow the source of truth** | Design tokens and routing/menu/permission structure **follow the target repository's sources of truth** — change the source, never fork a parallel system; copying the bundled template gives a new project the default sources |
 | **Reproducible acceptance** | The spec speaks in patterns, never version numbers, and cites no external sources; acceptance = static ban scan + quality commands (lint / tsc / test) + per-item self-check hooks, with command output as the evidence |
 | **Subtract the interface** | New or touched UI carries no filler slogans, explanatory copy, or decorative tags; if it cannot be read once they are gone, the layout is wrong — redesign it, never patch it with words (keep-list: four-state copy, validation, units, status tags, accessible names) |
 | **Three-party experience ledger** | Every change must improve the user (UX), the developer (DX), and the AI agent (AX) while breaking nothing; a regression for any party, or cost shifted onto another, is not done — evidence is command output |
@@ -51,17 +52,28 @@ required anchors and self-check hooks:
 
 | Scenario | Focus |
 | --- | --- |
-| Non-map CRUD | Lists/forms/details, layout skeleton, four-state coverage, wiring, data layer |
 | Map workbench | Layer selection and budgets, box-select/draw/controlled selection, alerts and legends, asset co-origin |
-| Legacy page modification | Smallest complete change, source-of-truth following, ban regression, four-state regression |
 | Spec review | Ban self-scan, document reference integrity, four-state and wiring recheck |
+| Legacy page modification | Smallest complete change, source-of-truth following, ban regression, four-state regression |
+| Non-map CRUD | Lists/forms/details, layout skeleton, four-state coverage, wiring, data layer |
 
 Public pages (landing, marketing, campaign, pricing/comparison) are a
 conditional overlay: strategy, content realism, interaction states, motion,
 SEO, and launch checklist live in `references/public-pages.md` and load only
 when the task matches.
 
-## Quick start
+Screenshot pixel-level review, visual walkthroughs, visual regression
+re-verification, and actionable e2e fix advice form another conditional
+overlay: the evidence-capture protocol (screenshot matrix / stability /
+structure+coordinates), the eight-axis checklist, finding admission and
+record format, and the fix-then-re-verify loop live in
+`references/visual-review.md` and load only when the task matches.
+
+## Archive recipients: install, use and start a project
+
+This section is for recipients of a release archive: unpack and follow the
+steps below. Self-tests, packaging, and maintenance belong to the development
+repository surface in the next section.
 
 ### Install
 
@@ -82,27 +94,34 @@ re-installing identical content prints `already up to date`; replacing an old
 install keeps a backup by default. Requires bash >= 3.2, python3 >= 3.9,
 coreutils.
 
-**Starting a project from scratch**: skip installing the skill and copy the
-bundled `template/` starter instead (five sources of truth + unified request
-channel + content shell, already compliant) — `cp -r template/ my-admin`,
-then follow the template README (`npm install`).
-
 ### Using it in a host session
 
-Add the parent path of `<target-dir>/enterprise-frontend` to your AI host's
-skill search path and describe tasks in natural language in a new session
-(some hosts also accept an explicit `$enterprise-frontend` or
-`/enterprise-frontend` prefix). The session classifies the scenario per the
-Workflow → runs the design-reasoning step (new pages/features produce a
-form·layout·composition design first) → reads the routed spec documents →
-applies the constraints → closes with the self-check hooks.
+Add the path of `<target-dir>/enterprise-frontend` to your AI host's skill search path and
+describe tasks in natural language in a new session (some hosts also accept an
+explicit `$enterprise-frontend` or `/enterprise-frontend` prefix). The session classifies
+the scenario per the Workflow → runs the design-reasoning step (new
+pages/features produce a form·layout·composition design first) → reads the
+routed spec documents → applies the constraints → closes with the self-check
+hooks.
 
 ### Verify the install
 
 ```bash
 cd <target-dir>/enterprise-frontend
-python3 scripts/ban_scan.py references/   # ban self-scan → RESULT: clean
+python3 scripts/ban_scan.py template/   # ban self-scan → RESULT: clean
 ```
+
+### Starting from scratch
+
+Copy the starter template from the archive (five sources of truth + unified
+request channel + content shell, already compliant):
+
+```bash
+cp -r enterprise-frontend/template/ my-admin
+cd my-admin && npm install
+```
+
+See `template/README.md` for details.
 
 ## The spec system
 
@@ -121,6 +140,7 @@ reads which document:
 | `references/engineering.md` | Engineering rules: quality discipline, **the global ban table B1–B7 (single source of truth)**, four-step wiring, the three-party experience ledger, build environment | Quality gates, bans, wiring, build environment, per-change ledger |
 | `references/map-layers.md` | Map layers: selection matrix, lifecycle, render budgets & explicit degradation | Tasks involving maps/spatial data (conditional) |
 | `references/map-interaction.md` | Map interaction: box-select/draw/selection/highlight, alerts & legends, asset co-origin, single engine entry | Map interaction and assets (conditional) |
+| `references/visual-review.md` | Screenshot visual review & e2e fix advice: evidence-capture protocol, eight-axis checklist, finding admission & pixel-diff semantics, finding record format, fix-then-re-verify loop (incl. layered acceptance, re-verify judge consistency, flaky retry protocol) | Pixel-level screenshot review / visual regression / e2e fix advice (conditional) |
 | `references/testing-guide.md` | Test design guide: five test forms + mock patterns + per-scenario checklists | Writing/reviewing tests |
 | `references/scenario-coverage.md` | Four core scenarios + public-page overlay matrix: scenario → anchors → self-check hooks | After scenario classification |
 
@@ -129,23 +149,46 @@ The full B1–B7 definitions (check level, blacklist literals) live only in
 semantics; the scan rule table `scripts/ban_rules.json` shares the same
 source.
 
-## Toolchain
+## Development repository: toolchain, packaging and maintenance
+
+This section is for maintainers of this skill: self-tests, packaging, and
+version gates live here; archive recipients do not need it.
+
+### Toolchain and self-tests
 
 | Tool | Role | Self-test |
 | --- | --- | --- |
 | `scripts/ban_scan.py` + `ban_rules.json` | Ban static check (minimal by design: pattern matching with comment-line exemption; the rule table shares a single source with the spec's ban table; B7 explicitly unscanned) | `python3 scripts/tests/test_ban_scan.py` |
+| `scripts/visual_review_check.py` | Visual-review evidence-package validator (three evidence levels, two-level retry semantics, screenshot hashing and path safety; exit codes 0/1/2) | `python3 scripts/tests/test_visual_review_check.py` |
 | `install.sh` | Host-agnostic installer (staging → idempotence check → backup → atomic move → validation → rollback) | `python3 scripts/tests/test_install_sh.py` |
 | `scripts/build_package.py` | Assembles the release tree and tar.gz/zip archives per manifest v2 + manifest listing | `python3 scripts/tests/test_build_package.py` |
 
-Ban self-scan: `python3 scripts/ban_scan.py <target>` — scanning the spec
-documents and the template must always come back clean; the scan surface
-naturally excludes documents and test fixtures.
+Ban self-scan: `python3 scripts/ban_scan.py <target>` — scanning the template
+must always come back clean. Exit codes: 0 clean / 1 violations / 2 usage or
+IO error; a target with zero scannable files (for example a docs-only
+directory) also exits 2, so a mistyped path never passes silently. Patterns
+the regex scan does not cover are listed as manual review items in
+`references/engineering.md`.
 
-## Packaging and distribution
+### Installing from the development repository root
+
+The development repository root *is* the skill body; there is no `enterprise-frontend/`
+source subdirectory for the installer to find by default. Installing from the
+repository root must name the source explicitly; preview with `--dry-run`
+first:
+
+```bash
+./install.sh <target-dir> --dry-run --skill-dir .   # preview
+./install.sh <target-dir> --skill-dir .             # install
+```
+
+`--skill-dir .` makes the development repository root the install source.
+
+### Packaging and distribution
 
 ```bash
 python3 scripts/build_package.py          # produces dist/ (tree + tar.gz + zip + SHA256SUMS + listing)
-python3 scripts/build_package.py --expect-version 1.3.0
+python3 scripts/build_package.py --expect-version 1.6.0
 ```
 
 Exclusion is the default: the `runtime` list in `manifest.json` is closed —
@@ -171,14 +214,14 @@ private Gitea source of truth, not from `dist/` in a development worktree: the
 build reads working-tree files, so uncommitted edits to tracked files would be
 packaged.
 
-## Maintenance quick reference
+### Maintenance quick reference
 
 | Action | Command |
 | --- | --- |
 | Ban scan | `python3 scripts/ban_scan.py <path>` |
 | Package | `python3 scripts/build_package.py` |
 | All tests | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
-| Doc structure contract | `python3 -I scripts/tests/test_spec_docs.py` (eight layers / B-ID agreement / links and anchors / public-page conditional wiring / wiring of the two experience constraints) |
+| Doc structure contract | `python3 -I scripts/tests/test_spec_docs.py` (eight layers / B-ID agreement / links and anchors / public-page and visual-review conditional wiring / wiring of the two experience constraints) |
 
 ## License & distribution
 
@@ -191,6 +234,6 @@ The repository's authored content (`SKILL.md`, `references/`, `template/`,
 Distribution channel: a private Gitea source of truth plus the accompanying
 archive; any public snapshot requires separate authorization.
 
-Third-party MIT notices for the public-page method live in
-[THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md) and are not part of the normative
-spec. See [CHANGELOG](CHANGELOG.md) for the change history.
+Third-party license notices for the public-page and visual-review methods
+live in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md) and are not part of the
+normative spec. See [CHANGELOG](CHANGELOG.md) for the change history.

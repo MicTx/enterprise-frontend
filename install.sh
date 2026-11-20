@@ -94,6 +94,56 @@ fi
 
 INSTALL_DIR="$TARGET_DIR/$SKILL_NAME"
 
+# 交付面 = manifest.runtime 闭式清单 + manifest.json（与 build_package.py 同口径）。
+# 预检：manifest 可读、runtime 为非空相对路径数组、条目全部存在且落在源目录内；
+# 条目不得为 `.`、纯/内嵌 `..`、绝对路径或 resolve 后越界。git 跟踪模式下显式文件条目
+# 必须在索引中（未跟踪或被忽略 → 拒绝）。任一不满足 → 用法错误 exit 2。
+if ! RUNTIME_ERR="$(python3 - "$SKILL_DIR" <<'PYEOF' 2>&1
+import json, os, subprocess, sys
+skill = sys.argv[1]
+try:
+    with open(os.path.join(skill, "manifest.json"), encoding="utf-8") as fh:
+        runtime = json.load(fh).get("runtime")
+except (OSError, ValueError, AttributeError) as exc:
+    sys.exit(f"manifest.json 不可读或非法: {exc}")
+if not isinstance(runtime, list) or not runtime or not all(isinstance(e, str) and e for e in runtime):
+    sys.exit("manifest.json 缺 runtime 闭式清单（非空字符串数组）")
+real_root = os.path.realpath(skill)
+for entry in runtime:
+    if os.path.isabs(entry):
+        sys.exit(f"runtime 条目越界（绝对路径）: {entry}")
+    parts = entry.replace("\\", "/").split("/")
+    norm = os.path.normpath(entry)
+    if norm in (".", "") or any(part == ".." for part in parts):
+        sys.exit(f"runtime 条目越界（不得为 . 或含 .. 段）: {entry}")
+    if not os.path.lexists(os.path.join(skill, norm)):
+        sys.exit(f"runtime 条目缺失: {entry}")
+    real_entry = os.path.realpath(os.path.join(skill, norm))
+    try:
+        inside = os.path.commonpath([real_root, real_entry]) == real_root
+    except ValueError:
+        inside = False
+    if not inside:
+        sys.exit(f"runtime 条目 resolve 后越出源目录: {entry}")
+def git(*args):
+    try:
+        return subprocess.run(["git", "-C", skill, *args], capture_output=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return None
+# git 跟踪模式（SKILL.md 已跟踪）下，显式文件条目必须以索引为边界；目录条目在暂存时按 tracked 收集。
+if git("ls-files", "--error-unmatch", "--", "SKILL.md") is not None:
+    for entry in runtime:
+        norm = os.path.normpath(entry)
+        if os.path.isdir(os.path.join(skill, norm)):
+            continue
+        listed = git("ls-files", "-z", "--", norm)
+        if not listed or not any(part for part in listed.split(b"\0")):
+            sys.exit(f"runtime 文件条目未被 git 跟踪（先 git add，或移出 runtime）: {entry}")
+PYEOF
+)"; then
+  die_usage "$RUNTIME_ERR"
+fi
+
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "dry-run: 源            $SKILL_DIR"
   echo "dry-run: 安装落点      $INSTALL_DIR"
@@ -132,24 +182,81 @@ restore_backup() {
 STAGE="$(mktemp -d "$TARGET_DIR/.install-staging.XXXXXX")" || { echo "ERROR: mktemp 失败" >&2; exit 1; }
 BACKUP=""
 
-if ! cp -R "$SKILL_DIR/." "$STAGE/$SKILL_NAME/"; then
-  echo "ERROR: 源复制到暂存失败" >&2
-  restore_backup
-  cleanup_stage
-  exit 1
-fi
-
-# 2) 暂存净化与拒绝 symlink（打包/安装面不携带系统差异物与链接逃逸）
-# 依赖树与内部证据档案不入交付面（与 manifest.runtime 闭式清单同口径）
-find "$STAGE" -type d \( -name 'node_modules' -o -name 'dist' \) -prune -exec rm -rf {} +
-find "$STAGE" \( -name '.DS_Store' -o -name '*.pyc' \) -delete
-find "$STAGE" -type d -name '__pycache__' -prune -exec rm -rf {} +
-rm -rf "$STAGE/$SKILL_NAME/library" "$STAGE/$SKILL_NAME/LICENSE-LIBRARY" \
-      "$STAGE/$SKILL_NAME/scripts/index_library.py" \
-      "$STAGE/$SKILL_NAME/scripts/verify_snapshot.py" \
-      "$STAGE/$SKILL_NAME/scripts/tests"
-if find "$STAGE" -type l -print -quit | grep -q .; then
-  echo "ERROR: 源包含 symlink，拒绝安装" >&2
+# 2) 按 runtime 白名单复制到暂存：不带 .git/.spec/agent 状态等私有目录；
+#    依赖树、生成目录、缓存与系统差异物不入交付面；遇 symlink 拒绝（链接逃逸）。
+#    源目录的 SKILL.md 受 git 跟踪时（仓库顶层或 monorepo 子目录）只装已跟踪文件
+#    （与 build_package.py 同口径），runtime 内有未跟踪且未忽略的文件则拒绝安装。
+if ! python3 - "$SKILL_DIR" "$STAGE/$SKILL_NAME" <<'PYEOF'
+import json, os, shutil, subprocess, sys
+skill, dest = sys.argv[1], sys.argv[2]
+SKIP_DIRS = {"node_modules", "dist", "coverage", ".git", ".spec", "__pycache__",
+             "test-results", "playwright-report"}
+SKIP_FILES = {".DS_Store", "package-lock.json"}
+with open(os.path.join(skill, "manifest.json"), encoding="utf-8") as fh:
+    runtime = json.load(fh)["runtime"]
+def ignore(directory, names):
+    skipped = []
+    for name in names:
+        full = os.path.join(directory, name)
+        if os.path.islink(full):
+            sys.exit(f"ERROR: 源包含 symlink，拒绝安装: {full}")
+        if os.path.isdir(full) and (name in SKIP_DIRS or name.startswith(".umi")):
+            skipped.append(name)
+        elif name in SKIP_FILES or name.endswith((".pyc", ".pyo")):
+            skipped.append(name)
+    return skipped
+def skipped_path(rel):
+    parts = rel.split("/")
+    return (any(p in SKIP_DIRS or p.startswith(".umi") for p in parts[:-1])
+            or parts[-1] in SKIP_FILES or parts[-1].endswith((".pyc", ".pyo")))
+def git(*args):
+    try:
+        return subprocess.run(["git", "-C", skill, *args], capture_output=True, check=True).stdout.decode()
+    except (OSError, subprocess.CalledProcessError):
+        return None
+def git_tracked():
+    # 解包在其他仓库未跟踪目录里的归档不算开发源：SKILL.md 未被跟踪 → 按文件系统复制。
+    if git("ls-files", "--error-unmatch", "--", "SKILL.md") is None:
+        return None
+    pending = [p for p in git("ls-files", "-z", "--others", "--exclude-standard", "--", *runtime).split("\0")
+               if p and not skipped_path(p)]
+    if pending:
+        sys.exit("ERROR: runtime 内有未跟踪且未忽略的文件（先 git add，或写入 .gitignore）: " + ", ".join(pending[:5]))
+    return [p for p in git("ls-files", "-z", "--", *runtime).split("\0") if p and not skipped_path(p)]
+def copy_file(rel):
+    src, out = os.path.join(skill, rel), os.path.join(dest, rel)
+    if os.path.islink(src):
+        sys.exit(f"ERROR: 源包含 symlink，拒绝安装: {src}")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    shutil.copy2(src, out)
+os.makedirs(dest)
+copy_file("manifest.json")
+tracked = git_tracked()
+for rel in tracked or []:
+    copy_file(rel)
+for entry in runtime if tracked is None else []:
+    src = os.path.join(skill, os.path.normpath(entry))
+    out = os.path.join(dest, os.path.normpath(entry))
+    if os.path.islink(src):
+        sys.exit(f"ERROR: 源包含 symlink，拒绝安装: {src}")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    if os.path.isdir(src):
+        shutil.copytree(src, out, ignore=ignore, dirs_exist_ok=True)
+    else:
+        shutil.copy2(src, out)
+# 逐条核对闭式清单：每个 runtime 条目都必须在暂存树留下至少一个文件。
+# 条目被排除规则整体滤除（如目录下只有 .DS_Store）→ 视为非白名单零产出，拒绝半装。
+staged = []
+for dirpath, _dirnames, filenames in os.walk(dest):
+    for name in filenames:
+        staged.append(os.path.relpath(os.path.join(dirpath, name), dest).replace(os.sep, "/"))
+for entry in runtime:
+    norm = os.path.normpath(entry).replace(os.sep, "/")
+    if not any(rel == norm or rel.startswith(norm + "/") for rel in staged):
+        sys.exit(f"ERROR: runtime 条目在暂存树零产出（被排除规则滤除）: {entry}")
+PYEOF
+then
+  echo "ERROR: 按 runtime 清单复制到暂存失败" >&2
   restore_backup
   cleanup_stage
   exit 1

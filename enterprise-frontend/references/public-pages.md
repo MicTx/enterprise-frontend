@@ -1,3 +1,10 @@
+---
+load_when: "公开落地页 / 营销页 / 活动页 / 定价对比页，仅此时读；中后台任务不读"
+rule_ids: []
+depends_on: ["design-reasoning.md","general-pages.md","design-tokens.md","engineering.md","testing-guide.md","scenario-coverage.md"]
+size_budget: 180
+---
+
 # 公开页面规范（public-pages）
 
 > 企业自有前端中的公开访客页面：落地页、营销页、活动页、定价/对比页、公开门户

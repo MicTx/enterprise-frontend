@@ -1,3 +1,10 @@
+---
+load_when: "任务涉及地图 / GIS / 空间数据 / 图层，仅此时读"
+rule_ids: ["B5","B6","B7"]
+depends_on: ["engineering.md","map-interaction.md","general-pages.md"]
+size_budget: 84
+---
+
 # 地图图层与渲染预算（map-layers）
 
 > 地图条件加载章节·上半：图层选型矩阵、图层生命周期与清理、渲染预算与显式降级。

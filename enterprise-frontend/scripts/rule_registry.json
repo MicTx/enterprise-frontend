@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "source_note": "全量硬约束可追溯注册表（schema v1）。禁令级（level=ban）与 references/engineering.md 全局禁令表逐 ID 同源，summary 与 scripts/ban_rules.json 的 title 逐 ID 一致；非禁令硬约束以 references/general-pages.md / engineering.md / data-layer.md 实际条文为准，doc_anchor 形态为「仓库根相对路径#小节标题」，锚点按 scripts/rule_coverage.py 的标题折叠规则解析（语义与 scripts/tests/test_spec_docs.py 一致）。生命周期可选键（scripts/rule_coverage.py 校验）：status（active 缺省/deprecated）；since（本条所锚规范能力生效的版本号字符串，∈ 已发布版本集合 {1.0.0,1.1.0,1.2.0,1.3.0,1.4.0,1.5.0,1.6.0}，按 CHANGELOG 对应版本段逐条查证 debut，查证表见 CHANGELOG 对应版本段 附节）；supersedes（被本条替代的其他规则 id，须存在、非自指、沿替代链两跳内无环）；reason（status=deprecated 时的废弃说明；deprecated 必须有 supersedes 或 reason 至少其一，不得无据废弃）。",
+  "rules": [
+    {
+      "id": "B1",
+      "summary": "页面/组件代码不直接 import axios；HTTP 走框架 request 或统一 apiClient",
+      "level": "ban",
+      "enforcement": "auto",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）",
+      "checker": "scripts/ban_scan.py",
+      "fixture": "scripts/tests/fixtures/ban_scan/violations/b1_axios.ts",
+      "test": "scripts/tests/test_ban_scan.py"
+    },
+    {
+      "id": "B2",
+      "summary": "不用 react-router 族（react-router-dom / react-router 及子路径）做页面路由/导航（白名单：只放行 MemoryRouter、与其同文件导入的 Route/Routes 与 type-only，仅限组件内嵌渲染；动态 import() 同查）",
+      "level": "ban",
+      "enforcement": "auto",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）",
+      "checker": "scripts/ban_scan.py",
+      "fixture": "scripts/tests/fixtures/ban_scan/violations/b2_router.tsx",
+      "test": "scripts/tests/test_ban_scan.py"
+    },
+    {
+      "id": "B3",
+      "summary": "不用 import.meta.env；环境配置走框架 config/代理通道",
+      "level": "ban",
+      "enforcement": "auto",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）",
+      "checker": "scripts/ban_scan.py",
+      "fixture": "scripts/tests/fixtures/ban_scan/violations/b3_env.ts",
+      "test": "scripts/tests/test_ban_scan.py"
+    },
+    {
+      "id": "B4",
+      "summary": "不安装 ESLint/Prettier；质量工具唯一 Biome（依赖名黑名单：精确 eslint/prettier，前缀 eslint-/prettier-/@eslint/；仅限 package.json 直接声明的 dependencies/devDependencies/optionalDependencies，lockfile 传递依赖与 peerDependencies 不在此列）",
+      "level": "ban",
+      "enforcement": "auto",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）",
+      "checker": "scripts/ban_scan.py",
+      "fixture": "scripts/tests/fixtures/ban_scan/violations/b4_deps",
+      "test": "scripts/tests/test_ban_scan.py"
+    },
+    {
+      "id": "B5",
+      "summary": "不引入第二地图引擎（模块/依赖名黑名单：精确 maplibre-gl/ol/cesium/leaflet/mapbox-gl + 包装库 react-leaflet/react-map-gl/@vis.gl/react-maplibre（ol 仅精确或 ol/ 子路径，禁子串匹配）+ 前缀 @maplibre//@cesium//@mapbox//@react-leaflet/；样式面含 less 的 ~ 前缀；清单以 references/engineering.md B5 行为真源（先改该行再同步本表））",
+      "level": "ban",
+      "enforcement": "auto",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）",
+      "checker": "scripts/ban_scan.py",
+      "fixture": "scripts/tests/fixtures/ban_scan/violations/b5_mapengine.ts",
+      "test": "scripts/tests/test_ban_scan.py"
+    },
+    {
+      "id": "B6",
+      "summary": "地图 SDK 静态资产必须同源同步（构建/安装期同步脚本），禁运行时 CDN 引用（扫描面含 html/ejs 模板）",
+      "level": "ban",
+      "enforcement": "auto",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）",
+      "checker": "scripts/ban_scan.py",
+      "fixture": "scripts/tests/fixtures/ban_scan/violations/b6_cdn.ts",
+      "test": "scripts/tests/test_ban_scan.py"
+    },
+    {
+      "id": "B7",
+      "summary": "业务页面不硬编码地图 overlay 颜色/透明度/线宽；overlay 样式走唯一真源（mapStyles 类文件）",
+      "level": "ban",
+      "enforcement": "manual",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）"
+    },
+    {
+      "id": "GP-FOUR-STATES",
+      "summary": "每个数据驱动区块必须有加载/空/错误/禁用四态的一致承载方案，禁「只有成功态」；页面审查逐数据区块核对，缺任一态即与禁令同级违反",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.0.0",
+      "doc_anchor": "references/general-pages.md#四态一致承载"
+    },
+    {
+      "id": "GP-INTERACTION-STATES",
+      "summary": "可交互控件 hover/active/focus-visible/disabled 交互态齐备，缺一即触碰面未完成；focus ring 不得以 outline: none 移除（只作用于本次新增或触碰的界面）",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.3.0",
+      "doc_anchor": "references/general-pages.md#交互态与可访问基线"
+    },
+    {
+      "id": "GP-UI-SUBTRACTION",
+      "summary": "写任何标语、说明文字、次要标签前先过删除试读：读得懂就删；读不懂不补文字、重新设计布局，文字补丁不算修复；保留清单（四态文案、校验信息、可访问名称等）外不得越界",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.2.0",
+      "doc_anchor": "references/general-pages.md#界面删减"
+    },
+    {
+      "id": "GP-CONTENT-TRUTH",
+      "summary": "不交付 lorem ipsum/TODO 占位；示例数据可信且标注为示例，不把虚构客户、证言、指标伪装成真实证据；系统消息具体；禁空泛填充词",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.3.0",
+      "doc_anchor": "references/general-pages.md#内容真实性"
+    },
+    {
+      "id": "GP-ROUTE-MODAL-SYNC",
+      "summary": "路由弹层放行清单（ALLOWED_ROUTE_PREFIXES 类）必须与路由真源保持同步，并有一致性测试守卫；漏配新路由 = 静默失败；弹层内再导航在弹层内终结，不替换父级 pathname",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.0.0",
+      "doc_anchor": "references/general-pages.md#Route modal 终层规则"
+    },
+    {
+      "id": "GP-MENU-ROUTE-SPLIT",
+      "summary": "路由真源维护 path/component/access，导航视图真源只控菜单可见性，两处同步修改；隐藏菜单不等于删除深链，授权在后端，前端不以前端裁剪替代后端授权",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.0.0",
+      "doc_anchor": "references/general-pages.md#菜单与路由接线"
+    },
+    {
+      "id": "ENG-PAGE-WIRING",
+      "summary": "新页面/模块按序四步接线：建组件 → 路由真源加路由 → 导航真源同步菜单 → 补权限与测试，每步有验收物；四步完成后跑质量门并检查无生成物混入",
+      "level": "discipline",
+      "enforcement": "manual",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#新页面四步接线流程"
+    },
+    {
+      "id": "ENG-QUALITY-GATE",
+      "summary": "提交门槛 = biome check .（lint 与格式双检）与 tsc --noEmit 双过；biome check --write 是唯一格式化入口，不引入第二格式化工具；测试跑 Jest 串行受限内存模式（test:ci）",
+      "level": "discipline",
+      "enforcement": "test",
+      "since": "1.0.0",
+      "doc_anchor": "references/engineering.md#质量纪律",
+      "test": "scripts/tests/test_ci_gates.py"
+    },
+    {
+      "id": "ENG-EXIT-CODES",
+      "summary": "禁令自扫与 verify 验收以进程退出码为准（0/1/2），禁止经 `| grep 子串` 管道判定结果——违规输出含该子串时管道吞掉非零退出码造成假绿；扫描面零文件或 IO 失败一律退出 2，不得假绿",
+      "level": "hard",
+      "enforcement": "test",
+      "since": "1.4.0",
+      "doc_anchor": "references/engineering.md#质量纪律",
+      "test": "scripts/tests/test_ci_gates.py"
+    },
+    {
+      "id": "ENG-LEDGER",
+      "summary": "每次改动交付说明按 UX/DX/AX 三方各一行记账（变好了什么+证据，无触点写理由，不得编造）；任一方变差即未完成；零破坏证据（质量门全绿、断言不放宽、公开契约不变、禁令自扫 clean）与证据准入三条硬规则",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.2.0",
+      "doc_anchor": "references/engineering.md#三方体验账"
+    },
+    {
+      "id": "DL-QUERY-KEYS",
+      "summary": "查询键字典全仓单一真源文件：每后端资源一个 root key、带参变体共享 root 前缀、单实体 [root, id]；不另起独立 query key 前缀（invalidate 失联）",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.0.0",
+      "doc_anchor": "references/data-layer.md#queryKeys 真源模式"
+    },
+    {
+      "id": "DT-TOKEN-SINGLE-SOURCE",
+      "summary": "页面/组件层不裸写颜色与尺寸字面量（hex/rgb()/rgba()/非 calc 的 px），样式值经 token 真源解析；布局参数色值从 token 真源单源引用",
+      "level": "hard",
+      "enforcement": "auto",
+      "doc_anchor": "references/design-tokens.md#真源跟随规则",
+      "checker": "scripts/token_scan.py",
+      "fixture": "scripts/tests/fixtures/token_scan/violations",
+      "test": "scripts/tests/test_token_scan.py",
+      "since": "1.6.0"
+    },
+    {
+      "id": "GVR-BASELINE-NO-AUTO-UPDATE",
+      "summary": "视觉回归基线只能随判定通过的复采推进（不得自动更新/原地覆盖，更新须在 spec 包记录并保留前后证据）；基线以 docs/visual-baselines/<version>/ + manifest.json 固化，回归结论以 scripts/visual_baseline_check.py 的退出码与报告为准",
+      "level": "discipline",
+      "enforcement": "manual",
+      "since": "1.6.0",
+      "doc_anchor": "references/visual-review.md#基线回归机制"
+    }
+  ]
+}

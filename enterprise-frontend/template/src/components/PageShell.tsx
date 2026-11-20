@@ -19,7 +19,11 @@ export default function PageShell({
 }: PropsWithChildren<PageShellProps>) {
   return (
     <div
-      className={exception ? 'page-shell page-shell--exception' : 'page-shell'}
+      className={
+        exception
+          ? 'page-shell page-shell--exception antialiased'
+          : 'page-shell antialiased'
+      }
     >
       <PageContainer ghost header={{ title: null }} pageHeaderRender={false}>
         {children}

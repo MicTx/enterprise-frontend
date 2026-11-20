@@ -1,3 +1,10 @@
+---
+load_when: "任何页面 / 组件 / 布局工作默认先读；标语、说明文字、标签的界面删减"
+rule_ids: ["B2"]
+depends_on: ["design-reasoning.md","data-layer.md","design-tokens.md","engineering.md","public-pages.md","visual-review.md","map-layers.md","map-interaction.md"]
+size_budget: 192
+---
+
 # 通用页面规范（general-pages）
 
 > 非地图通用中后台页面规范：布局骨架、CRUD 模式、四态承载、路由弹层终层规则、
@@ -143,6 +150,7 @@
 - 请求通道、缓存、401 收敛、SSE → [data-layer](data-layer.md)（四态错误态的请求侧）。
 - 色彩/间距/控件高度 token、禁用态视觉 → [design-tokens](design-tokens.md)。
 - 公开页面策略、转化结构、SEO 与上线清单 → [public-pages](public-pages.md)（条件加载）。
+- 截图像素级审查与 e2e 修改意见协议 → [visual-review](visual-review.md)（条件加载）。
 - 地图场景页面规范 → map-layers / map-interaction（条件加载）。
 - SKILL.md References 层路由表第一行指向本篇（默认首读）。
 

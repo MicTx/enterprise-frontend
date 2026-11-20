@@ -10,7 +10,12 @@
  * 反例（勿犯）：独立 key 前缀不共享 root → invalidate 失联、联动失效。
  */
 export const queryKeys = {
-  // 示例（接入首个资源后替换）：
-  // users: (params?: { keyword?: string }) =>
-  //   params ? (['users', params] as const) : (['users'] as const),
+  // 项目域：列表带分页/关键词参数共享 root 前缀，单实体挂 'detail' 分支。
+  projects: (params?: {
+    current?: number;
+    pageSize?: number;
+    keyword?: string;
+  }) =>
+    params ? (['projects', 'list', params] as const) : (['projects'] as const),
+  project: (id: string) => ['projects', 'detail', id] as const,
 } as const;

@@ -1,0 +1,276 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "my-admin projects API",
+    "version": "1.0.0",
+    "description": "projects 域最小 OpenAPI 描述：五端点与 mock/projects.ts 一致，schema 字段与 src/services/projects.ts 手写类型对齐。路径不含 /api 前缀——前缀由运行时请求通道（src/app.tsx request 导出的 baseURL='/api'）统一拼接，生成函数发 /projects 即落在 /api/projects。替换本文件 schemaPath 即可接入真实后端 spec（见 config/openapi.ts）。"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "同源：本地 mock 与真实后端均同源部署，前缀归 baseURL"
+    }
+  ],
+  "tags": [
+    {
+      "name": "projects",
+      "description": "项目域 CRUD"
+    }
+  ],
+  "paths": {
+    "/projects": {
+      "get": {
+        "tags": ["projects"],
+        "operationId": "listProjects",
+        "summary": "分页查询项目列表",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "当前页码，从 1 起"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "每页条数"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "命中项目名或负责人的关键词"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "分页结果（{ data } 包裹，与运行时直调 request 返回的 body 一致）",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectPageData" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["projects"],
+        "operationId": "createProject",
+        "summary": "新建项目",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProjectFormValues" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建后的项目",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectData" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "tags": ["projects"],
+        "operationId": "getProject",
+        "summary": "查询项目详情",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "项目 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "项目详情",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectData" }
+              }
+            }
+          },
+          "404": {
+            "description": "项目不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorBody" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["projects"],
+        "operationId": "updateProject",
+        "summary": "更新项目",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "项目 ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProjectFormValues" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新后的项目",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectData" }
+              }
+            }
+          },
+          "404": {
+            "description": "项目不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorBody" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["projects"],
+        "operationId": "removeProject",
+        "summary": "删除项目",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "项目 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除结果",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectDeleteData" }
+              }
+            }
+          },
+          "404": {
+            "description": "项目不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorBody" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProjectStatus": {
+        "type": "string",
+        "description": "项目状态",
+        "enum": ["active", "archived"]
+      },
+      "Project": {
+        "type": "object",
+        "required": ["id", "name", "status", "owner", "updatedAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/ProjectStatus" },
+          "owner": { "type": "string" },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 更新时间"
+          },
+          "description": { "type": "string" }
+        }
+      },
+      "ProjectFormValues": {
+        "type": "object",
+        "required": ["name", "owner", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "owner": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/ProjectStatus" },
+          "description": { "type": "string" }
+        }
+      },
+      "PageResult": {
+        "type": "object",
+        "required": ["list", "total"],
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Project" }
+          },
+          "total": { "type": "integer" }
+        }
+      },
+      "DeleteResult": {
+        "type": "object",
+        "required": ["ok"],
+        "properties": {
+          "ok": { "type": "boolean" }
+        }
+      },
+      "ProjectPageData": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": { "$ref": "#/components/schemas/PageResult" }
+        }
+      },
+      "ProjectData": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": { "$ref": "#/components/schemas/Project" }
+        }
+      },
+      "ProjectDeleteData": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": { "$ref": "#/components/schemas/DeleteResult" }
+        }
+      },
+      "ErrorBody": {
+        "type": "object",
+        "description": "错误响应体（与 mock 的 404 返回及运行时 showType 分发对齐）",
+        "required": ["success", "errorCode", "errorMessage", "showType"],
+        "properties": {
+          "success": { "type": "boolean" },
+          "errorCode": { "type": "string" },
+          "errorMessage": { "type": "string" },
+          "showType": { "type": "string" }
+        }
+      }
+    }
+  }
+}

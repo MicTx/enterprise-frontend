@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "skill": "enterprise-frontend",
-  "version": "1.3.0",
+  "version": "1.6.0",
   "requires": {
     "python": ">=3.9",
     "bash": ">=3.2"
@@ -13,6 +13,14 @@
     "references",
     "template",
     "scripts/ban_scan.py",
-    "scripts/ban_rules.json"
+    "scripts/ban_rules.json",
+    "scripts/visual_review_check.py",
+    "scripts/visual_baseline_check.py",
+    "docs/visual-baselines",
+    "scripts/rule_registry.json",
+    "scripts/rule_coverage.py",
+    "scripts/check_references_meta.py",
+    "scripts/token_scan.py",
+    "scripts/waivers.example.json"
   ]
 }

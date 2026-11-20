@@ -1,3 +1,10 @@
+---
+load_when: "颜色、间距、字号、主题与样式方案选择"
+rule_ids: []
+depends_on: ["general-pages.md","public-pages.md","visual-review.md","engineering.md"]
+size_budget: 156
+---
+
 # 设计 token 与主题（design-tokens）
 
 > 基础 token 清单、组件级 token 与 why 注释惯例、布局参数、样式分层与真源跟随
@@ -17,7 +24,7 @@
 | 维度 | 默认值 |
 | --- | --- |
 | colorPrimary / colorInfo | `#1677ff` |
-| colorSuccess | `#16a34a` |
+| colorSuccess | `#0b6b33` |
 | colorWarning | `#d97706` |
 | colorError | `#dc2626` |
 | colorBgLayout | `#f5f7fa` |
@@ -30,6 +37,12 @@
 | fontSize / Heading3 / Heading4 | `14` / `24` / `20` |
 | lineWidth | `1` |
 | fontFamily | 系统字体栈（-apple-system 起） |
+
+**colorSuccess 单源**：默认值取随包模板亮色真源
+（`template/src/theme/tokens.ts` 的 `lightTheme`）。`#16a34a` 是原始种子值——antd 6
+Tag 状态文字取全局 colorSuccess（Tag 无 success 前景组件 token），实测其对派生填充底
+仅 2.47:1；改为 `#0b6b33` 后实测 4.95:1，通过 AA。新建项目复制模板即得该值，不在
+项目里另开色值。
 
 ## 组件级 token 与 why 注释惯例
 
@@ -100,7 +113,8 @@
 
 - **目标仓库已有主题真源**（config token / 主题文件）→ 读真源沿用其值；本篇清单
   只作**维度完备性对照**（缺哪个维度补哪个维度，值跟随真源）。
-- **新建项目无真源** → 本篇清单值即默认值，直接落地。
+- **新建项目无真源** → 复制随包模板（token 真源 `template/src/theme/tokens.ts`），
+  本篇清单值即其默认值；无模板可复制时才以本篇清单做维度完备性对照、直接落地。
 - **禁止**：在目标仓库开第二套 token 体系（双主题并行）、散落硬编码色值/尺寸
   绕过 token——偏离必须改真源并带 why 注释（见组件级 token 节惯例）。
 
@@ -110,6 +124,7 @@
 - 禁用态视觉与四态承载 → [general-pages](general-pages.md)。
 - 交互态与可访问基线 → [general-pages](general-pages.md#交互态与可访问基线)。
 - 公开页面动效与视觉方向 → [public-pages](public-pages.md#视觉方向)。
+- 截图审查的 token 对照与修复值真源纪律 → [visual-review](visual-review.md)（条件加载）。
 - 样式分层与质量门 → [engineering](engineering.md)。
 - SKILL.md References 层路由表指向本篇。
 

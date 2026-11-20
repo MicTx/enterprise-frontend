@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "version": "v1",
+  "source_pack": "2026-11-15_fix-theme-contrast-accessibility",
+  "viewport": "1280x800",
+  "images": [
+    {
+      "file": "403-light-zh-CN.png",
+      "route": "/403",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "34b9c1fbbf17ceb6b043c33bd66af7942018748f36830816e08af331c5b63368"
+    },
+    {
+      "file": "403-realDark-en-US.png",
+      "route": "/403",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "c521f22de49d5dab43a43d15ddd29dc5fd0d691818dd1d6ac8fee90795d603d8"
+    },
+    {
+      "file": "404-light-zh-CN.png",
+      "route": "/404",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "ca902e8a75171367ac7c9c2bdd60c3afdf55192db71cac7d0b20e85ff29d5e01"
+    },
+    {
+      "file": "404-realDark-en-US.png",
+      "route": "/404",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "c6efc6537cad0652e3de8de5e6b168a652f011f3be00dd82984e4648ddd08e7f"
+    },
+    {
+      "file": "home-light-zh-CN.png",
+      "route": "/?login=1",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "b4991fbb6e389fdb7c7edf6015e957a22f46d580816b96f0da61c1f3316e71e2"
+    },
+    {
+      "file": "home-realDark-en-US.png",
+      "route": "/?login=1",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "819d7885241fe1822274f9cf115932fb70813a72972d6256c7d17547a9d3e21c"
+    },
+    {
+      "file": "projects-light-zh-CN.png",
+      "route": "/projects",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "f817a1fa5e0b64f66adffeb79f4e4c86b1f1f02b06077d34f9b4fb6115166a07"
+    },
+    {
+      "file": "projects-realDark-en-US.png",
+      "route": "/projects",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "8982fe2fa175a098286e7fcaa58cad27e491444f298f20b82a89561fa4b3d9e9"
+    }
+  ],
+  "environment": {
+    "viewport": "1280x800",
+    "dpr": 1,
+    "browser": "chromium 159.0.8154.6（Playwright 1.65.1，headless）",
+    "os": "Ubuntu 24.04.3 LTS / linux 6.14.0-37-generic x64",
+    "font_env": "fonts-noto-cjk 1:20230817+repack1-3 + fonts-liberation 1:2.1.5-3 + fonts-noto-color-emoji 2.047（fontconfig 597 faces）",
+    "engine": "Blink（headless new）",
+    "page_scale": "100%",
+    "frame": "main",
+    "capture_scope": "fullPage（8 张均 1280x800，页面无滚动，fullPage 高度未触及 8000px 上限）"
+  },
+  "source_commit": "f22a1bbc07ae2e13aefd9fe3d9af810857331c09"
+}

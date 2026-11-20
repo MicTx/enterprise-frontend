@@ -1,12 +1,82 @@
-import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { login } from '@/services/auth';
+import { hardNavigate } from '@/utils/authRedirect';
 import Home from './Home';
 
-// 模板自带的最小渲染冒烟测试：证明 jest + jsdom + RTL + jest-dom 链路可用；
-// 页面扩展后按 testing-guide 五形态补用例，不在此堆积。
+jest.mock('@/services/auth', () => ({ login: jest.fn() }));
+jest.mock('@/utils/authRedirect', () => ({
+  ...jest.requireActual('@/utils/authRedirect'),
+  hardNavigate: jest.fn(),
+}));
+
+function renderHome() {
+  const client = new QueryClient({
+    defaultOptions: { mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={client}>
+      <Home />
+    </QueryClientProvider>,
+  );
+}
+
+function submitLogin() {
+  fireEvent.change(screen.getByLabelText('用户名'), { target: { value: 'u' } });
+  fireEvent.change(screen.getByLabelText('密码'), { target: { value: 'p' } });
+  // antd 在两字中文按钮文案间自动插空格，可访问名称为「登 录」。
+  fireEvent.click(screen.getByRole('button', { name: /^登\s?录$/ }));
+}
+
 describe('Home', () => {
-  it('渲染单卡片占位与空态', () => {
-    render(<Home />);
+  beforeEach(() => {
+    localStorage.clear();
+    jest.mocked(login).mockReset();
+    jest.mocked(hardNavigate).mockReset();
+    window.history.replaceState(null, '', '/');
+  });
+
+  it('渲染单卡片占位与空态，无 login 参数时不弹登录', () => {
+    renderHome();
     expect(screen.getByText('开始')).toBeInTheDocument();
     expect(screen.getByText('尚无数据')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('login=1 打开登录弹层，登录成功写 token 并回跳同源 redirect', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/?login=1&redirect=%2Forders%3Fp%3D2',
+    );
+    jest.mocked(login).mockResolvedValue({ token: 't-1' });
+    renderHome();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    submitLogin();
+    await waitFor(() =>
+      expect(hardNavigate).toHaveBeenCalledWith('/orders?p=2'),
+    );
+    expect(localStorage.getItem('token')).toBe('t-1');
+  });
+
+  it('外域 redirect 回退首页，不做开放重定向', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/?login=1&redirect=%2F%2Fevil.example',
+    );
+    jest.mocked(login).mockResolvedValue({ token: 't-2' });
+    renderHome();
+    submitLogin();
+    await waitFor(() => expect(hardNavigate).toHaveBeenCalledWith('/'));
+  });
+
+  it('登录失败显示错误态且不跳转', async () => {
+    window.history.replaceState(null, '', '/?login=1');
+    jest.mocked(login).mockRejectedValue(new Error('401'));
+    renderHome();
+    submitLogin();
+    expect(await screen.findByText('登录失败，请重试')).toBeInTheDocument();
+    expect(hardNavigate).not.toHaveBeenCalled();
   });
 });

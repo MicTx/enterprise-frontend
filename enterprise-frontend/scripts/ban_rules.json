@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "doc_source": "references/engineering.md#全局禁令表-b1b7唯一真源",
+  "schema_notes": {
+    "severity": "每条规则的可选键，取值 \"error\"（缺省，可省略）或 \"warn\"；仅字符串 \"warn\" 触发降级，其余值按 error 处理。warn 级 finding 输出带 [warn] 标记且不计入「有违规」退出码。当前 B1–B7 全部保持缺省 error（不写该键），规则语义与既有键不变。与 --waivers 豁免台账正交：豁免命中同样降为 warn 并附 owner（见 waivers.example.json 与 ban_scan.py 文档头）。"
+  },
   "rules": [
     {
       "id": "B1",
@@ -14,13 +17,14 @@
     },
     {
       "id": "B2",
-      "title": "不用 react-router-dom 做页面路由/导航（命名导出黑名单）；MemoryRouter+Route+Routes 仅限组件内嵌渲染，允许",
-      "kind": "import_named_from",
+      "title": "不用 react-router 族（react-router-dom / react-router 及子路径）做页面路由/导航（白名单：只放行 MemoryRouter、与其同文件导入的 Route/Routes 与 type-only，仅限组件内嵌渲染；动态 import() 同查）",
+      "kind": "import_allowlist",
       "scan": true,
       "applies_to": ["code"],
       "params": {
-        "module": "react-router-dom",
-        "names": ["BrowserRouter", "HashRouter", "Link", "NavLink", "useNavigate", "useLocation", "useSearchParams", "useHistory"]
+        "modules": ["react-router-dom", "react-router"],
+        "allowed_names": ["MemoryRouter", "Route", "Routes"],
+        "requires_with": {"Route": ["MemoryRouter"], "Routes": ["MemoryRouter"]}
       }
     },
     {
@@ -35,7 +39,7 @@
     },
     {
       "id": "B4",
-      "title": "不安装 ESLint/Prettier；质量工具唯一 Biome（依赖名黑名单：精确 eslint/prettier，前缀 eslint-/prettier-/@eslint/；仅限直接声明，lockfile 传递依赖不在此列）",
+      "title": "不安装 ESLint/Prettier；质量工具唯一 Biome（依赖名黑名单：精确 eslint/prettier，前缀 eslint-/prettier-/@eslint/；仅限 package.json 直接声明的 dependencies/devDependencies/optionalDependencies，lockfile 传递依赖与 peerDependencies 不在此列）",
       "kind": "package_json_dep",
       "scan": true,
       "applies_to": ["deps"],
@@ -46,21 +50,21 @@
     },
     {
       "id": "B5",
-      "title": "不引入第二地图引擎（模块/依赖名黑名单：精确 maplibre-gl/ol/cesium/leaflet/mapbox-gl（ol 仅精确或 ol/ 子路径，禁子串匹配）+ 前缀 @maplibre//@cesium//@mapbox/；清单本表为真源，扩充须同步 engineering.md B5 行）",
+      "title": "不引入第二地图引擎（模块/依赖名黑名单：精确 maplibre-gl/ol/cesium/leaflet/mapbox-gl + 包装库 react-leaflet/react-map-gl/@vis.gl/react-maplibre（ol 仅精确或 ol/ 子路径，禁子串匹配）+ 前缀 @maplibre//@cesium//@mapbox//@react-leaflet/；样式面含 less 的 ~ 前缀；清单以 references/engineering.md B5 行为真源（先改该行再同步本表））",
       "kind": "import_module",
       "scan": true,
-      "applies_to": ["code", "deps"],
+      "applies_to": ["code", "style", "deps"],
       "params": {
-        "modules": ["maplibre-gl", "ol", "cesium", "leaflet", "mapbox-gl"],
-        "prefixes": ["@maplibre/", "@cesium/", "@mapbox/"]
+        "modules": ["maplibre-gl", "ol", "cesium", "leaflet", "mapbox-gl", "react-leaflet", "react-map-gl", "@vis.gl/react-maplibre"],
+        "prefixes": ["@maplibre/", "@cesium/", "@mapbox/", "@react-leaflet/"]
       }
     },
     {
       "id": "B6",
-      "title": "地图 SDK 静态资产必须同源同步（构建/安装期同步脚本），禁运行时 CDN 引用",
+      "title": "地图 SDK 静态资产必须同源同步（构建/安装期同步脚本），禁运行时 CDN 引用（扫描面含 html/ejs 模板）",
       "kind": "pattern",
       "scan": true,
-      "applies_to": ["code", "style"],
+      "applies_to": ["code", "style", "markup"],
       "params": {
         "patterns": [
           "js\\.arcgis\\.com",

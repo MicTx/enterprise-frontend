@@ -1,0 +1,16 @@
+[
+  {
+    "rule": "B1",
+    "path_pattern": "*/legacy/http/*.ts",
+    "owner": "team-backend",
+    "reason": "占位示例：存量模块未迁移，直连 axios 待切换框架 request（迁移单 <issue-id>，到期日=复核节点）",
+    "expires": "2027-06-30"
+  },
+  {
+    "rule": "B5",
+    "path_pattern": "*map-legacy*",
+    "owner": "team-map",
+    "reason": "占位示例：第二地图引擎灰度迁移期临时豁免，季度复核；过期自动失效并 stderr 提示",
+    "expires": "2027-03-31"
+  }
+]

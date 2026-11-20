@@ -12,12 +12,12 @@
 `enterprise-frontend` 不是组件库，也不是脚手架。它是一个**面向 AI 编码会话的
 前端工程规范（skill）**，由三部分组成：
 
-1. **约束规范**——`SKILL.md` 八层主文 + 十篇 `references/` 域文档：禁令、模式、
+1. **约束规范**——`SKILL.md` 八层主文 + 十一篇 `references/` 域文档：禁令、模式、
    接线纪律与自查钩子，全部写成「必须怎么做」，而不是「可以参考」。
 2. **起始模板**——`template/` 非地图基座合规骨架（五真源 + 统一请求通道 +
-   内容壳 + 质量门），新项目冷启动从复制模板开始，出厂即门禁全绿。
-3. **工具链**——禁令扫描、安装器与打包器，全部仅依赖 Python 3 标准库，
-   接收方可以逐条复现验收。
+   内容壳 + 质量门），新项目冷启动从复制随包模板开始，出厂即门禁全绿。
+3. **工具链**——禁令扫描、视觉证据包校验、安装器与打包器；Python 工具仅依赖
+   Python 3 标准库，安装器另需 bash ≥3.2 与 coreutils，接收方可以逐条复现验收。
 
 它同时服务两类读者：**AI 会话**把它当作执行规范（装载即生效），**人类工程师**
 把它当作一份企业前端工程约束手册。
@@ -27,7 +27,7 @@
 | 原则 | 含义 |
 | --- | --- |
 | **禁令硬执行** | B1–B7 禁令（不直连 axios、不绕框架路由、不装 ESLint/Prettier、不引第二地图引擎、资产同源……）在任何目标仓库、任何现状下都不让步 |
-| **真源跟随** | 设计 token、路由/导航/权限结构**跟随目标仓库的真源**——改真源，不开平行体系；新建项目无真源时才使用规范默认值 |
+| **真源跟随** | 设计 token、路由/导航/权限结构**跟随目标仓库的真源**——改真源，不开平行体系；新建项目复制随包模板即得默认真源 |
 | **验收可复现** | 规范只讲模式不讲版本号、不引外部来源；验收 = 静态禁令扫描 + 质量命令（lint / tsc / test）+ 逐条自查钩子，命令输出即证据 |
 | **界面做减法** | 新增或触碰的界面不留多余标语、说明文字与次要标签；删后读不懂说明布局有问题，直接重新设计，不补字（保留清单：四态文案、校验、单位、状态 Tag、可访问名称） |
 | **三方体验账** | 每次改动同时让用户（UX）、开发者（DX）、AI Agent（AX）变好，现有功能零破坏；任一方变差或成本转嫁他方均不算完成，证据是命令输出 |
@@ -42,15 +42,22 @@ SKILL.md Workflow 按序判定四个核心场景，`references/scenario-coverage
 
 | 场景 | 侧重 |
 | --- | --- |
-| 非地图 CRUD | 列表/表单/详情、布局骨架、四态承载、接线与数据层 |
 | 地图工作台 | 图层选型与预算、框选/绘制/受控选择、告警与图例、资产同源 |
-| 存量页面修改 | 最小完整变更、真源跟随、禁令回归、四态回归 |
 | 规范审查 | 禁令自扫、文档引用完整性、四态与接线复查 |
+| 存量页面修改 | 最小完整变更、真源跟随、禁令回归、四态回归 |
+| 非地图 CRUD | 列表/表单/详情、布局骨架、四态承载、接线与数据层 |
 
 公开页面（落地页/营销页/活动页/定价对比页）是条件叠加工作面：策略、内容真实性、
 交互态、动效、SEO 与上线清单见 `references/public-pages.md`，只在命中时读取。
 
-## 快速开始
+截图像素级审查 / 视觉走查 / 视觉回归复验 / e2e 修改意见同为条件叠加工作面：
+证据采集协议（截图矩阵 / 稳定协议 / 结构+坐标）、八维走查清单、发现准入与
+finding 格式、修复复验闭环见 `references/visual-review.md`，只在命中时读取。
+
+## 归档接收方：安装、使用与新建项目
+
+本节面向拿到发布归档的接收方：解包后按本节安装与使用；自测、打包与维护属于
+开发仓库面，见下一节。
 
 ### 安装
 
@@ -69,10 +76,6 @@ SKILL.md Workflow 按序判定四个核心场景，`references/scenario-coverage
 `already up to date`；替换旧安装默认保留备份。依赖：bash ≥3.2、
 python3 ≥3.9、coreutils。
 
-**从零新建项目**：不装 skill，而是复制随包的 `template/` 起始模板（五真源 +
-统一请求通道 + 内容壳，已合规）——`cp -r template/ my-admin` 后按模板 README
-执行 `npm install`。详见 `template/README.md`。
-
 ### 在宿主会话中使用
 
 把 `<目标目录>/enterprise-frontend` 所在路径加入你的 AI 编码宿主的 skill 搜索面，
@@ -84,8 +87,19 @@ python3 ≥3.9、coreutils。
 
 ```bash
 cd <目标目录>/enterprise-frontend
-python3 scripts/ban_scan.py references/   # 禁令自扫 → RESULT: clean
+python3 scripts/ban_scan.py template/   # 禁令自扫 → RESULT: clean
 ```
+
+### 从零新建项目
+
+复制归档内的起始模板（五真源 + 统一请求通道 + 内容壳，已合规）：
+
+```bash
+cp -r enterprise-frontend/template/ my-admin
+cd my-admin && npm install
+```
+
+详见 `template/README.md`。
 
 ## 规范体系
 
@@ -103,6 +117,7 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 | `references/engineering.md` | 工程规约：质量纪律、**全局禁令表 B1–B7（唯一真源）**、四步接线、三方体验账、构建环境 | 质量门、禁令、接线、构建环境、改动收尾记账 |
 | `references/map-layers.md` | 地图图层：选型矩阵、生命周期、渲染预算与显式降级 | 任务涉及地图/空间数据（条件加载） |
 | `references/map-interaction.md` | 地图交互：框选/绘制/选择/高亮、告警与图例、资产同源、引擎唯一入口 | 地图交互与资产（条件加载） |
+| `references/visual-review.md` | 截图视觉审查与 e2e 修改意见：证据采集协议、八维走查、发现准入与像素 diff 语义、finding 格式、修复复验闭环（含分层验收、复验裁判一致性、flaky 重试协议） | 截图像素级审查/视觉回归/e2e 修改意见（条件加载） |
 | `references/testing-guide.md` | 测试设计指南：五形态用例设计 + mock 模式 + 场景化清单 | 编写/评审测试 |
 | `references/scenario-coverage.md` | 四个核心场景 + 公开页面条件叠加矩阵：场景 → 必读锚点 → 自查钩子 | 场景判定后取行 |
 
@@ -110,22 +125,42 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 `references/engineering.md`；`SKILL.md` 只持 ID 与一句话语义；扫描规则表
 `scripts/ban_rules.json` 与其同源。
 
-## 工具链
+## 开发仓库：工具链、打包与维护
+
+本节面向开发本 skill 的维护者：自测、打包与版本门禁都在这里，归档接收方不需要
+本节内容。
+
+### 工具链与自测
 
 | 工具 | 职责 | 自测 |
 | --- | --- | --- |
 | `scripts/ban_scan.py` + `ban_rules.json` | 禁令静态检查（最小化：模式匹配，注释行豁免；规则表与规范禁令表同源，B7 显式不扫） | `python3 scripts/tests/test_ban_scan.py` |
+| `scripts/visual_review_check.py` | 视觉审查证据包校验器（三级证据级别、重试两级语义、截图哈希与路径安全；退出码 0/1/2） | `python3 scripts/tests/test_visual_review_check.py` |
 | `install.sh` | 宿主无关安装器（暂存 → 幂等检测 → 备份 → 原子就位 → 校验 → 回滚） | `python3 scripts/tests/test_install_sh.py` |
 | `scripts/build_package.py` | 按 manifest v2 组装发布树与 tar.gz/zip 归档 + 清单 | `python3 scripts/tests/test_build_package.py` |
 
-禁令自扫：`python3 scripts/ban_scan.py <目标路径>`——对规范文档与模板自扫应恒为
-clean；扫描面天然排除文档与测试夹具。
+禁令自扫：`python3 scripts/ban_scan.py <目标路径>`——对模板自扫应恒为 clean。
+退出码 0 干净 / 1 有违规 / 2 用法或 IO 错误；扫描面零文件（如只含文档的目录）
+也退出 2，路径写错不会假绿。正则不覆盖的写法列在 `references/engineering.md`
+的人工复查项。
 
-## 打包与分发
+### 从开发仓库根安装
+
+开发仓库根就是 skill 本体，没有安装器默认查找的 `enterprise-frontend/` 源子目录；在仓库根
+安装必须显式指定源，可先 `--dry-run` 预览动作：
+
+```bash
+./install.sh <目标目录> --dry-run --skill-dir .   # 预览
+./install.sh <目标目录> --skill-dir .             # 安装
+```
+
+`--skill-dir .` 即把开发仓库根作为安装源。
+
+### 打包与分发
 
 ```bash
 python3 scripts/build_package.py          # 产出 dist/（发布树 + tar.gz + zip + SHA256SUMS + 清单）
-python3 scripts/build_package.py --expect-version 1.3.0
+python3 scripts/build_package.py --expect-version 1.6.0
 ```
 
 排除即缺省：`manifest.json` 的 `runtime` 是闭式清单，不列清单即不入包——内部规划
@@ -142,14 +177,16 @@ python3 scripts/build_package.py --expect-version 1.3.0
 发布附件从私有 Gitea 真源的版本标签做干净浅克隆后构建，不用开发工作树的 `dist/`：构建读取
 工作树文件，已跟踪文件的未提交改动也会入包。
 
-## 维护速查
+### 维护速查
 
 | 动作 | 命令 |
 | --- | --- |
 | 禁令扫描 | `python3 scripts/ban_scan.py <路径>` |
+| 快照一致性 | `python3 scripts/verify_snapshot.py`（library/ 与 SNAPSHOT.json 漂移检查，gate.sh 第 5 门） |
+| 一键门禁 | `bash scripts/gate.sh`（`--list` 列门；`--skip-template` 跳过模板门并在汇总行披露 skipped） |
 | 打包 | `python3 scripts/build_package.py` |
 | 全部测试 | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
-| 文档结构契约 | `python3 -I scripts/tests/test_spec_docs.py`（八层 / B-ID 同源 / 链接锚点 / 公开页条件接线 / 两条体验约束接线） |
+| 文档结构契约 | `python3 -I scripts/tests/test_spec_docs.py`（八层 / B-ID 同源 / 链接锚点 / 公开页与视觉审查条件接线 / 两条体验约束接线） |
 
 ## 许可与分发
 
@@ -157,7 +194,12 @@ python3 scripts/build_package.py --expect-version 1.3.0
 门面文档）以 [PolyForm Noncommercial 1.0.0](LICENSE) 授权（SPDX:
 `PolyForm-Noncommercial-1.0.0`）——非商业使用自由，**商业使用需另行书面授权**。
 
-分发渠道：私有 Gitea 真源与随行压缩包；任何公开快照须另行授权。
+`library/` 为外部仓库 frontend 子树的派生源码快照，按 **AGPL-3.0** 治理（全文与归属
+见 [LICENSE-LIBRARY](LICENSE-LIBRARY)），**不受 PolyForm Noncommercial 覆盖**；自
+1.1.0 起 `library/` 退出交付面，**不随安装/打包分发**，仅在内部私有 Gitea 仓库保留。
 
-公开页面方法的第三方 MIT 许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，不进入
-规范正文。变更历史见 [CHANGELOG](CHANGELOG.md)。
+分发渠道：私有 Gitea 真源与随行压缩包——归档与安装仅含上述自著运行面，不含
+`library/` 与 `LICENSE-LIBRARY`；任何公开快照须另行授权。
+
+公开页面与视觉审查方法的第三方许可声明见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，
+不进入规范正文。变更历史见 [CHANGELOG](CHANGELOG.md)。

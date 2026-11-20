@@ -15,8 +15,10 @@ npm run dev        # 启动开发服务
 
 ## 已含骨架
 
-- `config/config.ts` — 框架配置 + 主题 token 真源 + 请求通道（baseURL /api、
-  Bearer 拦截器、401 统一收敛跳首页）
+- `config/config.ts` — 框架配置 + `request` 的 `dataField` 契约（`dataField: 'data'`）
+- `src/theme/tokens.ts` — 主题 token 真源（应用面 = ThemeProvider，随暗色偏好切 algorithm）
+- `src/app.tsx` — 运行时请求真源（`request` 导出：baseURL /api、Bearer 拦截器、
+  401 统一收敛跳首页）
 - `config/defaultSettings.ts` — ProLayout 布局参数真源
 - `config/routes.ts` — 路由真源（菜单可见性改 `src/nav/navViews.ts`，两处同步）
 - `src/access.ts` — 权限真源（页面用 `useAccess()` 消费）

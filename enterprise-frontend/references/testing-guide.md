@@ -1,3 +1,10 @@
+---
+load_when: "测试编写与用例设计：四步接线第 4 步、回归锁定与测试评审"
+rule_ids: []
+depends_on: ["engineering.md","general-pages.md","data-layer.md","scenario-coverage.md","visual-review.md"]
+size_budget: 96
+---
+
 # 测试设计指南（testing-guide）
 
 > 按交付物类型回答「**测什么、怎么断言、边界在哪**」。编写或评审测试时读本篇；
@@ -52,6 +59,7 @@ SKILL.md 路由表「测试编写与用例设计」场景读本篇。典型触�
 | 地图工作台 | 宿主 API 调用契约（不渲染地图即可断言）、预算/降级决策函数、告警与图例组件、资产引用（B6 由 ban_scan 承担） |
 | 存量页面修改 | 触碰面回归：修改处行为 + 关联真源一致性断言 + 四态不回归 |
 | 公开页面（条件叠加） | 策略/结构断言（单一主 CTA、大纲与证据位置）；文案真实性与占位词扫描；索引决策与 meta 静态断言；浏览器证据（移动/桌面首屏、键盘焦点、reduced-motion、无死链） |
+| 视觉审查（条件叠加） | 审查产物完整性：证据包经 `scripts/visual_review_check.py` 校验（0/1/2 退出码）、三级证据级别（observation / runtime-confirmed / fix-reverified）与 finding 强制字段、同参数复验对比（协议见 [visual-review](visual-review.md)）；**协议语义由 `scripts/tests/test_visual_review_check.py` 纯函数单测锁定，结构契约只证接线**；分层验收、重试两级协议与协议违规单列的审查产物完整性；修复落地的代码改动按本篇五形态照常设计用例 |
 | 规范审查 | 测试形态评审：同名同目录、有断言（非空快照）、四态覆盖、mock 未覆盖被测对象 |
 
 ## 反模式
@@ -69,6 +77,7 @@ SKILL.md 路由表「测试编写与用例设计」场景读本篇。典型触�
 - 四态承载语义 → [general-pages](general-pages.md#四态一致承载)。
 - 请求契约与状态归属 → [data-layer](data-layer.md)。
 - 场景 → 工作面映射 → [scenario-coverage](scenario-coverage.md)。
+- 截图像素级审查与复验证据协议 → [visual-review](visual-review.md)（条件加载）。
 
 ## 验证边界声明
 

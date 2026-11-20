@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "css": { "parser": { "tailwindDirectives": true } },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "files": {
     "ignoreUnknown": true,
     "includes": [
@@ -11,14 +15,27 @@
       "!**/dist",
       "!**/coverage",
       "!**/node_modules",
+      "!**/src/services/api",
       "!biome.json",
-      "!package-lock.json"
+      "!package-lock.json",
+      "!**/test-results",
+      "!**/playwright-report"
     ]
   },
-  "formatter": { "enabled": true, "indentStyle": "space" },
-  "linter": { "enabled": true, "rules": { "preset": "recommended" } },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
+    }
+  },
   "javascript": {
     "jsxRuntime": "reactClassic",
-    "formatter": { "quoteStyle": "single" }
+    "formatter": {
+      "quoteStyle": "single"
+    }
   }
 }
