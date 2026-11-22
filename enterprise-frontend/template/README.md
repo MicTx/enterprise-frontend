@@ -25,6 +25,8 @@ npm run dev        # 启动开发服务
 - `src/services/queryKeys.ts` — 查询键字典（四条键模式 + 反例注释）
 - `src/utils/apiClient.ts` — 统一请求客户端（B1：页面不直连 axios）
 - `src/components/PageShell.tsx` — 内容壳（锁视口 / 页滚例外声明）
+- `src/components/PageLayout.tsx` — 布局原语（PageLayout / PageCell / PageCard，
+  业务页面按 Layout → Cell → Card → content 四层落地）
 - `src/pages/Home.tsx` — 形态示例（新页面先用 design-reasoning 推理再实现）
 
 ## 边界说明

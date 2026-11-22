@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "review_id": "2026-11-21-responsive-baseline-r1",
+  "mode": "verify",
+  "level": "fix-reverified",
+  "target": "template/e2e/visual.spec.ts VISUAL_RESPONSIVE=1 响应式截图基线 r1",
+  "environment": {
+    "viewport": "1280x800 / 992x800 / 768x900 / 375x900（xl/lg/md/sm 四档）",
+    "dpr": 1,
+    "browser": "chromium headless shell 159.0.8154.6（Playwright 1.65.1）",
+    "os": "macOS 26.6.2（Darwin 25.6.0, arm64）",
+    "font_env": "macOS 系统字体栈（-apple-system / PingFang SC 等；未单独枚举字体清单）",
+    "engine": "Blink（headless shell）",
+    "page_scale": "100%"
+  },
+  "screenshots": [
+    {
+      "path": "docs/visual-baselines/r1/home-lg.png",
+      "sha256": "686e15f0afa6750cb23fe452c0778676d31f8cf7add2f1c98fe0c8d94fbefd5d",
+      "format": "png",
+      "step": "before:home-lg"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/home-lg.png",
+      "sha256": "686e15f0afa6750cb23fe452c0778676d31f8cf7add2f1c98fe0c8d94fbefd5d",
+      "format": "png",
+      "step": "after:home-lg"
+    },
+    {
+      "path": "docs/visual-baselines/r1/home-md.png",
+      "sha256": "03946794622ecd0d48bcc4774059ae588de8e9531aa9c9837b165228cefdabfc",
+      "format": "png",
+      "step": "before:home-md"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/home-md.png",
+      "sha256": "03946794622ecd0d48bcc4774059ae588de8e9531aa9c9837b165228cefdabfc",
+      "format": "png",
+      "step": "after:home-md"
+    },
+    {
+      "path": "docs/visual-baselines/r1/home-sm.png",
+      "sha256": "6558f5e6f2491fd251bff8683e5959dee983cded271a9fd74b7701b7c5650180",
+      "format": "png",
+      "step": "before:home-sm"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/home-sm.png",
+      "sha256": "6558f5e6f2491fd251bff8683e5959dee983cded271a9fd74b7701b7c5650180",
+      "format": "png",
+      "step": "after:home-sm"
+    },
+    {
+      "path": "docs/visual-baselines/r1/home-xl.png",
+      "sha256": "b3d25a56c90b717061948f7ab7867edffa07ad045acbac8acc95be09dc021a8e",
+      "format": "png",
+      "step": "before:home-xl"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/home-xl.png",
+      "sha256": "b3d25a56c90b717061948f7ab7867edffa07ad045acbac8acc95be09dc021a8e",
+      "format": "png",
+      "step": "after:home-xl"
+    },
+    {
+      "path": "docs/visual-baselines/r1/projects-lg.png",
+      "sha256": "0fca4bb2da218e7ba03cd9f9eb226a1de571e42ab4beac16b14955b402f9453b",
+      "format": "png",
+      "step": "before:projects-lg"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/projects-lg.png",
+      "sha256": "0fca4bb2da218e7ba03cd9f9eb226a1de571e42ab4beac16b14955b402f9453b",
+      "format": "png",
+      "step": "after:projects-lg"
+    },
+    {
+      "path": "docs/visual-baselines/r1/projects-md.png",
+      "sha256": "f8f77bc8facf28d78dec01cd49c36e92e0ab9969e597558005fc27eae1f7f4b0",
+      "format": "png",
+      "step": "before:projects-md"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/projects-md.png",
+      "sha256": "f8f77bc8facf28d78dec01cd49c36e92e0ab9969e597558005fc27eae1f7f4b0",
+      "format": "png",
+      "step": "after:projects-md"
+    },
+    {
+      "path": "docs/visual-baselines/r1/projects-sm.png",
+      "sha256": "97fbc41ba7ba59daf4f0f90c060f5dd065cee473644b02cdf1e185fe10b59f28",
+      "format": "png",
+      "step": "before:projects-sm"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/projects-sm.png",
+      "sha256": "97fbc41ba7ba59daf4f0f90c060f5dd065cee473644b02cdf1e185fe10b59f28",
+      "format": "png",
+      "step": "after:projects-sm"
+    },
+    {
+      "path": "docs/visual-baselines/r1/projects-xl.png",
+      "sha256": "6d228a1f29a6f8107dd7cb7f248f23da866f3be350c7df733884f7619126ea21",
+      "format": "png",
+      "step": "before:projects-xl"
+    },
+    {
+      "path": "docs/visual-baselines/r1/evidence/after/projects-xl.png",
+      "sha256": "6d228a1f29a6f8107dd7cb7f248f23da866f3be350c7df733884f7619126ea21",
+      "format": "png",
+      "step": "after:projects-xl"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R1-001",
+      "category": "readiness",
+      "observed": "首轮 375px projects-sm 用例以表格首列 visible 作就绪判据，窄屏横向滚动遮蔽首列导致 7/8 passed；窄屏首列可见不是布局就绪的充分条件。",
+      "expected": "窄屏以「新建按钮可见 + 表头挂载」为就绪判据，8/8 采集通过；两次独立复采逐字节一致，基线自比对 8/8 match。",
+      "rule_ref": "references/visual-review.md#响应式基线结构断言",
+      "status": "fixed",
+      "level": "fix-reverified",
+      "step": "after:projects-sm",
+      "solution": "template/e2e/visual.spec.ts responsiveReady 改用 toBeAttached 判表头，避免依赖窄屏表格首列可见。"
+    }
+  ],
+  "masks": [],
+  "baselines": [
+    {
+      "version": "r1",
+      "path": "docs/visual-baselines/r1",
+      "status": "established",
+      "validate": "python3 scripts/visual_baseline_check.py --manifest docs/visual-baselines/r1/manifest.json --validate-only",
+      "result": "RESULT: ok"
+    }
+  ],
+  "coverage": {
+    "captured": "/?login=1 与 /projects，light/zh-CN，xl/lg/md/sm 四档，共 8 张；每档运行布局/溢出结构断言",
+    "not_captured": "realDark/en-US、403/404 响应式；桌面底色回归继续由 v2 基线承担",
+    "rerun_precondition": "同浏览器、同 DPR、同字体环境、同 mock seed 态；改布局后须重新采集并按工具结论判定"
+  },
+  "retries": {
+    "attempts": [
+      {
+        "result": "pass",
+        "detail": "VISUAL_RESPONSIVE=1 第一复采 the capture directory，8/8 与首采逐字节一致"
+      },
+      {
+        "result": "pass",
+        "detail": "规范采集命令复采 the capture directory，8/8 与 r1 基线 match"
+      },
+      {
+        "result": "pass",
+        "detail": "Biome 格式归一后规范命令复采 the capture directory，8/8 与 r1 基线 match"
+      }
+    ],
+    "classification": "pass"
+  },
+  "verdict": "pass"
+}

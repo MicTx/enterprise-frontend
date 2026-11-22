@@ -6,6 +6,39 @@ The format follows Keep a Changelog headings so the packaging step can extract v
 
 ## [Unreleased]
 
+This section is a preview, not part of the v1.6.0 release.
+
+### Added
+
+- **页面布局系统（layout-system）**：新增 `references/layout-system.md`，把页面布局
+  从「骨架建议」升级为结构契约——业务页面内容区必须按 Layout（显式 rows × cols /
+  areas）→ 每区域一个 Cell → 每 Cell 一个 Card → Card `content` 内容组件的四层落地；
+  并补齐布局配方（single / stack / stats-content / main-aside / master-detail /
+  dashboard / map-workbench / long-form）、Card 内容组件选型、高度链与滚动归属、
+  响应式收缩顺序、例外白名单与审查钩子。SKILL Success Definition / Workflow /
+  Decision Rules / Anti-Patterns / Review Loop / References 路由表同步接线，
+  README 设计原则由五条增至六条。
+- **模板布局原语与页面迁移**：`template/src/components/PageLayout.tsx` 导出
+  `PageLayout` / `PageCell` / `PageCard`（开发态校验 Layout 只接 Cell、一 Cell
+  一 Card、Card content 必须是具名组件、areas 矩阵对齐、响应式 span）；`theme/tokens.ts`
+  增 `layoutTokens` 间距真源；Home / Projects 迁移到 Layout → Cell → Card →
+  content；新增组件单测与页面布局契约测试（业务页面不得直接 import antd Card、
+  不得写页面级栅格类）。
+- **布局规则注册与行为夹具**：rule_registry 增 5 条布局硬约束（GP-LAYOUT-GRID /
+  CELL-CARD / CARD-CONTENT / HEIGHT / RESPONSIVE，since=unreleased 哨兵），
+  rule-traceability 视图再生成；evals 增 3 个布局场景夹具（裸 div 拼页、
+  一区域多卡、Card content 裸 div）与推导锚点；`docs/layout-research-2026-11.md`
+  记录 Ant Design Pro / shadcn-admin / next-shadcn-dashboard-starter /
+  soybean-admin / vben / tabler / refine 的布局共性调研与取舍。
+- **响应式截图基线 r1**：`template/e2e/visual.spec.ts` 增 `VISUAL_RESPONSIVE=1`
+  采集开关与 xl/lg/md/sm 四档结构断言（布局节点、侧栏、单列与无横向溢出）；
+  `docs/visual-baselines/r1/` 固化 `/` 与 `/projects` 8 张 PNG + manifest +
+  fix-reverified 证据包 + CAPTURE.md。`visual_baseline_check.py` 增响应式
+  `breakpoint` / `viewport` 与 PNG 尺寸一致性校验；新增
+  `scripts/tests/test_responsive_baseline.py`、rule_registry 条目
+  `GVR-RESPONSIVE-BASELINE`、evals 场景与 visual-review §响应式基线结构断言；
+  `gate.sh` / CI 新增第 6 门 manifest 自证，全量门禁由 7 门增至 8 门。
+
 ## [1.6.0] - 2026-11-15
 
 ### Added

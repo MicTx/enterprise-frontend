@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "version": "r1",
+  "source_pack": "public-baseline-r1",
+  "viewport": "1280x800 (xl 基准；逐图 viewport 见 images[].viewport)",
+  "images": [
+    {
+      "file": "home-lg.png",
+      "route": "/?login=1",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "686e15f0afa6750cb23fe452c0778676d31f8cf7add2f1c98fe0c8d94fbefd5d",
+      "breakpoint": "lg",
+      "viewport": "992x800"
+    },
+    {
+      "file": "home-md.png",
+      "route": "/?login=1",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "03946794622ecd0d48bcc4774059ae588de8e9531aa9c9837b165228cefdabfc",
+      "breakpoint": "md",
+      "viewport": "768x900"
+    },
+    {
+      "file": "home-sm.png",
+      "route": "/?login=1",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "6558f5e6f2491fd251bff8683e5959dee983cded271a9fd74b7701b7c5650180",
+      "breakpoint": "sm",
+      "viewport": "375x900"
+    },
+    {
+      "file": "home-xl.png",
+      "route": "/?login=1",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "b3d25a56c90b717061948f7ab7867edffa07ad045acbac8acc95be09dc021a8e",
+      "breakpoint": "xl",
+      "viewport": "1280x800"
+    },
+    {
+      "file": "projects-lg.png",
+      "route": "/projects",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "0fca4bb2da218e7ba03cd9f9eb226a1de571e42ab4beac16b14955b402f9453b",
+      "breakpoint": "lg",
+      "viewport": "992x800"
+    },
+    {
+      "file": "projects-md.png",
+      "route": "/projects",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "f8f77bc8facf28d78dec01cd49c36e92e0ab9969e597558005fc27eae1f7f4b0",
+      "breakpoint": "md",
+      "viewport": "768x900"
+    },
+    {
+      "file": "projects-sm.png",
+      "route": "/projects",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "97fbc41ba7ba59daf4f0f90c060f5dd065cee473644b02cdf1e185fe10b59f28",
+      "breakpoint": "sm",
+      "viewport": "375x900"
+    },
+    {
+      "file": "projects-xl.png",
+      "route": "/projects",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "6d228a1f29a6f8107dd7cb7f248f23da866f3be350c7df733884f7619126ea21",
+      "breakpoint": "xl",
+      "viewport": "1280x800"
+    }
+  ],
+  "environment": {
+    "viewport": "1280x800 (xl 基准)",
+    "dpr": 1,
+    "browser": "chromium headless shell 159.0.8154.6（Playwright 1.65.1）",
+    "os": "macOS 26.6.2（Darwin 25.6.0, arm64）",
+    "font_env": "macOS 系统字体栈（-apple-system / PingFang SC 等；未单独枚举字体清单）",
+    "engine": "Blink（headless shell）",
+    "page_scale": "100%"
+  },
+  "source_commit": "Private source revision omitted from the public snapshot"
+}

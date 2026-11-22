@@ -1,7 +1,7 @@
 ---
 load_when: "截图像素级审查、视觉走查、视觉回归复验、e2e 修改意见，仅此时读；纯代码任务不读"
-rule_ids: []
-depends_on: ["design-tokens.md","general-pages.md","design-reasoning.md","engineering.md","testing-guide.md","scenario-coverage.md"]
+rule_ids: ["GVR-RESPONSIVE-BASELINE"]
+depends_on: ["layout-system.md","design-tokens.md","general-pages.md","design-reasoning.md","engineering.md","testing-guide.md","scenario-coverage.md"]
 size_budget: 360
 ---
 
@@ -316,6 +316,35 @@ file/route/theme/locale/sha256）；版本号只增不改，新版本建立后�
 失败或缺失 / 2 用法、IO 或格式错误；`--json` 逐图给出差异像素数、占比与差异
 坐标样本。人工不复述、不改写工具结论；基线 manifest 自证用
 `--manifest <path> --validate-only`（校验结构与逐图 sha256 与磁盘一致）。
+
+## 响应式基线结构断言
+
+响应式截图基线属于上节的基线生命周期：建立与推进仍以 `fix-reverified` 判定 /
+判定通过的复采为前提，旧版本只读留存，不自动更新、不原地覆盖。响应式层把
+[layout-system](layout-system.md#响应式规则) 的断点契约变成截图可回归的结构面。
+
+- **基线位置**：`docs/visual-baselines/r<N>/` + `manifest.json` + `visual-review.json`；
+  `version` 以 `r` 开头，旧版本只读留存。证据包按 §审查证据包 记录 before/after
+  两次独立复采、`verdict=pass`、`retries.classification=pass` 与修复后的窄屏就绪
+  判据，满足上节「建立只在 fix-reverified 判定通过后」的硬条件。
+- **逐图字段**：manifest 逐图除 `file/route/theme/locale/sha256` 外必须带
+  `breakpoint`（`xl` / `lg` / `md` / `sm`）与 `viewport`（`<宽>x<高>`）。文件名
+  形态 `<route>-<breakpoint>.png`，每个覆盖路由四档齐备且不重复；证据包截图由
+  `scripts/visual_review_check.py` 校验路径、哈希、重试与 verdict。
+- **采集面**：`template/e2e/visual.spec.ts` 以 `VISUAL_RESPONSIVE=1` 开启响应式
+  采集；桌面 8 格与响应式格分开开关，避免默认全量 e2e 时长翻倍。窄屏就绪判定
+  只要求目标组件挂载与表头存在，表格首列可被横向滚动遮蔽，不以「首列可见」
+  误判页面未就绪。
+- **结构断言**：`breakpoint` 必须属于四档；`viewport` 必须与 PNG 实际尺寸一致
+  （尺寸不符、字段缺失、断点未知均视为基线结构错误）；`environment` 与逐图
+  sha256 仍按上节校验。实现真源同为 `scripts/visual_baseline_check.py`。
+- **工具即真源**：常驻自证命令
+  `python3 scripts/visual_baseline_check.py --manifest docs/visual-baselines/r1/manifest.json --validate-only`；
+  回归比对命令 `--baseline docs/visual-baselines/r1 --capture <复采目录>`。
+  人工不复述工具结论；`RESULT: pass` 与退出码 0 才算响应式基线通过。
+- **门禁接线**：`scripts/gate.sh` 第 6 门与 CI python job 同源执行该自证命令；
+  `scripts/tests/test_responsive_baseline.py` 锁定路由 × 断点矩阵、PNG 尺寸、
+  自证 / 自比对与采集开关。真实采集复采证据见 `docs/visual-baselines/r1/CAPTURE.md`。
 
 ## 验证边界声明
 

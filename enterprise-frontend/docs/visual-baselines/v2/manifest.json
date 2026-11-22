@@ -1,76 +1,76 @@
 {
-    "schema_version": 1,
-    "version": "v2",
-    "source_pack": "2026-11-19_template-live-example",
-    "viewport": "1280x800",
-    "images": [
-        {
-            "file": "403-light-zh-CN.png",
-            "route": "/403",
-            "theme": "light",
-            "locale": "zh-CN",
-            "sha256": "8530db12a6bb577d49c6225861ff1bdd679f783be9f60514d9e5a1fe6a9c1bb1"
-        },
-        {
-            "file": "403-realDark-en-US.png",
-            "route": "/403",
-            "theme": "realDark",
-            "locale": "en-US",
-            "sha256": "c521f22de49d5dab43a43d15ddd29dc5fd0d691818dd1d6ac8fee90795d603d8"
-        },
-        {
-            "file": "404-light-zh-CN.png",
-            "route": "/404",
-            "theme": "light",
-            "locale": "zh-CN",
-            "sha256": "2bb8e1859c2d717a23a158eb041338856ee909e5a4bb3fe4231765a1d6a6e86e"
-        },
-        {
-            "file": "404-realDark-en-US.png",
-            "route": "/404",
-            "theme": "realDark",
-            "locale": "en-US",
-            "sha256": "c6efc6537cad0652e3de8de5e6b168a652f011f3be00dd82984e4648ddd08e7f"
-        },
-        {
-            "file": "home-light-zh-CN.png",
-            "route": "/?login=1",
-            "theme": "light",
-            "locale": "zh-CN",
-            "sha256": "611e409d512a0db59d5594396d036221efa147d0846126e64796a9fb5a7d9408"
-        },
-        {
-            "file": "home-realDark-en-US.png",
-            "route": "/?login=1",
-            "theme": "realDark",
-            "locale": "en-US",
-            "sha256": "819d7885241fe1822274f9cf115932fb70813a72972d6256c7d17547a9d3e21c"
-        },
-        {
-            "file": "projects-light-zh-CN.png",
-            "route": "/projects",
-            "theme": "light",
-            "locale": "zh-CN",
-            "sha256": "ef9e5a57423a9c69918cf36e98d612653b93a208ae0b6803732b1bf8e813ea20"
-        },
-        {
-            "file": "projects-realDark-en-US.png",
-            "route": "/projects",
-            "theme": "realDark",
-            "locale": "en-US",
-            "sha256": "520d2fc7ee818cfaf7669b8536efba3054ecd67929dbe06663a2ce70a3ae5964"
-        }
-    ],
-    "environment": {
-        "viewport": "1280x800",
-        "dpr": 1,
-        "browser": "chromium 159.0.8154.6（Playwright 1.65.1，headless）",
-        "os": "Ubuntu 24.04.3 LTS / linux 6.14.0-37-generic x64",
-        "font_env": "fonts-noto-cjk 1:20230817+repack1-3 + fonts-liberation 1:2.1.5-3 + fonts-noto-color-emoji 2.047（fontconfig 597 faces）",
-        "engine": "Blink（headless new）",
-        "page_scale": "100%",
-        "frame": "main",
-        "capture_scope": "fullPage（8 张均 1280x800，页面无滚动，fullPage 高度未触及 8000px 上限）"
+  "schema_version": 1,
+  "version": "v2",
+  "source_pack": "public-baseline-v2",
+  "viewport": "1280x800",
+  "images": [
+    {
+      "file": "403-light-zh-CN.png",
+      "route": "/403",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "8530db12a6bb577d49c6225861ff1bdd679f783be9f60514d9e5a1fe6a9c1bb1"
     },
-    "source_commit": "78ec6f254af1724eaeaef1b520976e6a0c7e240c"
+    {
+      "file": "403-realDark-en-US.png",
+      "route": "/403",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "c521f22de49d5dab43a43d15ddd29dc5fd0d691818dd1d6ac8fee90795d603d8"
+    },
+    {
+      "file": "404-light-zh-CN.png",
+      "route": "/404",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "2bb8e1859c2d717a23a158eb041338856ee909e5a4bb3fe4231765a1d6a6e86e"
+    },
+    {
+      "file": "404-realDark-en-US.png",
+      "route": "/404",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "c6efc6537cad0652e3de8de5e6b168a652f011f3be00dd82984e4648ddd08e7f"
+    },
+    {
+      "file": "home-light-zh-CN.png",
+      "route": "/?login=1",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "611e409d512a0db59d5594396d036221efa147d0846126e64796a9fb5a7d9408"
+    },
+    {
+      "file": "home-realDark-en-US.png",
+      "route": "/?login=1",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "819d7885241fe1822274f9cf115932fb70813a72972d6256c7d17547a9d3e21c"
+    },
+    {
+      "file": "projects-light-zh-CN.png",
+      "route": "/projects",
+      "theme": "light",
+      "locale": "zh-CN",
+      "sha256": "ef9e5a57423a9c69918cf36e98d612653b93a208ae0b6803732b1bf8e813ea20"
+    },
+    {
+      "file": "projects-realDark-en-US.png",
+      "route": "/projects",
+      "theme": "realDark",
+      "locale": "en-US",
+      "sha256": "520d2fc7ee818cfaf7669b8536efba3054ecd67929dbe06663a2ce70a3ae5964"
+    }
+  ],
+  "environment": {
+    "viewport": "1280x800",
+    "dpr": 1,
+    "browser": "chromium 159.0.8154.6（Playwright 1.65.1，headless）",
+    "os": "Ubuntu 24.04.3 LTS / linux 6.14.0-37-generic x64",
+    "font_env": "fonts-noto-cjk 1:20230817+repack1-3 + fonts-liberation 1:2.1.5-3 + fonts-noto-color-emoji 2.047（fontconfig 597 faces）",
+    "engine": "Blink（headless new）",
+    "page_scale": "100%",
+    "frame": "main",
+    "capture_scope": "fullPage（8 张均 1280x800，页面无滚动，fullPage 高度未触及 8000px 上限）"
+  },
+  "source_commit": "Private source revision omitted from the public snapshot"
 }

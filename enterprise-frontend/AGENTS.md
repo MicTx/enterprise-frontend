@@ -12,9 +12,16 @@ Read `SKILL.md` for the full contract: eight-layer workflow, the conditional-loa
 截图像素级审查/视觉走查/视觉回归复验/e2e 修改意见为条件叠加工作面：仅命中时读取
 `references/visual-review.md`，纯代码任务不读；四个核心场景判定不变。该篇是规范中
 唯一以运行页面截图证据为验收面的章节，视觉/像素结论必须由其协议产物支撑。
+响应式截图基线 r1 属于同一证据面：manifest 逐图 `breakpoint` / `viewport` 与 PNG 尺寸
+由 `scripts/visual_baseline_check.py` 校验，fix-reverified 证据包由
+`scripts/visual_review_check.py` 校验；细则见 `references/visual-review.md`。
 
 每次改动另受两条全局硬约束：界面删减（`references/general-pages.md`）与三方体验账
 （`references/engineering.md`，UX / DX / AX 三方都变好、现有功能零破坏）。
+
+页面布局为结构硬约束：业务页面内容区一律 `Layout`（rows × cols / areas）→ 每区域
+一个 `Cell` → 每 `Cell` 一个 `Card` → Card `content` 用内容组件；裸 div 栅格、空
+Cell、一 Cell 多卡、Card 套 Card 均违规。细则见 `references/layout-system.md`。
 
 ## 本仓库工程事实
 

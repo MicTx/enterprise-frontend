@@ -124,6 +124,14 @@ const darkTheme: ThemeConfig = {
   },
 };
 
+// 布局参数真源（layout-system 篇 §Layout 契约 / design-tokens §布局参数）：
+// PageLayout / PageCard 在此消费；业务页面不写裸间距与栅格宽度字面量。
+export const layoutTokens = {
+  gap: 16,
+  cardPadding: 20,
+  cardPaddingCompact: 12,
+} as const;
+
 // 按明暗选择颜色套并与公共 token 合并（ThemeProvider 运行时消费；algorithm 由
 // ThemeProvider 按 navTheme 接线）。components 两级浅合并：base 与颜色套不声明
 // 同一组件键，无字段覆盖冲突。

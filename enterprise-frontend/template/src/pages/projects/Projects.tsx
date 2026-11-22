@@ -7,9 +7,10 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
-import { Alert, Button, Card, Input, Modal, Skeleton, Space, Tag } from 'antd';
+import { Alert, Button, Input, Modal, Skeleton, Space, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
+import PageLayout, { PageCard, PageCell } from '@/components/PageLayout';
 import PageShell from '@/components/PageShell';
 import { listProjects, type Project, removeProject } from '@/services/projects';
 import { queryKeys } from '@/services/queryKeys';
@@ -179,94 +180,104 @@ export default function Projects() {
 
   return (
     <PageShell>
-      <Card
-        title={
-          <FormattedMessage id="projects.title" defaultMessage="项目管理" />
-        }
-        style={{ height: '100%' }}
-        styles={{ body: { height: 'calc(100% - 57px)', overflow: 'hidden' } }}
-        extra={
-          <Space>
-            <Input.Search
-              placeholder={intl.formatMessage({
-                id: 'projects.searchPlaceholder',
-                defaultMessage: '搜索名称/负责人',
-              })}
-              allowClear
-              style={{ width: 220 }}
-              onSearch={(value) => {
-                setCurrent(1);
-                setKeyword(value.trim());
-              }}
-            />
-            <Access accessible={access.canManageProjects}>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setEditing(null);
-                  setFormOpen(true);
-                }}
-              >
-                <FormattedMessage
-                  id="projects.create"
-                  defaultMessage="新建项目"
-                />
-              </Button>
-            </Access>
-          </Space>
-        }
-      >
-        {query.isPending && !query.data ? (
-          <Skeleton active paragraph={{ rows: 8 }} />
-        ) : query.isError && !query.data ? (
-          <Alert
-            type="error"
-            showIcon
+      <PageLayout rows={[1]} cols={[1]}>
+        <PageCell>
+          <PageCard
+            variant="flush"
             title={
-              <FormattedMessage
-                id="projects.listError"
-                defaultMessage="列表加载失败"
-              />
+              <FormattedMessage id="projects.title" defaultMessage="项目管理" />
             }
-            description={
-              <FormattedMessage
-                id="projects.loadErrorDescription"
-                defaultMessage="网络或服务暂不可用，请重试。"
-              />
+            extra={
+              <Space>
+                <Input.Search
+                  placeholder={intl.formatMessage({
+                    id: 'projects.searchPlaceholder',
+                    defaultMessage: '搜索名称/负责人',
+                  })}
+                  allowClear
+                  style={{ width: 220 }}
+                  onSearch={(value) => {
+                    setCurrent(1);
+                    setKeyword(value.trim());
+                  }}
+                />
+                <Access accessible={access.canManageProjects}>
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      setEditing(null);
+                      setFormOpen(true);
+                    }}
+                  >
+                    <FormattedMessage
+                      id="projects.create"
+                      defaultMessage="新建项目"
+                    />
+                  </Button>
+                </Access>
+              </Space>
             }
-            action={
-              <Button size="small" onClick={() => query.refetch()}>
-                <FormattedMessage id="error.retry" defaultMessage="重试" />
-              </Button>
+            content={
+              query.isPending && !query.data ? (
+                <Skeleton active paragraph={{ rows: 8 }} />
+              ) : query.isError && !query.data ? (
+                <Alert
+                  type="error"
+                  showIcon
+                  title={
+                    <FormattedMessage
+                      id="projects.listError"
+                      defaultMessage="列表加载失败"
+                    />
+                  }
+                  description={
+                    <FormattedMessage
+                      id="projects.loadErrorDescription"
+                      defaultMessage="网络或服务暂不可用，请重试。"
+                    />
+                  }
+                  action={
+                    <Button size="small" onClick={() => query.refetch()}>
+                      <FormattedMessage
+                        id="error.retry"
+                        defaultMessage="重试"
+                      />
+                    </Button>
+                  }
+                />
+              ) : (
+                <ProTable<Project>
+                  rowKey="id"
+                  columns={columns}
+                  dataSource={query.data?.list ?? []}
+                  loading={query.isFetching}
+                  search={false}
+                  options={false}
+                  pagination={{
+                    current,
+                    pageSize,
+                    total: query.data?.total ?? 0,
+                    showTotal: (total) =>
+                      intl.formatMessage(
+                        {
+                          id: 'projects.total',
+                          defaultMessage: '共 {total} 条',
+                        },
+                        { total },
+                      ),
+                    onChange: (next, size) => {
+                      setCurrent(next);
+                      setPageSize(size);
+                    },
+                  }}
+                  scroll={{ y: 'calc(100dvh - 360px)' }}
+                />
+              )
             }
           />
-        ) : (
-          <ProTable<Project>
-            rowKey="id"
-            columns={columns}
-            dataSource={query.data?.list ?? []}
-            loading={query.isFetching}
-            search={false}
-            options={false}
-            pagination={{
-              current,
-              pageSize,
-              total: query.data?.total ?? 0,
-              showTotal: (total) =>
-                intl.formatMessage(
-                  { id: 'projects.total', defaultMessage: '共 {total} 条' },
-                  { total },
-                ),
-              onChange: (next, size) => {
-                setCurrent(next);
-                setPageSize(size);
-              },
-            }}
-            scroll={{ y: 'calc(100dvh - 360px)' }}
-          />
-        )}
-      </Card>
+        </PageCell>
+      </PageLayout>
       <ProjectFormModal
         open={formOpen}
         project={editing}

@@ -20,9 +20,10 @@
   零 PNG 视为用法错误。
 - 校验：--manifest <path> --validate-only——校验 manifest 结构（schema_version、
   version、source_pack、viewport、environment、source_commit、images 逐图
-  file/route/theme/locale/sha256）与逐图 sha256 同磁盘一致；供 spec 包 verify
-  快速自证。manifest 结构错误、路径非法（绝对路径/`..`/反斜杠）、文件缺失或
-  sha256 不一致均退出 2。
+  file/route/theme/locale/sha256）与逐图 sha256 同磁盘一致；响应式图可另带
+  breakpoint/viewport，breakpoint 限 xl/lg/md/sm，viewport 必须与 PNG 实际
+  尺寸一致；供 spec 包 verify 快速自证。manifest 结构错误、路径非法（绝对路径/
+  `..`/反斜杠）、文件缺失或 sha256 不一致均退出 2。
 
 PNG 支持边界：8-bit、非隔行、真彩 RGB（color_type 2）与 RGBA（color_type 6）、
 compression/filter method 0。灰度（0）、调色板（3）、灰度+alpha（4）、16-bit、
@@ -42,6 +43,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import struct
 import sys
 import zlib
@@ -60,6 +62,8 @@ DIFF_SAMPLE_LIMIT = 10
 MANIFEST_REQUIRED_KEYS = ("schema_version", "version", "source_pack", "viewport", "environment", "source_commit", "images")
 IMAGE_REQUIRED_KEYS = ("file", "route", "theme", "locale", "sha256")
 ENV_REQUIRED_KEYS = ("viewport", "dpr", "browser", "os", "font_env", "engine", "page_scale")
+RESPONSIVE_BREAKPOINT_NAMES = ("xl", "lg", "md", "sm")
+VIEWPORT_RE = re.compile(r"^(\d+)x(\d+)$")
 
 
 class PngFormatError(Exception):
@@ -263,6 +267,38 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _validate_responsive_entry(
+    image: dict, label: str, target: Path, rel: str, errors: list[str]
+) -> None:
+    """响应式图的可选结构断言：断点档位 + viewport 与实际 PNG 尺寸一致。
+
+    桌面基线不含 breakpoint/viewport 字段，行为保持原样；响应式基线一旦声明
+    这两个字段就必须同时可校验，防止截图尺寸与响应式断言脱节。
+    """
+    if "breakpoint" not in image and "viewport" not in image:
+        return
+    breakpoint = image.get("breakpoint")
+    viewport = image.get("viewport")
+    if not isinstance(breakpoint, str) or breakpoint not in RESPONSIVE_BREAKPOINT_NAMES:
+        errors.append(
+            f"{label}.breakpoint 必须为 {'/'.join(RESPONSIVE_BREAKPOINT_NAMES)} 之一"
+        )
+    match = VIEWPORT_RE.fullmatch(viewport) if isinstance(viewport, str) else None
+    if match is None:
+        errors.append(f"{label}.viewport 必须为 <宽>x<高>（如 375x900）")
+        return
+    try:
+        width, height, _channels, _rows = decode_png(target.read_bytes(), origin=rel)
+    except (OSError, PngFormatError) as exc:
+        errors.append(f"{label}.file PNG 读取/解码失败: {rel} ({exc})")
+        return
+    expected = (int(match.group(1)), int(match.group(2)))
+    if (width, height) != expected:
+        errors.append(
+            f"{label}.viewport 与 PNG 实际尺寸不一致: {viewport} != {width}x{height}"
+        )
+
+
 def validate_manifest(record, root: Path) -> tuple[list[str], list[str]]:
     """校验 manifest 结构与逐图 sha256。返回 (oks, errors)：errors 非空即失败。
 
@@ -338,6 +374,9 @@ def validate_manifest(record, root: Path) -> tuple[list[str], list[str]]:
             if actual != digest.lower():
                 errors.append(f"{label}.sha256 与磁盘内容不一致: {rel}")
                 continue
+        _validate_responsive_entry(image, label, target, rel, errors)
+        if any(error.startswith(f"{label}.") for error in errors):
+            continue
         oks.append(rel)
     return oks, errors
 

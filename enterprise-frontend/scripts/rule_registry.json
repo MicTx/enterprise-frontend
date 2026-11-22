@@ -77,6 +77,48 @@
       "doc_anchor": "references/engineering.md#全局禁令表（B1–B7，唯一真源）"
     },
     {
+      "id": "GP-LAYOUT-GRID",
+      "summary": "业务页面内容区必须用 Layout 的显式 rows × cols（非平凡布局用 areas 矩阵）做区域划分，禁止裸 div / flex / grid 自拼页面区域",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "unreleased",
+      "doc_anchor": "references/layout-system.md#布局公理layout--cell--card--content"
+    },
+    {
+      "id": "GP-LAYOUT-CELL-CARD",
+      "summary": "每个区域恰好一个 Cell；每个 Cell 恰好一个 Card；禁止空 Cell、单 Cell 多 Card、Card 内再套 Card（全屏结果页按白名单例外）；PageCell 开发态校验并附带同名测试",
+      "level": "hard",
+      "enforcement": "test",
+      "since": "unreleased",
+      "doc_anchor": "references/layout-system.md#布局公理layout--cell--card--content",
+      "test": "template/src/components/PageLayout.test.tsx"
+    },
+    {
+      "id": "GP-LAYOUT-CARD-CONTENT",
+      "summary": "Card content 必须由具名内容组件承载（ProTable/Descriptions/Form/Chart/List/Empty 等），禁止裸文本或 div 内容堆；Card title/extra 承载区域标题与操作；PageCard 开发态校验并附带同名测试",
+      "level": "hard",
+      "enforcement": "test",
+      "since": "unreleased",
+      "doc_anchor": "references/layout-system.md#card-内容组件",
+      "test": "template/src/components/PageLayout.test.tsx"
+    },
+    {
+      "id": "GP-LAYOUT-HEIGHT",
+      "summary": "Layout 行轨道用 auto + minmax(0,1fr)，Cell/Card/Card body 逐级 min-height:0；滚动归 Card body / 表格体 / 地图宿主，页面级滚动只能由 PageShell exception 显式声明",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "unreleased",
+      "doc_anchor": "references/layout-system.md#高度链与滚动"
+    },
+    {
+      "id": "GP-LAYOUT-RESPONSIVE",
+      "summary": "多列布局必须声明收缩顺序：xl 全量、lg/md 降列、sm 单列；DOM 顺序即阅读顺序，禁止 order 重排；窄屏不横向溢出，主要操作不得隐藏",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "unreleased",
+      "doc_anchor": "references/layout-system.md#响应式规则"
+    },
+    {
       "id": "GP-FOUR-STATES",
       "summary": "每个数据驱动区块必须有加载/空/错误/禁用四态的一致承载方案，禁「只有成功态」；页面审查逐数据区块核对，缺任一态即与禁令同级违反",
       "level": "hard",
@@ -184,6 +226,17 @@
       "enforcement": "manual",
       "since": "1.6.0",
       "doc_anchor": "references/visual-review.md#基线回归机制"
+    },
+    {
+      "id": "GVR-RESPONSIVE-BASELINE",
+      "summary": "响应式截图基线必须按 docs/visual-baselines/<version>/ + manifest.json 登记（逐图 breakpoint/viewport），由 template/e2e/visual.spec.ts VISUAL_RESPONSIVE=1 采集；结构与视口尺寸由 visual_baseline_check.py --validate-only 校验，基线自比对须 RESULT: pass",
+      "level": "hard",
+      "enforcement": "test",
+      "since": "unreleased",
+      "doc_anchor": "references/visual-review.md#响应式基线结构断言",
+      "checker": "scripts/visual_baseline_check.py",
+      "fixture": "docs/visual-baselines/r1",
+      "test": "scripts/tests/test_responsive_baseline.py"
     }
   ]
 }

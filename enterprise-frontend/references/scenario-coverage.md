@@ -1,7 +1,7 @@
 ---
 load_when: "SKILL.md Workflow 完成场景判定后读本篇，按场景取必读锚点与自查钩子、核对四场景覆盖缺口"
 rule_ids: []
-depends_on: ["engineering.md","design-reasoning.md","general-pages.md","data-layer.md","design-tokens.md","testing-guide.md","public-pages.md","map-layers.md","map-interaction.md","visual-review.md"]
+depends_on: ["layout-system.md","engineering.md","design-reasoning.md","general-pages.md","data-layer.md","design-tokens.md","testing-guide.md","public-pages.md","map-layers.md","map-interaction.md","visual-review.md"]
 size_budget: 144
 ---
 
@@ -35,6 +35,7 @@ size_budget: 144
 | 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
 | --- | --- | --- | --- | --- |
 | 新页面设计推理 | [design-reasoning](references/design-reasoning.md#页面形态判定矩阵) | 形态判定走地图工作台行；先设计后实现 | B5/B6/B7 高发场景先设计 | 设计产物 ↔ 实现对照复查 |
+| 布局分区 | [layout-system](references/layout-system.md#布局公理layout--cell--card--content) | 地图页按 map-workbench 配方：地图 Card flush、侧栏独立 Cell；每 Cell 一 Card | — | `grep -n -e "<PageLayout" -e "<PageCell" -e "<PageCard" <目标>`（三件套齐备） |
 | 图层选型 | [map-layers](references/map-layers.md#选型矩阵) | 五类触发场景对应路径；禁原生服务降级拼装 | B5 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
 | 生命周期 | [map-layers](references/map-layers.md#图层生命周期与清理) | 宿主统一管理；destroy 链完整；WGS84 坐标边界 | B7 | `grep -n -e "map\\.add" -e "map\\.remove" <目标>`（应零命中） |
 | 渲染预算 | [map-layers](references/map-layers.md#渲染预算与显式降级) | 三值预算（5000/300/200）；超预算显式降级；完成项移出地图 | — | `grep -n -e "MAX_TILES" -e "MAX_GRAPHICS" -e "MAX_LABELS" <目标>`（预算常量抽查） |
@@ -50,6 +51,7 @@ size_budget: 144
 | 文档引用完整性 | [engineering](references/engineering.md#交叉引用) | 各篇互链与章节锚点逐条存在 | — | 抽取文档互链路径逐条 `test -e` |
 | 四态与接线复查 | [general-pages](references/general-pages.md#四态一致承载) | 逐区块四态；五真源 diff 无平行体系 | — | 四态 grep + 真源 diff（同上两行钩子） |
 | 设计产物审查 | [design-reasoning](references/design-reasoning.md#设计产物契约) | 新页面/新功能的设计产物（形态·布局·决策记录·组件组成·删减检验·真源接线增量）与实现逐项对照；偏离未回写即审查不通过 | — | 设计产物 ↔ 实现对照复查 |
+| 布局结构审查 | [layout-system](references/layout-system.md#布局公理layout--cell--card--content) | 逐页核对 Layout 行列矩阵、Cell 与 Card 一对一、Card content 内容组件化；例外页落白名单 | — | `grep -rn -e "<PageLayout" -e "<PageCell" -e "<PageCard" -e "grid-cols-" <目标页面目录>`（逐页判定） |
 | 测试形态审查 | [testing-guide](references/testing-guide.md#反模式) | 同名同目录、有断言、四态覆盖、mock 未覆盖被测对象 | — | 对照反模式清单逐项复查 |
 | 体验约束审查 | [engineering](references/engineering.md#三方体验账) | 交付说明 UX / DX / AX / 零破坏四行齐备；界面删减结论：保留项各落保留清单一条 | — | `grep -rn -e "<Tag" -e "<Badge" -e "subTitle=" -e "tooltip=" -e "description=" -e 'type="secondary"' <目标>` |
 
@@ -59,6 +61,7 @@ size_budget: 144
 | --- | --- | --- | --- | --- |
 | 场景判定与最小变更 | [general-pages](references/general-pages.md#用途与触发场景) | 存量修改最小完整变更；禁令面内顺手修正不扩战线 | B1–B7 全量 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
 | 真源跟随 | [design-tokens](references/design-tokens.md#真源跟随规则) | 读目标仓库真源沿用；不开平行体系；偏离改真源带 why | — | `git diff <目标>`（无平行主题/散落硬编码） |
+| 布局回归 | [layout-system](references/layout-system.md#布局公理layout--cell--card--content) | 触碰页面保持 Layout → Cell → Card → content；改布局先回写设计产物布局坐标 | — | `grep -n -e "<PageLayout" -e "<PageCell" -e "<PageCard" <目标>`（三件套齐备） |
 | 菜单与深链 | [general-pages](references/general-pages.md#菜单与路由接线) | 隐藏菜单 ≠ 删除深链；双真源分离同步 | — | 对照 `config/routes.ts` ↔ `src/nav/navViews.ts` diff |
 | 四态回归 | [general-pages](references/general-pages.md#四态一致承载) | 触碰面逐数据区块核对四态 | — | `grep -n -e "Skeleton" -e "Empty" -e "ErrorBoundary" -e "disabled" <目标>` |
 | 禁令回归 | [engineering](references/engineering.md#全局禁令表b1b7唯一真源) | 全局硬执行，不因现状让步 | B1–B7 全量 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
@@ -70,6 +73,7 @@ size_budget: 144
 | --- | --- | --- | --- | --- |
 | 新页面接线 | [engineering](references/engineering.md#新页面四步接线流程) | 四步接线与验收物；接线质量钩子 | B2 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
 | 新页面设计推理 | [design-reasoning](references/design-reasoning.md#页面形态判定矩阵) | 先产出形态·布局·组件组成设计产物，实现后逐项对照 | — | 设计产物 ↔ 实现对照复查 |
+| 布局分区 | [layout-system](references/layout-system.md#布局公理layout--cell--card--content) | 按 single / stats-content / main-aside 等配方声明 rows × cols / areas；每 Cell 一 Card | — | `grep -n -e "<PageLayout" -e "<PageCell" -e "<PageCard" <目标>`（三件套齐备） |
 | 布局与内容壳 | [general-pages](references/general-pages.md#布局骨架) | 页头槽位废黜；内容壳锁视口；高度链；页滚例外显式声明 | — | `grep -n "pageHeaderRender={false}" <目标>` |
 | 列表/表单/详情 | [general-pages](references/general-pages.md#CRUD-模式) | ProTable 列表（卡内滚）；Modal+Form 编辑；Descriptions 详情；Empty/Alert | — | 对照列表页 / 编辑弹层 / 详情抽屉既有形态 |
 | 请求与缓存 | [data-layer](references/data-layer.md#双通道请求) | 通道二选一；apiClient 双认证；不直连 axios | B1 | `python3 <skill-root>/scripts/ban_scan.py <目标>` |
@@ -106,6 +110,7 @@ size_budget: 144
 | 八维走查 | [visual-review](references/visual-review.md#八维走查清单) | 八维固定顺序走查；审查缺省值让位 token 真源；AI 味黑名单核对；装饰自减法 | — | 对照八维清单逐维核对审查产物 |
 | 发现准入与记录 | [visual-review](references/visual-review.md#偏差判定) + [visual-review](references/visual-review.md#发现记录与-e2e-修改意见格式) | 准入四门（功能 / 无障碍 / 布局破损 / 违反设计约定）；感知色差双阈值与 AA 豁免；动态区域掩码清单化；还原度分层验收；**三级证据级别（observation / runtime-confirmed / fix-reverified）**；finding 强制字段与 fix 双分层；修复值走真源不发明新值 | — | finding 字段齐备性与「模糊表述」复查；掩码清单登记核对 |
 | 修复与复验闭环 | [visual-review](references/visual-review.md#修复复验闭环) | 同参数同环境重截；前后对比排除误报；基线不可原地覆盖；复验裁判一致性（同一观察空间）；重试两级协议（采集稳定 + 判定，混合结果 flaky）；落地改动照常过质量门与三方体验账 | B1–B7 全量（落地改动面） | `npm run lint && npm run test:ci`（目标仓质量门）+ 交付说明四行 + 复验对比证据（含重试记录）+ `python3 <skill-root>/scripts/visual_review_check.py <证据包>`（退出码 0） |
+| 响应式基线 | [visual-review](references/visual-review.md#响应式基线结构断言) | xl / lg / md / sm 四档逐图 `breakpoint` / `viewport` 与 PNG 实际尺寸一致；建立走 fix-reverified 证据包（verdict=pass、retries=pass）；r1 只读留存 | — | `python3 <skill-root>/scripts/visual_baseline_check.py --manifest docs/visual-baselines/r1/manifest.json --validate-only` + `python3 <skill-root>/scripts/visual_review_check.py docs/visual-baselines/r1/visual-review.json` |
 
 ## 覆盖缺口登记
 
@@ -117,6 +122,7 @@ size_budget: 144
 | 存量页面修改 | 最小变更原则 | 「最小完整变更/顺手修正不扩战线」的裁决语义归属 SKILL.md Decision Rules 分层表，references 不设对应节 | non_actionable | SKILL.md#decision-rules（映射归属 SKILL.md，非规范缺口） |
 | 规范审查 | 工具使用说明 | ban_scan.py 的使用细节不设 references 专节 | non_actionable | SKILL.md#review-loop（工具落点已声明）；命令在本矩阵自查钩子列可执行，`--help` 即用法 |
 | 非地图 CRUD / 地图工作台 | 全工作面锚点 | 各文档章节已覆盖全部行；未发现缺失约束 | resolved_current | 本矩阵四场景节（锚点解析通过，见验收证据） |
+| 非地图 CRUD / 地图工作台 / 规范审查 / 存量页面修改 | 布局分区 | 布局结构契约原分散在 general-pages 与 design-reasoning，缺统一 Layout → Cell → Card → content 真源；已新增 layout-system 篇并在四场景矩阵接线 | resolved_current | `references/layout-system.md` 全篇 + 本节四场景布局行 |
 | 公开页面 | 条件叠加 | 策略/文案/视觉/SEO/交互态已回写 public-pages 与相关横切文档 | resolved_current | `references/public-pages.md` 与本节各行 |
 
 登记结论：**零 open 项**。

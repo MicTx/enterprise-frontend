@@ -23,3 +23,130 @@ body,
   height: 100%;
   overflow: hidden;
 }
+
+/* —— Layout → Cell → Card → content（layout-system 篇 §布局公理） ——
+   高度链：PageLayout 100% → Cell 100% → Card 100% → Card body 滚动；
+   Cell 不带 margin，间距统一由 PageLayout gap 承担。 */
+.page-layout {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  gap: var(--layout-gap, 16px);
+}
+
+.page-layout--fill-auto {
+  height: auto;
+}
+
+.page-cell {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.page-cell:not([data-area]) {
+  grid-column: span var(--cell-span, 1);
+}
+
+.page-cell > .ant-card {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.page-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.page-card > .ant-card-head {
+  flex: 0 0 auto;
+}
+
+.page-card > .ant-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 响应式跨列：先按 lg → md → sm → xs 逐级覆盖；未配置的档位继承上一档。 */
+@media (max-width: 1199px) {
+  .page-cell:not([data-area]) {
+    grid-column: span var(--cell-span-lg, var(--cell-span, 1));
+  }
+
+  .page-layout--collapse-xl {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-template-areas: none !important;
+    overflow-y: auto;
+  }
+
+  .page-layout--collapse-xl > .page-cell {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .page-cell:not([data-area]) {
+    grid-column: span var(--cell-span-md, var(--cell-span-lg, var(--cell-span, 1)));
+  }
+
+  .page-layout--collapse-lg {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-template-areas: none !important;
+    overflow-y: auto;
+  }
+
+  .page-layout--collapse-lg > .page-cell {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-cell:not([data-area]) {
+    grid-column: span
+      var(--cell-span-sm, var(--cell-span-md, var(--cell-span-lg, var(--cell-span, 1))));
+  }
+
+  .page-layout--collapse-md {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-template-areas: none !important;
+    overflow-y: auto;
+  }
+
+  .page-layout--collapse-md > .page-cell {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .page-cell:not([data-area]) {
+    grid-column: span
+      var(
+        --cell-span-xs,
+        var(--cell-span-sm, var(--cell-span-md, var(--cell-span-lg, var(--cell-span, 1))))
+      );
+  }
+
+  .page-layout--collapse-sm {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-template-areas: none !important;
+    overflow-y: auto;
+  }
+
+  .page-layout--collapse-sm > .page-cell {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}

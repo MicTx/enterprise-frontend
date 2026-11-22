@@ -3,7 +3,8 @@ name: enterprise-frontend
 description: >-
   约束驱动的企业级中后台前端规范执行器。凡企业级前端 / 中后台 / 管理端 / 控制台 /
   dashboard / admin console / workbench / enterprise frontend 的新建、扩展、迁移、审查——
-  CRUD 页面、列表页、表单页、详情页、权限、菜单、路由、布局、页面设计、界面删减（去标语 /
+  CRUD 页面、列表页、表单页、详情页、权限、菜单、路由、布局、页面布局分区
+  （Layout 行列 / Cell / Card / 内容组件）、页面设计、界面删减（去标语 /
   说明文字 / 次要标签）、数据流、主题与设计 token、前端初始化、技术栈迁移、UI 迁移、
   一致性审查、前端代码审查、截图像素级审查 / 视觉走查 / 视觉回归复验 /
   e2e 修改意见；以及企业自有公开落地页 / 营销页 / 活动页 / 定价对比页——
@@ -65,15 +66,22 @@ description: >-
    四步程序产出设计产物——形态、布局、决策记录、组件组成（含四态方案）、
    删减检验与真源接线增量；实现逐项对照设计产物落地，偏离先回写设计产物
    再动手（契约见 design-reasoning §设计产物契约）。
-9. **公开页面（条件项）**：命中公开落地页/营销页时，单一转化目标、内容真实性与证据
+9. **布局分区契约**：业务页面的内容区必须是 `Layout`（显式 rows × cols / areas）
+   → 每个区域一个 `Cell` → 每个 `Cell` 一个 `Card` → Card `content` 由内容组件承载；
+   裸 div / flex / grid 拼页面、空 Cell、一 Cell 多 Card、Card 套 Card 均未完成
+   （`references/layout-system.md` §布局公理）。
+10. **公开页面（条件项）**：命中公开落地页/营销页时，单一转化目标、内容真实性与证据
    边界、视觉方向与动效、交互态、SEO 与上线清单齐备（`references/public-pages.md`）；
    中后台任务不适用。
-10. **视觉审查（条件项）**：命中截图像素级审查 / 视觉回归 / e2e 修改意见任务时，
+11. **视觉审查（条件项）**：命中截图像素级审查 / 视觉回归 / e2e 修改意见任务时，
    按 `references/visual-review.md` 协议产出审查产物——**审查证据包**
    （`visual-review.json`，三级证据级别 `observation / runtime-confirmed /
    fix-reverified`，字段契约见 visual-review §审查证据包）+ finding 记录 +
    同参数复验对比；证据包经 `python3 <skill-root>/scripts/visual_review_check.py` 校验（退出码 0）
-   才算产物齐备；修复值走 token 真源，禁发明新值；未命中则不适用。
+   才算产物齐备；修复值走 token 真源，禁发明新值；命中响应式截图基线时，
+   r<N> manifest 逐图 `breakpoint` / `viewport` 与 PNG 尺寸一致，且 fix-reverified
+   证据包经 `python3 <skill-root>/scripts/visual_review_check.py` 校验（退出码 0）；
+   未命中则不适用。
 
 ## Workflow
 
@@ -92,9 +100,10 @@ description: >-
    非对应场景不读。
 3. **设计推理（新页面 / 新功能必经）**：按 `references/design-reasoning.md` 的四步
    程序产出设计产物——页面形态、布局模式、卡片-内容组件组成（含四态方案）、删减检验
-   与真源接线增量；实现与 Review Loop 以此为对照基准。
-4. **执行约束**：禁令（B1–B7）、界面删减、三方体验账硬执行；token 与结构约定按 Decision Rules 分层裁决；
-   每条新写代码可追溯到对应规范条文。
+   与真源接线增量；布局坐标按 `references/layout-system.md` 写明 rows / cols / areas /
+   cells 与每个 Card 的内容组件，实现与 Review Loop 以此为对照基准。
+4. **执行约束**：禁令（B1–B7）、布局分区契约、界面删减、三方体验账硬执行；token 与
+   结构约定按 Decision Rules 分层裁决；每条新写代码可追溯到对应规范条文。
 5. **Review Loop 自查**（见下）后交付；验收证据 = 命令输出，不是口头声明。
 
 ## Decision Rules
@@ -103,7 +112,7 @@ description: >-
 
 | 层级 | 内容 | 裁决 |
 | --- | --- | --- |
-| 禁令与质量规则 | B1–B7、四态承载、界面删减、三方体验账、质量命令、真源同步纪律 | **全局硬执行**，不因目标仓库现状让步 |
+| 禁令与质量规则 | B1–B7、布局分区契约（Layout → Cell → Card → content）、四态承载、界面删减、三方体验账、质量命令、真源同步纪律 | **全局硬执行**，不因目标仓库现状让步；组件名与轨道数值可跟随目标仓库真源，四层语义不可改 |
 | token 与结构约定 | 色彩 / 圆角 / 高度 / 字号 / 间距、布局参数、目录组织 | **跟随目标仓库真源**：已有主题 / 路由 / 请求层 → 读其真源并沿用（改真源，不开平行体系）；新建项目 → 复制随包 `template/`（token 真源 `template/src/theme/tokens.ts`）；无模板可复制时才用 `references/design-tokens.md` 清单做维度对照 |
 | 目标仓库自身规则 | 其 AGENTS / README / 约定文档 | 架构 / 主题 / 数据 / 权限约定优先于本规范的「跟随类」条款；**永不豁免禁令类条款** |
 
@@ -112,6 +121,9 @@ description: >-
 - 新建项目：复制随包 `template/` 为唯一主路径（token 真源 `template/src/theme/tokens.ts`），
   全量按规范标准栈落地，不留「渐进适配」口子；无模板可复制时才以
   `references/design-tokens.md` 清单做维度对照。
+- 布局：业务页面一律按 `references/layout-system.md` 的 Layout → Cell → Card → content
+  四层落地；行列轨道、间距与断点数值跟随目标仓库布局真源（无真源用模板 `layoutTokens`），
+  但「一区域一 Cell、一 Cell 一 Card、Card content 组件化」不随仓库现状放宽。
 - 存量修改：最小完整变更；禁令面内的存量违规代码在触碰时顺手修正，不扩大战线。
 - 公开页面：视觉方向可不同于中后台，但必须收敛到单一品牌/主题真源；不把营销页的
   字体/配色/间距规则反向套进中后台。
@@ -152,6 +164,10 @@ description: >-
 11. **从代码猜效果、模糊表述或发明 token 值的截图审查** → 未读截图就下视觉结论、
     finding 无坐标无量测值无规则依据、修复值不来自真源，审查产物不可执行且制造
     平行体系；按 `references/visual-review.md` 观察纪律与记录格式回炉。
+12. **裸 div 栅格 / Card 套 Card / 一个 Cell 塞多卡** → 布局层级失去唯一锚点：
+    滚动归属、四态承载与可访问树随内容增长失控，页面审查无法定位区域责任；按
+    `references/layout-system.md` 的 Layout → Cell → Card → content 重建，不靠 CSS
+    补丁掩盖结构问题。
 
 ## Review Loop
 
@@ -165,19 +181,22 @@ description: >-
 4. **设计产物对照复查**：新页面 / 新功能逐项对照设计产物——形态、布局、决策
    记录、组件组成（含四态方案）、删减检验、真源接线增量；实现与设计产物不一致处
    已回改或回写设计记录，偏离逐条解释（design-reasoning §设计产物契约）。
-5. **产物净度**：构建或生成后 `git status --short` 无意外产物、无生成物混入。
-6. **文档引用完整性**：本次改动文档中出现的 `references/<路径>` 与章节锚点逐条存在。
-7. **界面删减自查**：对新增或触碰的界面跑 general-pages §界面删减 的候选钩子，逐处做
+5. **布局分区复查**：业务页面逐页核对 Layout rows × cols / areas、Cell 与 Card
+   一对一、Card content 为内容组件；例外页必须落在 layout-system §例外与白名单，
+   否则按结构违规回改。
+6. **产物净度**：构建或生成后 `git status --short` 无意外产物、无生成物混入。
+7. **文档引用完整性**：本次改动文档中出现的 `references/<路径>` 与章节锚点逐条存在。
+8. **界面删减自查**：对新增或触碰的界面跑 general-pages §界面删减 的候选钩子，逐处做
    删除试读；保留项各落在保留清单一条，读不懂处已重新设计布局而非补字。
-8. **三方体验账**：交付说明按 engineering §三方体验账 填 UX / DX / AX / 零破坏四行；
+9. **三方体验账**：交付说明按 engineering §三方体验账 填 UX / DX / AX / 零破坏四行；
    任一方变差或公开契约变动即未通过。
-9. **公开页面自查（条件项）**：命中公开页时按 public-pages 核对单一主 CTA、内容真实性、
+10. **公开页面自查（条件项）**：命中公开页时按 public-pages 核对单一主 CTA、内容真实性、
    交互态、SEO 与上线清单；未命中则跳过。
-10. **视觉审查自查（条件项）**：命中视觉审查时按 visual-review 核对——每张截图已读回
+11. **视觉审查自查（条件项）**：命中视觉审查时按 visual-review 核对——每张截图已读回
    看图、量测值来自脚本或源码、finding 强制字段齐备、修复值走真源、复验同参数同环境；
    **证据包（visual-review.json）经 `python3 <skill-root>/scripts/visual_review_check.py`
    校验通过（退出码 0）**；未命中则跳过。
-11. 未通过项回改后重跑；不带未解释的红项交付。
+12. 未通过项回改后重跑；不带未解释的红项交付。
 
 ## References
 
@@ -186,6 +205,7 @@ description: >-
 | 触发场景 | 读取文档 |
 | --- | --- |
 | 新页面 / 新功能：从需求推理页面形态、布局与卡片-内容组件组成（实现前必读） | `references/design-reasoning.md` |
+| 任何页面布局设计与实现：Layout 行列分区、Cell 与 Card 承载、Card 内容组件、高度链与响应式细则（默认读） | `references/layout-system.md` |
 | 任何页面 / 组件 / 布局工作（默认先读）；标语、说明文字、标签的界面删减 | `references/general-pages.md` |
 | 公开落地页 / 营销页 / 活动页 / 定价对比页（仅此时读；中后台不读） | `references/public-pages.md` |
 | 请求、数据获取、缓存、登录态、SSE | `references/data-layer.md` |

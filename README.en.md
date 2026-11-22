@@ -2,6 +2,8 @@
 
 [中文](README.md) | [English](README.en.md)
 
+**Unreleased snapshot**: this branch includes changes since v1.6.0. For the stable release, use [v1.6.0](https://github.com/MicTx/enterprise-frontend/releases/tag/v1.6.0).
+
 **A constraint-driven spec for enterprise admin frontends** — a production-
 proven stack, design language, and engineering discipline distilled into a
 **hard-constraint checklist** that AI coding sessions execute directly.
@@ -14,7 +16,7 @@ proven stack, design language, and engineering discipline distilled into a
 **frontend engineering spec (a skill) for AI coding sessions**, made of three
 parts:
 
-1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus eleven
+1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus twelve
    `references/` domain documents: bans, patterns, wiring discipline, and
    self-check hooks, all written as "do this", never as "you could consider".
 2. **The starter template** — `template/`, a compliant non-map base skeleton
@@ -30,11 +32,12 @@ It serves two readers at once: **AI sessions** treat it as an executable spec
 (load it and it applies), while **human engineers** use it as an enterprise
 frontend engineering constraint handbook.
 
-## Five design principles
+## Six design principles
 
 | Principle | Meaning |
 | --- | --- |
 | **Bans execute globally** | The B1–B7 bans (no direct axios, no bypassing the framework router, no ESLint/Prettier, no second map engine, co-located assets, …) hold in any target repository regardless of its current state |
+| **Layout partitioning** | Every business page divides its content area with a Layout (rows × columns) → one Cell per region → one Card per Cell → content components inside the Card content; raw div grids, empty Cells, multi-Card Cells, and nested Cards are structural violations |
 | **Follow the source of truth** | Design tokens and routing/menu/permission structure **follow the target repository's sources of truth** — change the source, never fork a parallel system; copying the bundled template gives a new project the default sources |
 | **Reproducible acceptance** | The spec speaks in patterns, never version numbers, and cites no external sources; acceptance = static ban scan + quality commands (lint / tsc / test) + per-item self-check hooks, with command output as the evidence |
 | **Subtract the interface** | New or touched UI carries no filler slogans, explanatory copy, or decorative tags; if it cannot be read once they are gone, the layout is wrong — redesign it, never patch it with words (keep-list: four-state copy, validation, units, status tags, accessible names) |
@@ -71,9 +74,7 @@ record format, and the fix-then-re-verify loop live in
 
 ## Archive recipients: install, use and start a project
 
-This section is for recipients of a release archive: unpack and follow the
-steps below. Self-tests, packaging, and maintenance belong to the development
-repository surface in the next section.
+These instructions apply to both this public snapshot and the release archives.
 
 ### Install
 
@@ -133,6 +134,7 @@ reads which document:
 | Document | Domain | When to read |
 | --- | --- | --- |
 | `references/design-reasoning.md` | Page design reasoning: requirement → page form/layout/card-content composition + three minimal pattern cards | Read before implementing any new page/feature |
+| `references/layout-system.md` | Page layout system: Layout rows/columns → Cell → Card → content components, with recipes, height chain, and responsive rules | Any page layout design or implementation (read by default) |
 | `references/general-pages.md` | Page spec: layout skeleton, CRUD patterns, four-state coverage, interface subtraction, route modals, menu wiring | Any page/component/layout work (read first by default) |
 | `references/public-pages.md` | Public pages: one conversion goal, page structure, copy and content realism, visual direction, interaction states and motion, SEO and launch checklist | Public landing/marketing/campaign/pricing pages (conditional) |
 | `references/data-layer.md` | Requests & server state: dual-channel, SSE, 401 convergence, queryKeys source of truth | Fetching, caching, login state |
@@ -149,91 +151,6 @@ The full B1–B7 definitions (check level, blacklist literals) live only in
 semantics; the scan rule table `scripts/ban_rules.json` shares the same
 source.
 
-## Development repository: toolchain, packaging and maintenance
-
-This section is for maintainers of this skill: self-tests, packaging, and
-version gates live here; archive recipients do not need it.
-
-### Toolchain and self-tests
-
-| Tool | Role | Self-test |
-| --- | --- | --- |
-| `scripts/ban_scan.py` + `ban_rules.json` | Ban static check (minimal by design: pattern matching with comment-line exemption; the rule table shares a single source with the spec's ban table; B7 explicitly unscanned) | `python3 scripts/tests/test_ban_scan.py` |
-| `scripts/visual_review_check.py` | Visual-review evidence-package validator (three evidence levels, two-level retry semantics, screenshot hashing and path safety; exit codes 0/1/2) | `python3 scripts/tests/test_visual_review_check.py` |
-| `install.sh` | Host-agnostic installer (staging → idempotence check → backup → atomic move → validation → rollback) | `python3 scripts/tests/test_install_sh.py` |
-| `scripts/build_package.py` | Assembles the release tree and tar.gz/zip archives per manifest v2 + manifest listing | `python3 scripts/tests/test_build_package.py` |
-
-Ban self-scan: `python3 scripts/ban_scan.py <target>` — scanning the template
-must always come back clean. Exit codes: 0 clean / 1 violations / 2 usage or
-IO error; a target with zero scannable files (for example a docs-only
-directory) also exits 2, so a mistyped path never passes silently. Patterns
-the regex scan does not cover are listed as manual review items in
-`references/engineering.md`.
-
-### Installing from the development repository root
-
-The development repository root *is* the skill body; there is no `enterprise-frontend/`
-source subdirectory for the installer to find by default. Installing from the
-repository root must name the source explicitly; preview with `--dry-run`
-first:
-
-```bash
-./install.sh <target-dir> --dry-run --skill-dir .   # preview
-./install.sh <target-dir> --skill-dir .             # install
-```
-
-`--skill-dir .` makes the development repository root the install source.
-
-### Packaging and distribution
-
-```bash
-python3 scripts/build_package.py          # produces dist/ (tree + tar.gz + zip + SHA256SUMS + listing)
-python3 scripts/build_package.py --expect-version 1.6.0
-```
-
-Exclusion is the default: the `runtime` list in `manifest.json` is closed —
-what is not listed is not packaged; internal planning surfaces, evidence
-archives, and test fixtures (such as `scripts/tests/`) are excluded by
-construction. When built from a git worktree root, directory entries take only
-tracked files: generated files ignored by `.gitignore` (such as `.umi*`) are
-not packaged, and an untracked, unignored file makes the build fail (exit 2)
-instead of being silently left out.
-
-The assembled release tree then passes a privacy gate: an absolute home
-directory path, a private host name from the repository's git remotes, or a
-common credential format fails the build (exit 2), reporting only file, line,
-and rule name, never the matched text. Private host names come from the git
-remotes, so that rule does nothing in a clone whose remotes are all public.
-Each build first removes its own earlier outputs from `dist/` and leaves no
-archive behind when it fails; tar entries carry no builder user name or uid.
-Output layout and validation rules are documented in the
-`scripts/build_package.py` module docstring.
-
-Release assets are built from a clean shallow clone of the version tag in the
-private Gitea source of truth, not from `dist/` in a development worktree: the
-build reads working-tree files, so uncommitted edits to tracked files would be
-packaged.
-
-### Maintenance quick reference
-
-| Action | Command |
-| --- | --- |
-| Ban scan | `python3 scripts/ban_scan.py <path>` |
-| Package | `python3 scripts/build_package.py` |
-| All tests | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
-| Doc structure contract | `python3 -I scripts/tests/test_spec_docs.py` (eight layers / B-ID agreement / links and anchors / public-page and visual-review conditional wiring / wiring of the two experience constraints) |
-
 ## License & distribution
 
-The repository's authored content (`SKILL.md`, `references/`, `template/`,
-`scripts/`, the installer, and facade docs) is licensed under
-[PolyForm Noncommercial 1.0.0](LICENSE) (SPDX:
-`PolyForm-Noncommercial-1.0.0`) — free for noncommercial use;
-**commercial use requires separate written authorization**.
-
-Distribution channel: a private Gitea source of truth plus the accompanying
-archive; any public snapshot requires separate authorization.
-
-Third-party license notices for the public-page and visual-review methods
-live in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md) and are not part of the
-normative spec. See [CHANGELOG](CHANGELOG.md) for the change history.
+This snapshot is licensed under [PolyForm Noncommercial 1.0.0](LICENSE). **Commercial use requires separate written authorization**. See [third-party notices](THIRD_PARTY_NOTICES.md) and the [changelog](CHANGELOG.md).

@@ -1,7 +1,7 @@
 ---
 load_when: "质量门、禁令、新页面接线、构建环境；每次改动收尾的三方体验账"
 rule_ids: ["B1","B2","B3","B4","B5","B6","B7"]
-depends_on: ["general-pages.md","data-layer.md","design-tokens.md","map-layers.md","map-interaction.md"]
+depends_on: ["layout-system.md","general-pages.md","data-layer.md","design-tokens.md","map-layers.md","map-interaction.md"]
 size_budget: 180
 ---
 
@@ -80,7 +80,9 @@ SKILL.md 路由表「质量门、禁令、新页面接线、构建环境」场�
 [general-pages](general-pages.md)（布局与四态承载）与 [data-layer](data-layer.md)
 （请求层接线）：
 
-1. **建组件**：`src/pages/` 下建页面组件文件。验收物：组件文件存在且可渲染。
+1. **建组件**：`src/pages/` 下建页面组件文件；业务页面按
+   [layout-system](layout-system.md) 的 Layout → Cell → Card → content 四层组织内容区。
+   验收物：组件文件存在、可渲染且布局结构符合 layout-system。
 2. **路由真源加路由**：在路由配置真源追加路由项（path/component/access）。
    验收物：路由项入库。
 3. **导航真源同步菜单**：导航视图真源同步菜单项（导航只控可见性，不承载路由定义；

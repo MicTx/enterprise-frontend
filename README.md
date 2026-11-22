@@ -2,6 +2,8 @@
 
 [中文](README.md) | [English](README.en.md)
 
+**未发布快照**：本分支包含 v1.6.0 之后的改动；正式版请使用 [v1.6.0](https://github.com/MicTx/enterprise-frontend/releases/tag/v1.6.0)。
+
 **约束驱动的企业级中后台前端规范** —— 把一套在生产环境验证过的技术栈、设计语言
 与工程纪律，蒸馏为 AI 编码会话可直接执行的**硬约束清单**。
 
@@ -12,7 +14,7 @@
 `enterprise-frontend` 不是组件库，也不是脚手架。它是一个**面向 AI 编码会话的
 前端工程规范（skill）**，由三部分组成：
 
-1. **约束规范**——`SKILL.md` 八层主文 + 十一篇 `references/` 域文档：禁令、模式、
+1. **约束规范**——`SKILL.md` 八层主文 + 十二篇 `references/` 域文档：禁令、模式、
    接线纪律与自查钩子，全部写成「必须怎么做」，而不是「可以参考」。
 2. **起始模板**——`template/` 非地图基座合规骨架（五真源 + 统一请求通道 +
    内容壳 + 质量门），新项目冷启动从复制随包模板开始，出厂即门禁全绿。
@@ -22,11 +24,12 @@
 它同时服务两类读者：**AI 会话**把它当作执行规范（装载即生效），**人类工程师**
 把它当作一份企业前端工程约束手册。
 
-## 五条设计原则
+## 六条设计原则
 
 | 原则 | 含义 |
 | --- | --- |
 | **禁令硬执行** | B1–B7 禁令（不直连 axios、不绕框架路由、不装 ESLint/Prettier、不引第二地图引擎、资产同源……）在任何目标仓库、任何现状下都不让步 |
+| **布局分区** | 业务页面内容区一律 Layout 行列分区 → 每区域一个 Cell → 每 Cell 一个 Card → Card content 用内容组件；裸 div 栅格、空 Cell、一 Cell 多卡、Card 套 Card 均为结构违规 |
 | **真源跟随** | 设计 token、路由/导航/权限结构**跟随目标仓库的真源**——改真源，不开平行体系；新建项目复制随包模板即得默认真源 |
 | **验收可复现** | 规范只讲模式不讲版本号、不引外部来源；验收 = 静态禁令扫描 + 质量命令（lint / tsc / test）+ 逐条自查钩子，命令输出即证据 |
 | **界面做减法** | 新增或触碰的界面不留多余标语、说明文字与次要标签；删后读不懂说明布局有问题，直接重新设计，不补字（保留清单：四态文案、校验、单位、状态 Tag、可访问名称） |
@@ -56,8 +59,7 @@ finding 格式、修复复验闭环见 `references/visual-review.md`，只在命
 
 ## 归档接收方：安装、使用与新建项目
 
-本节面向拿到发布归档的接收方：解包后按本节安装与使用；自测、打包与维护属于
-开发仓库面，见下一节。
+本节适用于此公开快照和发布归档。
 
 ### 安装
 
@@ -110,6 +112,7 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 | 文档 | 域 | 何时读 |
 | --- | --- | --- |
 | `references/design-reasoning.md` | 页面设计推理：需求 → 页面形态/布局/卡片-内容组件组成 + 三张最小骨架模式卡片 | 新页面/新功能实现前先读 |
+| `references/layout-system.md` | 页面布局系统：Layout 行列分区 → Cell → Card → 内容组件，含布局配方、高度链与响应式细则 | 任何页面布局设计与实现（默认读） |
 | `references/general-pages.md` | 页面规范：布局骨架、CRUD 模式、四态承载、界面删减、路由弹层、菜单接线 | 任何页面/组件/布局工作（默认先读） |
 | `references/public-pages.md` | 公开页面：单一转化目标、页面结构、文案与内容真实性、视觉方向、交互态与动效、SEO 与上线清单 | 公开落地页/营销页/活动页/定价对比页（仅此时读） |
 | `references/data-layer.md` | 请求与服务端状态：双通道、SSE、401 收敛、queryKeys 真源 | 涉及取数、缓存、登录态 |
@@ -125,81 +128,6 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 `references/engineering.md`；`SKILL.md` 只持 ID 与一句话语义；扫描规则表
 `scripts/ban_rules.json` 与其同源。
 
-## 开发仓库：工具链、打包与维护
-
-本节面向开发本 skill 的维护者：自测、打包与版本门禁都在这里，归档接收方不需要
-本节内容。
-
-### 工具链与自测
-
-| 工具 | 职责 | 自测 |
-| --- | --- | --- |
-| `scripts/ban_scan.py` + `ban_rules.json` | 禁令静态检查（最小化：模式匹配，注释行豁免；规则表与规范禁令表同源，B7 显式不扫） | `python3 scripts/tests/test_ban_scan.py` |
-| `scripts/visual_review_check.py` | 视觉审查证据包校验器（三级证据级别、重试两级语义、截图哈希与路径安全；退出码 0/1/2） | `python3 scripts/tests/test_visual_review_check.py` |
-| `install.sh` | 宿主无关安装器（暂存 → 幂等检测 → 备份 → 原子就位 → 校验 → 回滚） | `python3 scripts/tests/test_install_sh.py` |
-| `scripts/build_package.py` | 按 manifest v2 组装发布树与 tar.gz/zip 归档 + 清单 | `python3 scripts/tests/test_build_package.py` |
-
-禁令自扫：`python3 scripts/ban_scan.py <目标路径>`——对模板自扫应恒为 clean。
-退出码 0 干净 / 1 有违规 / 2 用法或 IO 错误；扫描面零文件（如只含文档的目录）
-也退出 2，路径写错不会假绿。正则不覆盖的写法列在 `references/engineering.md`
-的人工复查项。
-
-### 从开发仓库根安装
-
-开发仓库根就是 skill 本体，没有安装器默认查找的 `enterprise-frontend/` 源子目录；在仓库根
-安装必须显式指定源，可先 `--dry-run` 预览动作：
-
-```bash
-./install.sh <目标目录> --dry-run --skill-dir .   # 预览
-./install.sh <目标目录> --skill-dir .             # 安装
-```
-
-`--skill-dir .` 即把开发仓库根作为安装源。
-
-### 打包与分发
-
-```bash
-python3 scripts/build_package.py          # 产出 dist/（发布树 + tar.gz + zip + SHA256SUMS + 清单）
-python3 scripts/build_package.py --expect-version 1.6.0
-```
-
-排除即缺省：`manifest.json` 的 `runtime` 是闭式清单，不列清单即不入包——内部规划
-记录、证据档案与测试夹具（如 `scripts/tests/`）天然排除。在 git 工作树顶层构建时，
-目录条目只收已跟踪文件：被 `.gitignore` 忽略的生成物（如 `.umi*`）不入包，未跟踪且
-未忽略的文件使构建失败（exit 2），避免无声漏包。
-
-组装后的发布树先过隐私门禁：家目录绝对路径、仓库 git 远端里的私有主机名、常见凭据格式
-任一命中即 exit 2，只报文件、行号与规则名，不回显内容。私有主机名从 git 远端推导，在只有
-公共远端的 clone 上构建时这条规则不生效。每次构建先删除 `dist/` 下本工具的旧产物，构建失败
-不留归档；tar 条目不带构建者的用户名与 uid。产物布局与校验规则见 `scripts/build_package.py`
-模块文档。
-
-发布附件从私有 Gitea 真源的版本标签做干净浅克隆后构建，不用开发工作树的 `dist/`：构建读取
-工作树文件，已跟踪文件的未提交改动也会入包。
-
-### 维护速查
-
-| 动作 | 命令 |
-| --- | --- |
-| 禁令扫描 | `python3 scripts/ban_scan.py <路径>` |
-| 快照一致性 | `python3 scripts/verify_snapshot.py`（library/ 与 SNAPSHOT.json 漂移检查，gate.sh 第 5 门） |
-| 一键门禁 | `bash scripts/gate.sh`（`--list` 列门；`--skip-template` 跳过模板门并在汇总行披露 skipped） |
-| 打包 | `python3 scripts/build_package.py` |
-| 全部测试 | `python3 -m unittest discover -s scripts/tests -p 'test_*.py'` |
-| 文档结构契约 | `python3 -I scripts/tests/test_spec_docs.py`（八层 / B-ID 同源 / 链接锚点 / 公开页与视觉审查条件接线 / 两条体验约束接线） |
-
 ## 许可与分发
 
-本仓库自著内容（`SKILL.md`、`references/`、`template/`、`scripts/`、安装器与
-门面文档）以 [PolyForm Noncommercial 1.0.0](LICENSE) 授权（SPDX:
-`PolyForm-Noncommercial-1.0.0`）——非商业使用自由，**商业使用需另行书面授权**。
-
-`library/` 为外部仓库 frontend 子树的派生源码快照，按 **AGPL-3.0** 治理（全文与归属
-见 [LICENSE-LIBRARY](LICENSE-LIBRARY)），**不受 PolyForm Noncommercial 覆盖**；自
-1.1.0 起 `library/` 退出交付面，**不随安装/打包分发**，仅在内部私有 Gitea 仓库保留。
-
-分发渠道：私有 Gitea 真源与随行压缩包——归档与安装仅含上述自著运行面，不含
-`library/` 与 `LICENSE-LIBRARY`；任何公开快照须另行授权。
-
-公开页面与视觉审查方法的第三方许可声明见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，
-不进入规范正文。变更历史见 [CHANGELOG](CHANGELOG.md)。
+本快照以 [PolyForm Noncommercial 1.0.0](LICENSE) 授权。**商业使用需另行书面授权**。第三方许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，变更见 [CHANGELOG](CHANGELOG.md)。

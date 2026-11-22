@@ -1,7 +1,7 @@
 ---
 load_when: "公开落地页 / 营销页 / 活动页 / 定价对比页，仅此时读；中后台任务不读"
 rule_ids: []
-depends_on: ["design-reasoning.md","general-pages.md","design-tokens.md","engineering.md","testing-guide.md","scenario-coverage.md"]
+depends_on: ["layout-system.md","design-reasoning.md","general-pages.md","design-tokens.md","engineering.md","testing-guide.md","scenario-coverage.md"]
 size_budget: 180
 ---
 
@@ -21,7 +21,9 @@ size_budget: 180
   章节，不读本篇。
 - 与中后台的边界：公开页面允许并要求价值主张、证据、异议处理与主 CTA 等转化内容；
   这些是转化内容，不是 [general-pages](general-pages.md#界面删减) 所说的赘字。
-  装饰性口号、空泛形容、重复说明与无信息标签仍按删减规则删除。
+  装饰性口号、空泛形容、重复说明与无信息标签仍按删减规则删除。公开页面按本节
+  分节结构组织，不套中后台 [layout-system](layout-system.md#布局配方) 的
+  Layout → Cell → Card 配方。
 
 ## 页面策略
 

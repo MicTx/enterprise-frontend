@@ -9,8 +9,15 @@ import { expect, type Page, test } from '@playwright/test';
 // /403、/404 处于登录态才不会被 401 收敛带走，故预置 mock token（等价登录产物）。
 // 截图默认写 test-results/visual（被 .gitignore 忽略）；可用环境变量
 // VISUAL_EVIDENCE_DIR 覆盖到证据包目录。不得硬编码构建机绝对路径或内部包路径。
+//
+// 响应式层（VISUAL_RESPONSIVE=1 时追加）：对 / 与 /projects 在 4 个断点视口
+// （1280×800 / 992×800 / 768×900 / 375×900，对应 xl/lg/md/sm 档）各采一张
+// light/zh-CN 截图，供 docs/visual-baselines/r1 响应式基线比对（layout-system
+// §响应式规则 的运行证据面）。桌面 8 格与响应式格分开开关，避免默认全量
+// e2e 的时长翻倍。
 const EVIDENCE_DIR =
   process.env.VISUAL_EVIDENCE_DIR ?? path.resolve('test-results/visual');
+const RESPONSIVE = process.env.VISUAL_RESPONSIVE === '1';
 
 // 证据目录随项目存在；缺失时自建，避免首跑失败。
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -226,5 +233,145 @@ for (const route of ROUTES) {
         animations: 'disabled',
       });
     });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 响应式层：VISUAL_RESPONSIVE=1 时对 / 与 /projects 采 4 断点 × light/zh-CN。
+// 文件名 <route>-<breakpoint>.png（home-xl.png / projects-md.png …），与
+// docs/visual-baselines/r1/manifest.json 逐图对应。断点档位与 layout-system
+// §响应式规则 一致：xl ≥1200 / lg 992–1199 / md 768–991 / sm <768。
+// ---------------------------------------------------------------------------
+
+interface ResponsiveBreakpoint {
+  /** 文件名与 manifest.breakpoint 用的档位名 */
+  name: 'xl' | 'lg' | 'md' | 'sm';
+  width: number;
+  height: number;
+  /** 该档断言的布局结构（结构断言随采集一起留运行证据） */
+  assert: (page: Page) => Promise<void>;
+}
+
+const RESPONSIVE_BREAKPOINTS: ResponsiveBreakpoint[] = [
+  {
+    name: 'xl',
+    width: 1280,
+    height: 800,
+    assert: async (page) => {
+      // 桌面档：侧栏菜单与主内容并列
+      await expect(page.locator('.ant-pro-sider')).toBeVisible();
+      await expect(page.locator('[data-layout="page"]')).toBeVisible();
+    },
+  },
+  {
+    name: 'lg',
+    width: 992,
+    height: 800,
+    assert: async (page) => {
+      await expect(page.locator('.ant-pro-sider')).toBeVisible();
+      await expect(page.locator('[data-layout="page"]')).toBeVisible();
+    },
+  },
+  {
+    name: 'md',
+    width: 768,
+    height: 900,
+    assert: async (page) => {
+      // md 档：布局已单列（collapse=md 生效），不出现横向溢出
+      await expect(page.locator('[data-layout="page"]')).toBeVisible();
+      await expect(page.locator('body')).toBeVisible();
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    },
+  },
+  {
+    name: 'sm',
+    width: 375,
+    height: 900,
+    assert: async (page) => {
+      await expect(page.locator('[data-layout="page"]')).toBeVisible();
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    },
+  },
+];
+
+const RESPONSIVE_ROUTES = ROUTES.filter(
+  (route) => route.file === 'home' || route.file === 'projects',
+);
+
+// 响应式就绪判定：窄屏下表格首列可被横向滚动遮蔽（visible 判 false），改用
+// 「挂载 + 表头存在」判定；sm 断点由列裁剪/横向滚动承载，不要求首列在视口内。
+function responsiveReady(route: RouteCase, page: Page) {
+  if (route.file !== 'projects') {
+    return route.ready(page);
+  }
+  return (async () => {
+    await expect(
+      page.getByRole('button', { name: /新建项目|New project/ }),
+    ).toBeVisible({ timeout: READY_TIMEOUT });
+    await expect(
+      page
+        .locator('.ant-table-thead')
+        .getByText(/名称|Name/)
+        .first(),
+    ).toBeAttached({ timeout: READY_TIMEOUT });
+  })();
+}
+
+if (RESPONSIVE) {
+  for (const route of RESPONSIVE_ROUTES) {
+    for (const bp of RESPONSIVE_BREAKPOINTS) {
+      const name = `${route.file}-${bp.name}`;
+      test(`${name} 响应式截图`, async ({ page }) => {
+        await page.setViewportSize({
+          width: bp.width,
+          height: bp.height,
+        });
+        await page.addInitScript(
+          ({ locale, token }: { locale: Locale; token: string | null }) => {
+            try {
+              localStorage.setItem('umi_locale', locale);
+              if (token) localStorage.setItem('token', token);
+            } catch {
+              // 无 localStorage 上下文，忽略
+            }
+          },
+          {
+            locale: 'zh-CN' as Locale,
+            token: route.loginFlow || route.loginModal ? null : 'demo-admin',
+          },
+        );
+
+        if (route.loginFlow) {
+          await loginAsAdmin(page);
+        }
+        await page.goto(route.openPath);
+        await responsiveReady(route, page);
+        await bp.assert(page);
+
+        try {
+          await page.waitForLoadState('networkidle', { timeout: 15_000 });
+        } catch {
+          await page.waitForLoadState('load');
+        }
+
+        await settleBeforeCapture(page);
+
+        await page.screenshot({
+          path: path.join(EVIDENCE_DIR, `${name}.png`),
+          fullPage: true,
+          animations: 'disabled',
+        });
+      });
+    }
   }
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "version": "v1",
-  "source_pack": "2026-11-15_fix-theme-contrast-accessibility",
+  "source_pack": "public-baseline-v1",
   "viewport": "1280x800",
   "images": [
     {
@@ -72,5 +72,5 @@
     "frame": "main",
     "capture_scope": "fullPage（8 张均 1280x800，页面无滚动，fullPage 高度未触及 8000px 上限）"
   },
-  "source_commit": "f22a1bbc07ae2e13aefd9fe3d9af810857331c09"
+  "source_commit": "Private source revision omitted from the public snapshot"
 }

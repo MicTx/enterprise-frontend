@@ -1,7 +1,7 @@
 ---
 load_when: "新页面 / 新功能实现前必读：从需求推理页面形态、布局与卡片-内容组件组成"
 rule_ids: []
-depends_on: ["general-pages.md","data-layer.md","engineering.md","map-layers.md","public-pages.md","scenario-coverage.md"]
+depends_on: ["layout-system.md","general-pages.md","data-layer.md","engineering.md","map-layers.md","public-pages.md","scenario-coverage.md"]
 size_budget: 276
 ---
 
@@ -29,7 +29,9 @@ SKILL.md Workflow 的「设计推理」步骤（场景判定与规范阅读之�
    是否从列表/地图下钻）。
 2. **页面形态判定**：查下方形态判定矩阵，确定**唯一起始形态**；复合需求拆解
    为多形态组合（如 列表页 + 详情抽屉 + 编辑弹层），不发明新形态。
-3. **布局模式选择**：查布局模式表，确定内容骨架与滚动归属。
+3. **布局模式选择**：查布局模式表并读 [layout-system](layout-system.md#布局配方)，确定
+   Layout 的 `rows × cols / areas`、各 Cell 的坐标与跨列、每个 Cell 内 Card 的
+   `variant` 与 content 内容组件；布局坐标必须能直接落到 PageLayout 契约。
 4. **组件组成清单**：按组件选型表列出卡片-内容组成，逐区块给出四态方案，并对
    界面上每处标语、说明文字、次要标签做[界面删减](general-pages.md#界面删减)检验；
    产出「设计产物」（契约见下），实现与 Review Loop 以此对照。
@@ -49,17 +51,24 @@ SKILL.md Workflow 的「设计推理」步骤（场景判定与规范阅读之�
 
 ## 布局模式
 
-| 模式 | 结构 | 适用信号 |
+布局模式与 `layout-system` 的配方一一对应；下表只给形态选择信号，**行列坐标、
+Cell/Card 数量、Card 内容组件与响应式档位以 layout-system §布局配方为准**。
+
+| 模式 | 结构（rows × cols / areas） | 适用信号 |
 | --- | --- | --- |
-| 全屏内容壳（默认） | PageShell 锁视口；滚动归卡体 / 表格体 | 单一主内容区 |
-| 统计行 + 内容区 | 统计行 → 主卡片纵排 | 模块页需汇总指标 |
-| 卡片网格 | KPI 卡 + 图表卡组合 | 工作台 / 仪表盘 |
-| 主从（列表 + 抽屉） | 列表占满；详情 Drawer 覆盖，不占新路由 | 详情只读、需保留列表上下文 |
-| 剩余高度填充 | `useFillRemainingHeight` 填满内容区 | 表格 / 面板需吃掉剩余高度 |
+| 单区页 `single` | `rows=[1] cols=[1]` | 单一主内容区 |
+| 纵向堆叠 `stack` | `rows=[auto, auto, 1] cols=[1]` | 多个独立区块 |
+| 统计行 + 内容区 `stats-content` | `rows=[auto, 1] columns=4` | 模块页需汇总指标 |
+| 卡片网格 / 仪表盘 `dashboard` | `rows=[auto, auto, 1] columns=12` | 工作台 / 仪表盘 |
+| 主次两栏 `main-aside` | `rows=[1] cols=[2, 1]` | 主内容 + 侧栏 |
+| 主从（列表 + 详情）`master-detail` | `rows=[1] cols=[1, 3]` | 详情只读、需保留列表上下文 |
+| 地图工作台 `map-workbench` | `rows=[1] cols=[3, 1]` | 地图主画布 + 侧栏 |
+| 长表单 `long-form` | `rows=[auto, auto] cols=[1]` + `exception` | 内容天然超屏 |
 | 公开页分节（hero → 论证 → 异议 → 最终 CTA） | 页面级滚动 + 分节锚点（exception 显式声明） | 公开落地页 / 活动页 / 对比页 |
 
 布局纪律：页头槽位废黜（`pageHeaderRender={false}` 常开）；页面级滚动必须
-exception 显式声明——细则见 [general-pages](general-pages.md#布局骨架)。公开页面
+exception 显式声明——细则见 [general-pages](general-pages.md#布局骨架)。业务页面
+必须走 Layout → Cell → Card → content 四层，禁止用裸 div/flex 自拼区域；公开页面
 不走中后台内容壳与 CRUD 组件惯例，按 [public-pages](public-pages.md) 组织分节结构。
 
 ## 卡片-内容组件选型
@@ -89,8 +98,9 @@ exception 显式声明——细则见 [general-pages](general-pages.md#布局骨
 
 ```tsx
 import { ProTable, type ProColumns } from '@ant-design/pro-components';
-import { Button, Card } from 'antd';
+import { Button } from 'antd';
 import PageShell from '@/components/PageShell';
+import PageLayout, { PageCard, PageCell } from '@/components/PageLayout';
 
 interface Row { id: string; name: string; status: string; }
 
@@ -106,21 +116,27 @@ const columns: ProColumns<Row>[] = [
 export default function ExampleList() {
   return (
     <PageShell>
-      <Card
-        title="示例列表"
-        extra={<Button type="primary">新建</Button>}  // → Modal 表单（卡片二）
-      >
-        <ProTable<Row>
-          rowKey="id"
-          columns={columns}
-          // 服务端状态走 React Query + queryKeys 真源（data-layer 篇）；
-          // request 内部接统一请求通道，不直接 import axios（B1）
-          request={async () => ({ data: [], success: true, total: 0 })}
-          scroll={{ y: 480 }}      // 卡内滚：滚动归表格体（general-pages 布局骨架）
-          search={{ labelWidth: 'auto' }}
-          rowSelection={{}}        // 需要批量操作时开启，配 ListBatchBar
-        />
-      </Card>
+      <PageLayout rows={[1]} cols={[1]}>
+        <PageCell>
+          <PageCard
+            title="示例列表"
+            extra={<Button type="primary">新建</Button>}  // → Modal 表单（卡片二）
+            variant="flush"
+            content={
+              <ProTable<Row>
+                rowKey="id"
+                columns={columns}
+                // 服务端状态走 React Query + queryKeys 真源（data-layer 篇）；
+                // request 内部接统一请求通道，不直接 import axios（B1）
+                request={async () => ({ data: [], success: true, total: 0 })}
+                scroll={{ y: 480 }}      // 卡内滚：滚动归表格体（general-pages 布局骨架）
+                search={{ labelWidth: 'auto' }}
+                rowSelection={{}}        // 需要批量操作时开启，配 ListBatchBar
+              />
+            }
+          />
+        </PageCell>
+      </PageLayout>
     </PageShell>
   );
 }
@@ -197,6 +213,7 @@ export default function ExampleDetailDrawer({ detail, loading, onClose }: {
 ```text
 形态：<形态判定矩阵中的一种；复合需求列组合>
 布局：<布局模式表中的一种或组合>
+布局坐标：rows=<...>；cols=<...>；areas=<...>；cells=<区域名 → Card variant + 内容组件>
 决策记录：<信息组织与层级类改动的决策依据（谁在什么场景先读什么）；
           至少对比一个更轻方案 / 保留现状方案；字段数量、读取数量、排版整齐
           不作执行质量证据>
@@ -214,6 +231,8 @@ Review Loop 复查时以设计产物为对照：组件组成缺四态、布局�
 
 ## 交叉引用
 
+- 布局结构契约（Layout → Cell → Card → content、行列配方、响应式）→
+  [layout-system](layout-system.md)。
 - 实现纪律（布局骨架、四态承载、界面删减、弹层规则、接线细则）→
   [general-pages](general-pages.md)。
 - 请求通道与状态归属 → [data-layer](data-layer.md)；禁令与质量门 →

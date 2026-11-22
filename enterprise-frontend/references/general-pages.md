@@ -1,7 +1,7 @@
 ---
 load_when: "任何页面 / 组件 / 布局工作默认先读；标语、说明文字、标签的界面删减"
 rule_ids: ["B2"]
-depends_on: ["design-reasoning.md","data-layer.md","design-tokens.md","engineering.md","public-pages.md","visual-review.md","map-layers.md","map-interaction.md"]
+depends_on: ["layout-system.md","design-reasoning.md","data-layer.md","design-tokens.md","engineering.md","public-pages.md","visual-review.md","map-layers.md","map-interaction.md"]
 size_budget: 192
 ---
 
@@ -21,6 +21,10 @@ size_budget: 192
 
 ## 布局骨架
 
+- **Layout 分区先行**：业务页面内容区必须先按 [layout-system](layout-system.md#布局公理layout--cell--card--content)
+  声明 Layout（rows × cols / areas），每个区域一个 Cell、每个 Cell 一个 Card、Card
+  content 放内容组件；PageShell 只提供视口壳，不承担分区。裸 div 栅格、Card 套
+  Card、一 Cell 多卡均为结构违规。
 - **页头槽位废黜**：页面容器 ghost 模式 + `pageHeaderRender={false}` 常开；页面定位
   由菜单当前项与标签页标题承载，页内不再渲染大标题页头。全站默认，非逐页选择。
 - **内容壳锁定视口**：页面级滚动不存在；滚动归属 Card body / 表格体
@@ -40,8 +44,9 @@ size_budget: 192
 
 ## CRUD 模式
 
-中后台内容用 Card / PageShell / ProTable / Modal+Form / Descriptions / Empty / Alert
-组织。三类页面的组件选型惯例（目标仓库已有惯例时以其实际形态为准）：
+中后台内容用 PageShell → PageLayout → PageCell → PageCard → 内容组件组织；Card /
+ProTable / Modal+Form / Descriptions / Empty / Alert 的选型遵循 layout-system 与
+下列 CRUD 惯例（目标仓库已有惯例时以其实际形态为准）：
 
 - **列表页 = ProTable（卡内滚）**：ProTable 承载表格列表，滚动归属表格体。
 - **编辑/创建页 = Modal + Form**：表单在路由弹层或页内 Modal 中以 antd Form 承载
@@ -145,6 +150,7 @@ size_budget: 192
 
 ## 交叉引用
 
+- 布局分区、行列轨道、Card 内容组件与响应式细则 → [layout-system](layout-system.md)。
 - 质量门、禁令表、接线质量钩子、构建环境 → [engineering](engineering.md)。
 - 每次改动的 UX / DX / AX 记账与零破坏证据 → [engineering](engineering.md#三方体验账)。
 - 请求通道、缓存、401 收敛、SSE → [data-layer](data-layer.md)（四态错误态的请求侧）。

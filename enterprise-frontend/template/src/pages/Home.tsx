@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { FormattedMessage } from '@umijs/max';
-import { Alert, Button, Card, Empty, Form, Input, Modal } from 'antd';
+import { Alert, Button, Empty, Form, Input, Modal } from 'antd';
+import PageLayout, { PageCard, PageCell } from '@/components/PageLayout';
 import PageShell from '@/components/PageShell';
 import { type LoginPayload, login } from '@/services/auth';
 import {
@@ -26,15 +27,22 @@ export default function Home() {
 
   return (
     <PageShell>
-      <Card
-        title={<FormattedMessage id="home.cardTitle" defaultMessage="开始" />}
-      >
-        <Empty
-          description={
-            <FormattedMessage id="home.empty" defaultMessage="尚无数据" />
-          }
-        />
-      </Card>
+      <PageLayout rows={[1]} cols={[1]} fill={false}>
+        <PageCell>
+          <PageCard
+            title={
+              <FormattedMessage id="home.cardTitle" defaultMessage="开始" />
+            }
+            content={
+              <Empty
+                description={
+                  <FormattedMessage id="home.empty" defaultMessage="尚无数据" />
+                }
+              />
+            }
+          />
+        </PageCell>
+      </PageLayout>
       <Modal
         open={loginOpen}
         title={<FormattedMessage id="home.login.title" defaultMessage="登录" />}

@@ -77,6 +77,20 @@ Tag 状态文字取全局 colorSuccess（Tag 无 success 前景组件 token）�
 - 主题形态：navTheme `light`（浅色）；本规范不强制暗色模式，目标仓库
   自行决策。
 
+**布局 token（Layout / Cell / Card 专用）**：真源为 `template/src/theme/tokens.ts`
+的 `layoutTokens`（新建项目直接消费；存量仓库沿用其布局 token，不另起一套）。
+
+| token | 默认值 | 用途 |
+| --- | --- | --- |
+| `gap` | `16` | PageLayout 行列间距；Cell 不自带 margin |
+| `cardPadding` | `20` | PageCard `default` body 内边距 |
+| `cardPaddingCompact` | `12` | PageCard `compact`（KPI / 紧凑列表）内边距 |
+
+- 行列轨道不用 token 数值拼像素：弹性轨道统一 `minmax(0, 1fr)`，固定宽度只在
+  目标仓库已有布局真源时引用其 token；页面不写裸 `px` / `rem` 栅格值。
+- 响应式断点默认 `1200 / 992 / 768 / 576`，随目标仓库断点 token 真源裁决；
+  收缩顺序与例外见 [layout-system](layout-system.md#响应式规则)。
+
 ## 动效与交互状态
 
 真源：目标仓库动效 token（Ant Design 类的 `motionDurationFast/Mid/Slow`、

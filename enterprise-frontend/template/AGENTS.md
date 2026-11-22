@@ -3,6 +3,17 @@
 面向在本模板上工作的 AI Agent 与新成员：命令、接线流程、自查钩子。规范真源在
 skill 的 `references/`（本文件随模板交付，就近生效；与 skill 规范冲突时以规范为准）。
 
+## 页面布局（Layout → Cell → Card → content）
+
+- 业务页面内容区一律 `PageShell` → `PageLayout` → `PageCell` → `PageCard` → 内容组件。
+- `PageLayout` 必须显式给 `rows` / `cols`（或 `columns`）；非 1×1 布局给 `areas`
+  矩阵或每格 `row/col/span`。行列轨道与布局配方见 skill `references/layout-system.md`。
+- 每个 `PageCell` 只能承载一个 `PageCard`；`PageCard` 的 `content` 只放具名内容组件
+  （ProTable / Descriptions / Form / 图表组件 / List / Empty 等），不写裸文本或 div 内容堆。
+- `PageCard variant`：表格、地图、通栏图表用 `flush`；KPI / 紧凑列表用 `compact`；
+  其余 `default`。Card 不自带 margin，间距由 Layout `gap` 承担。
+- 403 / 404 / 登录引导 / 打印页等全屏结果页可 `PageShell + Result` 直接承载，不包 Card。
+
 ## 命令表
 
 | 场景                                            | 命令（在本目录下）           |
@@ -14,9 +25,13 @@ skill 的 `references/`（本文件随模板交付，就近生效；与 skill �
 | e2e 冒烟（需先装 chromium，dev server 自动起）  | `npm run e2e`                |
 | 生成服务层（openapi.json 改后重跑；目录勿手改） | `npm run openapi`            |
 | 单测快速定位                                    | `npm test -- <路径或关键字>` |
+| 响应式基线采集                                  | `VISUAL_RESPONSIVE=1 VISUAL_EVIDENCE_DIR=<目录> npm run e2e -- e2e/visual.spec.ts --grep "响应式"` |
 
 Playwright 浏览器下载被墙时走镜像：
 `PLAYWRIGHT_DOWNLOAD_HOST=https://cdn.npmmirror.com/binaries/playwright npx playwright install chromium`。
+本机 8000 端口被占用时，用 `PLAYWRIGHT_BASE_URL=http://localhost:8300` 让 dev server
+与 Playwright 对齐到同一端口；采集后按 skill `references/visual-review.md` 的响应式
+基线结构断言跑 `visual_baseline_check.py --manifest ... --validate-only` 与复采比对。
 
 禁令自扫（在本模板项目目录内）：`python3 <skill-root>/scripts/ban_scan.py src/`，
 退出码 0 = 干净（`<skill-root>`＝含 SKILL.md 的 skill 根目录；禁令真源
