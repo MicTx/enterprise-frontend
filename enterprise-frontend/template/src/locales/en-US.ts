@@ -18,7 +18,7 @@ export default {
   'error.retry': 'Retry',
 
   'home.cardTitle': 'Start',
-  'home.empty': 'No data yet',
+  'home.viewProjects': 'View projects',
   'home.login.title': 'Sign in',
   'home.login.username': 'Username',
   'home.login.password': 'Password',
@@ -29,6 +29,7 @@ export default {
 
   'projects.title': 'Projects',
   'projects.searchPlaceholder': 'Search name / owner',
+  'projects.noMatches': 'No matching projects',
   'projects.create': 'New project',
   'projects.column.name': 'Name',
   'projects.column.status': 'Status',
@@ -42,6 +43,7 @@ export default {
   'projects.action.remove': 'Delete',
   'projects.total': '{total} items in total',
   'projects.listError': 'Failed to load the list',
+  'projects.refreshFailed': 'Refresh failed. Last results kept.',
   'projects.loadErrorDescription':
     'Network or service unavailable. Please retry.',
   'projects.form.create': 'New project',
@@ -49,6 +51,11 @@ export default {
   'projects.form.cancel': 'Cancel',
   'projects.form.save': 'Save',
   'projects.form.saveFailed': 'Save failed. Please retry.',
+  'projects.form.discardTitle': 'Discard unsaved changes?',
+  'projects.form.discardContent':
+    'Your edits have not been saved and will be lost.',
+  'projects.form.keepEditing': 'Keep editing',
+  'projects.form.discardChanges': 'Discard changes',
   'projects.form.name': 'Project name',
   'projects.form.nameRequired': 'Please enter a project name',
   'projects.form.owner': 'Owner',
@@ -62,4 +69,5 @@ export default {
   'projects.removeConfirm.content': 'This cannot be undone.',
   'projects.removeConfirm.ok': 'Delete',
   'projects.removeConfirm.cancel': 'Cancel',
+  'projects.removeConfirm.failed': 'Delete failed. Please retry.',
 } as const;

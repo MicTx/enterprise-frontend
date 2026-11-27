@@ -2,8 +2,6 @@
 
 [中文](README.md) | [English](README.en.md)
 
-**未发布快照**：本分支包含 v1.6.0 之后的改动；正式版请使用 [v1.6.0](https://github.com/MicTx/enterprise-frontend/releases/tag/v1.6.0)。
-
 **约束驱动的企业级中后台前端规范** —— 把一套在生产环境验证过的技术栈、设计语言
 与工程纪律，蒸馏为 AI 编码会话可直接执行的**硬约束清单**。
 
@@ -14,7 +12,7 @@
 `enterprise-frontend` 不是组件库，也不是脚手架。它是一个**面向 AI 编码会话的
 前端工程规范（skill）**，由三部分组成：
 
-1. **约束规范**——`SKILL.md` 八层主文 + 十二篇 `references/` 域文档：禁令、模式、
+1. **约束规范**——`SKILL.md` 八层主文 + 十三篇 `references/` 域文档：禁令、模式、
    接线纪律与自查钩子，全部写成「必须怎么做」，而不是「可以参考」。
 2. **起始模板**——`template/` 非地图基座合规骨架（五真源 + 统一请求通道 +
    内容壳 + 质量门），新项目冷启动从复制随包模板开始，出厂即门禁全绿。
@@ -59,7 +57,7 @@ finding 格式、修复复验闭环见 `references/visual-review.md`，只在命
 
 ## 归档接收方：安装、使用与新建项目
 
-本节适用于此公开快照和发布归档。
+本节适用于此公开版本和发布归档。
 
 ### 安装
 
@@ -80,10 +78,15 @@ python3 ≥3.9、coreutils。
 
 ### 在宿主会话中使用
 
-把 `<目标目录>/enterprise-frontend` 所在路径加入你的 AI 编码宿主的 skill 搜索面，
-新开会话后自然语言描述任务即可触发（部分宿主支持显式 `$enterprise-frontend`
-或 `/enterprise-frontend` 前缀）。会话将按 Workflow 判定场景 → 设计推理（新页面/新功能先产出形态·布局·
-组件组成设计）→ 按路由表读取对应规范 → 执行约束 → 按自查钩子收尾。
+把 `<目标目录>/enterprise-frontend` 所在路径加入 AI 宿主的技能搜索面，新开会话后直接描述任务。自然触发由宿主判断；如需指定本技能，使用宿主支持的显式入口。Claude Code 支持：
+
+| 指令 | 会做什么 |
+| --- | --- |
+| `/enterprise-frontend design 项目列表` | 给出形态、布局、四态和验证方案，不改业务源码。 |
+| `/enterprise-frontend review src/pages/projects` | 只读审查，给出处、依据和建议；没做运行验证就明确说明。 |
+| `/enterprise-frontend revise 按上次意见修复项目弹窗误关` | 只修已授权的范围并复验，不会自动提交或发布。 |
+
+其他宿主若不接受 `/` 指令，可显式选用 `enterprise-frontend` 后输入同一指令与目标。两种入口统一先判意图和场景，读命中的规范，再产出设计、审查或修订结果。
 
 ### 验证安装
 
@@ -122,6 +125,7 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 | `references/map-interaction.md` | 地图交互：框选/绘制/选择/高亮、告警与图例、资产同源、引擎唯一入口 | 地图交互与资产（条件加载） |
 | `references/visual-review.md` | 截图视觉审查与 e2e 修改意见：证据采集协议、八维走查、发现准入与像素 diff 语义、finding 格式、修复复验闭环（含分层验收、复验裁判一致性、flaky 重试协议） | 截图像素级审查/视觉回归/e2e 修改意见（条件加载） |
 | `references/testing-guide.md` | 测试设计指南：五形态用例设计 + mock 模式 + 场景化清单 | 编写/评审测试 |
+| `references/state-transitions.md` | 状态转换与动效决策：触发→当下反馈→最终状态→中断/回退四格判定、五类信号判定表、减动效首帧生效 | 命中状态转换/动效工作面时读（条件加载） |
 | `references/scenario-coverage.md` | 四个核心场景 + 公开页面条件叠加矩阵：场景 → 必读锚点 → 自查钩子 | 场景判定后取行 |
 
 禁令表 B1–B7 的完整定义（检查级、黑名单字面量）唯一真源在
@@ -130,4 +134,4 @@ Decision Rules → Boundaries → Anti-Patterns → Review Loop → References�
 
 ## 许可与分发
 
-本快照以 [PolyForm Noncommercial 1.0.0](LICENSE) 授权。**商业使用需另行书面授权**。第三方许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，变更见 [CHANGELOG](CHANGELOG.md)。
+以 [PolyForm Noncommercial 1.0.0](LICENSE) 授权；**商业使用需另行书面授权**。第三方许可见 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)，变更见 [CHANGELOG](CHANGELOG.md)。

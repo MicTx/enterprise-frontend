@@ -84,9 +84,16 @@ test('未登录深链 /projects 被 401 收敛到登录弹层并带回跳', asyn
     (url) => url.pathname === '/' && url.searchParams.has('login'),
     { timeout: 10_000 },
   );
-  await expect(page.getByRole('dialog')).toBeVisible();
-  const redirect = page.url();
-  if (!redirect.includes('login=1')) throw new Error(`未收敛: ${redirect}`);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  expect(new URL(page.url()).searchParams.get('redirect')).toBe('/projects');
+  await dialog.getByLabel('用户名').fill('admin');
+  await dialog.getByLabel('密码').fill('admin123');
+  await dialog.getByRole('button', { name: /^登\s?录$/ }).click();
+  await expect(page).toHaveURL(/\/projects$/);
+  await expect(
+    page.getByRole('cell', { name: '长三角水体遥感监测' }),
+  ).toBeVisible();
 });
 
 test('暗色偏好经设置抽屉持久化，刷新后仍生效', async ({ page }) => {

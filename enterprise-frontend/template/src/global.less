@@ -150,3 +150,23 @@ body,
     grid-row: auto !important;
   }
 }
+
+/* —— 减动效兜底（state-transitions 篇「减动效首帧即生效」+ design-tokens
+     「prefers-reduced-motion 移除位移/缩放，保留必要透明度变化」） ——
+   antd 的弹层/抽屉进出场经 ConfigProvider token.motion=false 已覆盖（rc-motion
+   supportMotion=false + motionDuration*=0s）；唯一漏网的是 Skeleton 的 shimmer
+   ——它走独立组件 token skeletonLoadingMotionDuration 的无限位移动画，token
+   真源没有提供按偏好改道的通道。这是真实缺口：用户在减动效偏好下首屏仍是
+   持续位移噪点。此处只补这一个 overlay：停动画、保留静态渐变底，占位识别
+   度不变；不扩散到其他组件（默认过渡与焦点环由组件 token 承载，不在此插手）。 */
+@media (prefers-reduced-motion: reduce) {
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-title,
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-paragraph > li,
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-avatar,
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-button,
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-input,
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-node,
+  .ant-skeleton.ant-skeleton-active .ant-skeleton-image {
+    animation: none;
+  }
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_note": "全量硬约束可追溯注册表（schema v1）。禁令级（level=ban）与 references/engineering.md 全局禁令表逐 ID 同源，summary 与 scripts/ban_rules.json 的 title 逐 ID 一致；非禁令硬约束以 references/general-pages.md / engineering.md / data-layer.md 实际条文为准，doc_anchor 形态为「仓库根相对路径#小节标题」，锚点按 scripts/rule_coverage.py 的标题折叠规则解析（语义与 scripts/tests/test_spec_docs.py 一致）。生命周期可选键（scripts/rule_coverage.py 校验）：status（active 缺省/deprecated）；since（本条所锚规范能力生效的版本号字符串，∈ 已发布版本集合 {1.0.0,1.1.0,1.2.0,1.3.0,1.4.0,1.5.0,1.6.0}，按 CHANGELOG 对应版本段逐条查证 debut，查证表见 CHANGELOG 对应版本段 附节）；supersedes（被本条替代的其他规则 id，须存在、非自指、沿替代链两跳内无环）；reason（status=deprecated 时的废弃说明；deprecated 必须有 supersedes 或 reason 至少其一，不得无据废弃）。",
+  "source_note": "全量硬约束可追溯注册表（schema v1）。禁令级（level=ban）与 references/engineering.md 全局禁令表逐 ID 同源，summary 与 scripts/ban_rules.json 的 title 逐 ID 一致；非禁令硬约束以 references/general-pages.md / engineering.md / data-layer.md 实际条文为准，doc_anchor 形态为「仓库根相对路径#小节标题」，锚点按 scripts/rule_coverage.py 的标题折叠规则解析（语义与 scripts/tests/test_spec_docs.py 一致）。生命周期可选键（scripts/rule_coverage.py 校验）：status（active 缺省/deprecated）；since（本条所锚规范能力生效的版本号字符串，∈ 已发布版本集合 {1.0.0,1.1.0,1.2.0,1.3.0,1.4.0,1.5.0,1.6.0,1.7.0}，按 CHANGELOG 对应版本段逐条查证 debut，查证表见 CHANGELOG 对应版本段 附节）；supersedes（被本条替代的其他规则 id，须存在、非自指、沿替代链两跳内无环）；reason（status=deprecated 时的废弃说明；deprecated 必须有 supersedes 或 reason 至少其一，不得无据废弃）。",
   "rules": [
     {
       "id": "B1",
@@ -81,7 +81,7 @@
       "summary": "业务页面内容区必须用 Layout 的显式 rows × cols（非平凡布局用 areas 矩阵）做区域划分，禁止裸 div / flex / grid 自拼页面区域",
       "level": "hard",
       "enforcement": "manual",
-      "since": "unreleased",
+      "since": "1.7.0",
       "doc_anchor": "references/layout-system.md#布局公理layout--cell--card--content"
     },
     {
@@ -89,7 +89,7 @@
       "summary": "每个区域恰好一个 Cell；每个 Cell 恰好一个 Card；禁止空 Cell、单 Cell 多 Card、Card 内再套 Card（全屏结果页按白名单例外）；PageCell 开发态校验并附带同名测试",
       "level": "hard",
       "enforcement": "test",
-      "since": "unreleased",
+      "since": "1.7.0",
       "doc_anchor": "references/layout-system.md#布局公理layout--cell--card--content",
       "test": "template/src/components/PageLayout.test.tsx"
     },
@@ -98,7 +98,7 @@
       "summary": "Card content 必须由具名内容组件承载（ProTable/Descriptions/Form/Chart/List/Empty 等），禁止裸文本或 div 内容堆；Card title/extra 承载区域标题与操作；PageCard 开发态校验并附带同名测试",
       "level": "hard",
       "enforcement": "test",
-      "since": "unreleased",
+      "since": "1.7.0",
       "doc_anchor": "references/layout-system.md#card-内容组件",
       "test": "template/src/components/PageLayout.test.tsx"
     },
@@ -107,7 +107,7 @@
       "summary": "Layout 行轨道用 auto + minmax(0,1fr)，Cell/Card/Card body 逐级 min-height:0；滚动归 Card body / 表格体 / 地图宿主，页面级滚动只能由 PageShell exception 显式声明",
       "level": "hard",
       "enforcement": "manual",
-      "since": "unreleased",
+      "since": "1.7.0",
       "doc_anchor": "references/layout-system.md#高度链与滚动"
     },
     {
@@ -115,7 +115,7 @@
       "summary": "多列布局必须声明收缩顺序：xl 全量、lg/md 降列、sm 单列；DOM 顺序即阅读顺序，禁止 order 重排；窄屏不横向溢出，主要操作不得隐藏",
       "level": "hard",
       "enforcement": "manual",
-      "since": "unreleased",
+      "since": "1.7.0",
       "doc_anchor": "references/layout-system.md#响应式规则"
     },
     {
@@ -149,6 +149,22 @@
       "enforcement": "manual",
       "since": "1.3.0",
       "doc_anchor": "references/general-pages.md#内容真实性"
+    },
+    {
+      "id": "GP-USER-CONTROL",
+      "summary": "表单/弹层/删除/提交路径保留用户控制：默认值收敛、按需显示、即时反馈、撤回可逆、误关保留输入（默认继续编辑）、防误操作（焦点给安全动作、取消不发请求）、状态保留、双语一致与名称不藏；每条以页面状态/请求次数/焦点断言",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.7.0",
+      "doc_anchor": "references/general-pages.md#操作反馈与用户控制"
+    },
+    {
+      "id": "GP-STATE-TRANSITIONS",
+      "summary": "状态转换按「触发→当下反馈→最终状态→中断/回退」判定：可见差异必有一格反馈（静默替换是缺陷），「不动」是合法决定，高频更快数值跟 design-tokens 真源，中断从当前态续演，prefers-reduced-motion 首帧即生效；流畅度以真浏览器测量为准，冻结截图不作证据",
+      "level": "hard",
+      "enforcement": "manual",
+      "since": "1.7.0",
+      "doc_anchor": "references/state-transitions.md#状态转换判定程序"
     },
     {
       "id": "GP-ROUTE-MODAL-SYNC",
@@ -232,7 +248,7 @@
       "summary": "响应式截图基线必须按 docs/visual-baselines/<version>/ + manifest.json 登记（逐图 breakpoint/viewport），由 template/e2e/visual.spec.ts VISUAL_RESPONSIVE=1 采集；结构与视口尺寸由 visual_baseline_check.py --validate-only 校验，基线自比对须 RESULT: pass",
       "level": "hard",
       "enforcement": "test",
-      "since": "unreleased",
+      "since": "1.7.0",
       "doc_anchor": "references/visual-review.md#响应式基线结构断言",
       "checker": "scripts/visual_baseline_check.py",
       "fixture": "docs/visual-baselines/r1",

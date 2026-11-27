@@ -1,0 +1,17 @@
+/* Keep the title and the primary action readable at the layout system's sm breakpoint. */
+@media (max-width: 767px) {
+  .projectList :global(.ant-card-head-wrapper) {
+    flex-wrap: wrap;
+    row-gap: var(--ant-margin-xs);
+    padding-block: var(--ant-padding-xs);
+  }
+
+  .projectList :global(.ant-card-head-title) {
+    flex-basis: 100%;
+  }
+
+  .projectList :global(.ant-card-extra) {
+    width: 100%;
+    margin-inline-start: 0;
+  }
+}

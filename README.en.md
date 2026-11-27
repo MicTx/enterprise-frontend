@@ -2,8 +2,6 @@
 
 [中文](README.md) | [English](README.en.md)
 
-**Unreleased snapshot**: this branch includes changes since v1.6.0. For the stable release, use [v1.6.0](https://github.com/MicTx/enterprise-frontend/releases/tag/v1.6.0).
-
 **A constraint-driven spec for enterprise admin frontends** — a production-
 proven stack, design language, and engineering discipline distilled into a
 **hard-constraint checklist** that AI coding sessions execute directly.
@@ -16,7 +14,7 @@ proven stack, design language, and engineering discipline distilled into a
 **frontend engineering spec (a skill) for AI coding sessions**, made of three
 parts:
 
-1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus twelve
+1. **The constraint spec** — `SKILL.md` (an eight-layer main file) plus thirteen
    `references/` domain documents: bans, patterns, wiring discipline, and
    self-check hooks, all written as "do this", never as "you could consider".
 2. **The starter template** — `template/`, a compliant non-map base skeleton
@@ -74,7 +72,7 @@ record format, and the fix-then-re-verify loop live in
 
 ## Archive recipients: install, use and start a project
 
-These instructions apply to both this public snapshot and the release archives.
+These instructions apply to this public version and its release archives.
 
 ### Install
 
@@ -97,13 +95,15 @@ coreutils.
 
 ### Using it in a host session
 
-Add the path of `<target-dir>/enterprise-frontend` to your AI host's skill search path and
-describe tasks in natural language in a new session (some hosts also accept an
-explicit `$enterprise-frontend` or `/enterprise-frontend` prefix). The session classifies
-the scenario per the Workflow → runs the design-reasoning step (new
-pages/features produce a form·layout·composition design first) → reads the
-routed spec documents → applies the constraints → closes with the self-check
-hooks.
+Add `<target-dir>/enterprise-frontend` to your AI host's skill search path. In a new session, describe the task in natural language. The host decides when to activate the skill; use its explicit entry point when you want to select it directly. In Claude Code:
+
+| Command | What it does |
+| --- | --- |
+| `/enterprise-frontend design project list` | Produce a page shape, layout, four states, and a verification plan without editing application code. |
+| `/enterprise-frontend review src/pages/projects` | Report findings with locations, rules, and evidence. Leave application files untouched. |
+| `/enterprise-frontend revise fix the project dialog's accidental-close behavior` | Apply only the authorized changes and verify them. Do not commit or publish automatically. |
+
+On hosts without slash commands, explicitly select `enterprise-frontend` and enter the same command and target. Both entry points classify the intent and scenario, load the matching rules, and then deliver the requested design, review, or revision.
 
 ### Verify the install
 
@@ -144,6 +144,7 @@ reads which document:
 | `references/map-interaction.md` | Map interaction: box-select/draw/selection/highlight, alerts & legends, asset co-origin, single engine entry | Map interaction and assets (conditional) |
 | `references/visual-review.md` | Screenshot visual review & e2e fix advice: evidence-capture protocol, eight-axis checklist, finding admission & pixel-diff semantics, finding record format, fix-then-re-verify loop (incl. layered acceptance, re-verify judge consistency, flaky retry protocol) | Pixel-level screenshot review / visual regression / e2e fix advice (conditional) |
 | `references/testing-guide.md` | Test design guide: five test forms + mock patterns + per-scenario checklists | Writing/reviewing tests |
+| `references/state-transitions.md` | State-transition & motion decisions: trigger → immediate feedback → final state → interrupt/rollback four-cell check, five-signal table, reduced-motion effective on first frame | State-transition/motion work surfaces (conditional) |
 | `references/scenario-coverage.md` | Four core scenarios + public-page overlay matrix: scenario → anchors → self-check hooks | After scenario classification |
 
 The full B1–B7 definitions (check level, blacklist literals) live only in
@@ -153,4 +154,4 @@ source.
 
 ## License & distribution
 
-This snapshot is licensed under [PolyForm Noncommercial 1.0.0](LICENSE). **Commercial use requires separate written authorization**. See [third-party notices](THIRD_PARTY_NOTICES.md) and the [changelog](CHANGELOG.md).
+Licensed under [PolyForm Noncommercial 1.0.0](LICENSE). **Commercial use requires separate written authorization**. See the [third-party notices](THIRD_PARTY_NOTICES.md) and [changelog](CHANGELOG.md).

@@ -72,5 +72,5 @@
     "frame": "main",
     "capture_scope": "fullPage（8 张均 1280x800，页面无滚动，fullPage 高度未触及 8000px 上限）"
   },
-  "source_commit": "Private source revision omitted from the public snapshot"
+  "source_commit": "Private source revision omitted from this distribution"
 }

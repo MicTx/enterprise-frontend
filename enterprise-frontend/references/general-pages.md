@@ -1,8 +1,8 @@
 ---
 load_when: "任何页面 / 组件 / 布局工作默认先读；标语、说明文字、标签的界面删减"
 rule_ids: ["B2"]
-depends_on: ["layout-system.md","design-reasoning.md","data-layer.md","design-tokens.md","engineering.md","public-pages.md","visual-review.md","map-layers.md","map-interaction.md"]
-size_budget: 192
+depends_on: ["layout-system.md","design-reasoning.md","data-layer.md","design-tokens.md","engineering.md","public-pages.md","visual-review.md","map-layers.md","map-interaction.md","state-transitions.md"]
+size_budget: 216
 ---
 
 # 通用页面规范（general-pages）
@@ -13,11 +13,14 @@ size_budget: 192
 ## 用途与触发场景
 
 新建页面、扩展既有页面、存量页面修改、页面级一致性审查——进入任何页面/组件/布局
-工作前先读本篇，写任何标语、说明文字、标签前先过 [界面删减](#界面删减)；请求与数据面读
+工作前先读本篇，写任何标语、说明文字、标签前先过 [界面删减](#界面删减)，触碰
+表单 / 弹层 / 删除 / 提交路径先过 [操作反馈与用户控制](#操作反馈与用户控制)；
+请求与数据面读
 [data-layer](data-layer.md)，样式 token 读 [design-tokens](design-tokens.md)，
 质量门、接线质量钩子与每次改动的三方体验账读 [engineering](engineering.md)，
 地图场景另读地图章节；公开访客页面（落地页/营销页/活动页）另读
-[public-pages](public-pages.md)，中后台任务不读。
+[public-pages](public-pages.md)，中后台任务不读；状态转换与动效决策另读
+[state-transitions](state-transitions.md)（条件加载）。
 
 ## 布局骨架
 
@@ -83,6 +86,44 @@ ProTable / Modal+Form / Descriptions / Empty / Alert 的选型遵循 layout-syst
 - **动效**：遵循 [design-tokens](design-tokens.md#动效与交互状态)；
   `prefers-reduced-motion` 下移除位移/缩放。
 - **审查口径**：以上只作用于本次新增或触碰的界面，不借机整页补齐存量。
+
+## 操作反馈与用户控制
+
+复杂度留给系统：用户提交一个意图，系统负责确认生效、可收回、回来还在。
+本节八条是**可判定规则**（每条可用页面状态 / 请求次数 / 焦点位置断言），
+作用于本次新增或触碰的表单 / 弹层 / 删除 / 提交路径，不借机整页补齐存量。
+状态转换的反馈形态（要不要动效、给哪格）见
+[state-transitions](state-transitions.md)（条件加载）。
+
+1. **默认值收敛**：表单、筛选、分页先给能直接用的默认值；不让用户填系统
+   可推定的字段（当前页、默认页大小、当前角色可选项）。
+2. **按需显示**：次级信息不进首屏；展开/详情/编辑的入口在，但内容不在
+   初始渲染里占位。判断口径 = 初始可见区的信息能支撑当前任务闭环。
+3. **即时反馈**：每个可触发的操作让用户立即可知「收没收到」——提交置
+   confirmLoading / disabled 防连点，动作完成就地更新或给成功信号；
+   慢请求期间显示进行态，不让界面看起来像没反应。
+4. **撤回与可逆**：可逆操作给撤销路径；不可逆操作（删除、提交不可回退的
+   变更）写明对象与后果后默认停在安全动作。不承诺接口做不到的撤销——
+   删除成功后不可恢复的，不做「撤销删除」假按钮。
+5. **误关保留输入**：表单弹层 / 抽屉的关闭分两态——未做任何修改直接关；
+   有修改时默认动作是「继续编辑」，只有明确选择「放弃更改」才丢弃；
+   取消按钮不发请求。草稿不写持久存储（业务草稿与密码不出会话内存）。
+   「有修改」按实际字段值：onValuesChange 将当前值与打开时的基线比较（可空字段先归一）；改回原值后直接关闭，不用 sticky dirty 或 isFieldsTouched。
+   表单本体可直接读 `form.getFieldsValue()` 与当前基线比较；保持同一份表单挂载，勿在确认前清空。初始焦点给「继续编辑」，不能仅用按钮颜色暗示。
+   仅弃稿可用 context-aware `modal.confirm`（`App.useApp()`）：取消为「继续编辑」、确定为「放弃」。
+   用 `focusable: { autoFocusButton: 'cancel' }` 给安全初焦；键盘实测，不能靠按钮颜色或文案。
+6. **防误操作**：会发写请求的高风险确认（如删除）用受控 Modal，写明操作对象与后果，
+   初始焦点落在安全动作（取消），危险动作标 `danger`；不由 static `Modal.confirm` 代管。
+   提交期间锁住确认、取消和关闭路径，连按只生效一次。
+   等待回包时保留上下文，不把在途写入显示为可撤销。
+   失败时在弹层就地提示，原行不移除并保留重试；成功才更新并关闭。
+7. **状态保留**：从详情 / 编辑返回列表，检索词、筛选、分页、滚动位置
+   与选中行保持；慢翻页 / 刷新失败时旧数据继续展示并可重试，不打断
+   检索、不跳回第一页、不让旧响应覆盖新请求的弹层。
+8. **双语一致与名称不藏**：中英两版按钮与提示表达同一动作同一后果，
+   动词语义对齐；主要操作、错误信息与可访问名称（aria-label / 纯图标
+   按钮名称）不得藏进 Tooltip / 折叠区——那是把成本转嫁给读屏与
+   Agent（[engineering](engineering.md#三方体验账) §不转嫁）。
 
 ## 界面删减
 
@@ -155,10 +196,11 @@ ProTable / Modal+Form / Descriptions / Empty / Alert 的选型遵循 layout-syst
 - 每次改动的 UX / DX / AX 记账与零破坏证据 → [engineering](engineering.md#三方体验账)。
 - 请求通道、缓存、401 收敛、SSE → [data-layer](data-layer.md)（四态错误态的请求侧）。
 - 色彩/间距/控件高度 token、禁用态视觉 → [design-tokens](design-tokens.md)。
+- 状态转换的触发/反馈/中断回退判定 → [state-transitions](state-transitions.md)（条件加载）。
 - 公开页面策略、转化结构、SEO 与上线清单 → [public-pages](public-pages.md)（条件加载）。
 - 截图像素级审查与 e2e 修改意见协议 → [visual-review](visual-review.md)（条件加载）。
 - 地图场景页面规范 → map-layers / map-interaction（条件加载）。
-- SKILL.md References 层路由表第一行指向本篇（默认首读）。
+- SKILL.md Workflow「首批必读」按工作面指定何时读本篇；纯文案小修不叠加视觉和动效。
 
 ## 验证边界声明
 

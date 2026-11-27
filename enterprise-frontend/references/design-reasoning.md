@@ -1,8 +1,8 @@
 ---
 load_when: "新页面 / 新功能实现前必读：从需求推理页面形态、布局与卡片-内容组件组成"
 rule_ids: []
-depends_on: ["layout-system.md","general-pages.md","data-layer.md","engineering.md","map-layers.md","public-pages.md","scenario-coverage.md"]
-size_budget: 276
+depends_on: ["layout-system.md","general-pages.md","data-layer.md","engineering.md","map-layers.md","public-pages.md","scenario-coverage.md","state-transitions.md"]
+size_budget: 300
 ---
 
 # 页面设计推理（design-reasoning）
@@ -13,7 +13,7 @@ size_budget: 276
 
 ## 用途与触发场景
 
-SKILL.md Workflow 的「设计推理」步骤（场景判定与规范阅读之后、编码之前）。
+对应 SKILL.md Workflow「设计、执行与交付」：按本篇产出设计；仅在用户要求实施时继续编码。
 触发：新建页面、新功能模块、存量页面的形态级变化。纯样式微调与既定形态内的
 小修不触发本环节。
 
@@ -41,8 +41,9 @@ SKILL.md Workflow 的「设计推理」步骤（场景判定与规范阅读之�
 | 需求信号 | 页面形态 |
 | --- | --- |
 | 数据集合 + 行操作（查 / 筛 / 批量 / 导出） | 列表页（ProTable 卡内滚） |
-| 行实体的创建 / 编辑（低频、上下文轻） | Modal + Form（页内或路由弹层） |
-| 单实体只读详情（从列表 / 地图下钻） | Descriptions + Drawer |
+| 行实体的创建 / 编辑（低频、上下文轻） | Modal + Form（页内或路由弹层；误关两态见卡片二） |
+| 单实体只读详情（从列表 / 地图下钻） | Descriptions + Drawer（即开即骨架，不等数据先开见卡片三） |
+| 行实体的高风险删除 | 就地确认：写明对象与后果，初始焦点给安全动作（取消），成功才更新（卡片一） |
 | 指标总览 + 多模块入口 | 工作台（统计行 + 卡片网格 + 图表卡） |
 | 空间数据浏览 / 操作 | 地图工作台（图层按 map-layers 选型矩阵） |
 | 长流程采集 / 向导（内容天然超屏） | 页面级滚动 + exception 显式声明 |
@@ -98,45 +99,71 @@ exception 显式声明——细则见 [general-pages](general-pages.md#布局骨
 
 ```tsx
 import { ProTable, type ProColumns } from '@ant-design/pro-components';
-import { Button } from 'antd';
+import { Alert, Button, Modal } from 'antd';
+import { useRef, useState } from 'react';
 import PageShell from '@/components/PageShell';
 import PageLayout, { PageCard, PageCell } from '@/components/PageLayout';
 
 interface Row { id: string; name: string; status: string; }
 
-const columns: ProColumns<Row>[] = [
-  { title: '名称', dataIndex: 'name' },
-  { title: '状态', dataIndex: 'status' },
-  { title: '操作', valueType: 'option', render: (_, row) => [
-    <a key="detail">详情</a>,   // → 详情抽屉（卡片三）
-    <a key="edit">编辑</a>,     // → Modal 表单（卡片二）
-  ] },
-];
+interface ListActions {
+  openDetail: (id: string) => void; edit: (row: Row | null) => void;
+  remove: (id: string) => Promise<void>; canWrite: boolean;
+  rows: Row[]; loading: boolean; rowsAreCurrent: boolean;
+}
 
-export default function ExampleList() {
+export default function ExampleList(p: ListActions) {
+  const [target, confirmRemove] = useState<Row | null>(null);
+  const [phase, setPhase] = useState<'idle' | 'pending' | 'error'>('idle');
+  const safeButton = useRef<HTMLButtonElement>(null);
+  const pending = useRef(false);
+  const close = () => { if (!pending.current) { confirmRemove(null); setPhase('idle'); } };
+  const remove = async () => {
+    if (!target || pending.current) return;
+    pending.current = true; setPhase('pending');
+    try { await p.remove(target.id); confirmRemove(null); setPhase('idle'); }
+    catch { setPhase('error'); }
+    finally { pending.current = false; }
+  };
+
+  const columns: ProColumns<Row>[] = [
+    { title: '名称', dataIndex: 'name' },
+    { title: '状态', dataIndex: 'status' },
+    { title: '操作', valueType: 'option', render: (_, row) => [
+      <Button key="detail" type="link" disabled={!p.rowsAreCurrent} onClick={() => p.openDetail(row.id)}>详情</Button>,
+      p.canWrite && <Button key="edit" type="link" disabled={!p.rowsAreCurrent} onClick={() => p.edit(row)}>编辑</Button>,
+      p.canWrite && <Button key="remove" type="link" danger disabled={!p.rowsAreCurrent} onClick={() => confirmRemove(row)}>删除</Button>,
+    ] },
+  ];
+
   return (
     <PageShell>
       <PageLayout rows={[1]} cols={[1]}>
         <PageCell>
           <PageCard
             title="示例列表"
-            extra={<Button type="primary">新建</Button>}  // → Modal 表单（卡片二）
+            extra={p.canWrite && <Button type="primary" onClick={() => p.edit(null)}>新建</Button>}
             variant="flush"
             content={
               <ProTable<Row>
                 rowKey="id"
                 columns={columns}
-                // 服务端状态走 React Query + queryKeys 真源（data-layer 篇）；
-                // request 内部接统一请求通道，不直接 import axios（B1）
-                request={async () => ({ data: [], success: true, total: 0 })}
-                scroll={{ y: 480 }}      // 卡内滚：滚动归表格体（general-pages 布局骨架）
-                search={{ labelWidth: 'auto' }}
-                rowSelection={{}}        // 需要批量操作时开启，配 ListBatchBar
+                dataSource={p.rows} loading={p.loading}
+                scroll={{ x: 'max-content', y: 480 }} search={false}
               />
             }
           />
         </PageCell>
       </PageLayout>
+      <Modal open={!!target} title={`删除「${target?.name ?? ''}」？`} onCancel={close}
+        afterOpenChange={(open) => { if (open) safeButton.current?.focus(); }}
+        footer={[
+          <Button key="cancel" ref={safeButton} disabled={phase === 'pending'} onClick={close}>取消</Button>,
+          <Button key="delete" danger loading={phase === 'pending'} onClick={remove}>删除</Button>,
+        ]}>
+        删除后不可恢复。
+        {phase === 'error' && <Alert type="error" title="删除失败，请重试" />}
+      </Modal>
     </PageShell>
   );
 }
@@ -145,34 +172,43 @@ export default function ExampleList() {
 ### 卡片二：Modal 表单
 
 ```tsx
-import { Form, Input, Modal } from 'antd';
-import { useState } from 'react';
+import { Alert, App, Form, Input, Modal } from 'antd';
+import { useEffect, useRef, useState } from 'react';
 
 export interface FormValue { name: string; }
 
-export default function ExampleFormModal({ open, onCancel }: {
-  open: boolean;
-  onCancel: () => void;
+// 通过 open 控制显隐，让退出动画和焦点归还完成。close 仅关闭发起写入的会话。
+export default function ExampleFormModal({ open, initial, save, close }: {
+  open: boolean; initial: FormValue; save: (value: FormValue) => Promise<void>; close: () => void;
 }) {
   const [form] = Form.useForm<FormValue>();
-  const [submitting, setSubmitting] = useState(false);
+  const { modal } = App.useApp();
+  const inFlight = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (open) { form.resetFields(); form.setFieldsValue({ name: initial.name }); }
+  }, [open, initial.name, form]);
+  const requestClose = () => {
+    if (inFlight.current) return;
+    if (form.getFieldValue('name') === initial.name) { close(); return; }
+    modal.confirm({ title: '放弃未保存的更改？', okText: '放弃更改', cancelText: '继续编辑',
+      okButtonProps: { danger: true }, focusable: { autoFocusButton: 'cancel' }, onOk: close });
+  };
+  const submit = async (value: FormValue) => {
+    if (inFlight.current) return;
+    inFlight.current = true; setSaving(true); setFailed(false);
+    try { await save(value); close(); }
+    catch { setFailed(true); }
+    finally { inFlight.current = false; setSaving(false); }
+  };
   return (
-    <Modal
-      title="示例表单"
-      open={open}
-      confirmLoading={submitting}          // 提交态（禁用态由主题 token 承载）
-      onCancel={() => { form.resetFields(); onCancel(); }}
-      onOk={async () => {
-        const values = await form.validateFields();
-        setSubmitting(true);
-        try { /* 提交走统一请求通道（data-layer 篇）；成功后关闭并刷新列表 */ }
-        finally { setSubmitting(false); }
-      }}
-    >
-      <Form form={form} layout="vertical">
-        <Form.Item name="name" label="名称" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
+    <Modal title="编辑项目" open={open} destroyOnHidden afterClose={() => setFailed(false)}
+      onCancel={requestClose} onOk={() => form.submit()}
+      okText="保存" confirmLoading={saving} cancelButtonProps={{ disabled: saving }} keyboard={!saving}>
+      {failed && <Alert type="error" title="保存失败，请重试" />}
+      <Form form={form} layout="vertical" preserve={false} initialValues={initial} disabled={saving} onFinish={submit}>
+        <Form.Item name="name" label="名称" rules={[{ required: true }]}><Input /></Form.Item>
       </Form>
     </Modal>
   );
@@ -182,25 +218,35 @@ export default function ExampleFormModal({ open, onCancel }: {
 ### 卡片三：详情抽屉
 
 ```tsx
-import { Descriptions, Drawer, Skeleton } from 'antd';
+import { Alert, Button, Descriptions, Drawer, Empty, Skeleton } from 'antd';
 
 export interface Detail { id: string; name: string; status: string; }
 
-export default function ExampleDetailDrawer({ detail, loading, onClose }: {
-  detail?: Detail;
+// 打开与数据解耦（general-pages §操作反馈与用户控制 第 3 条即时反馈）：点击详情
+// 即开抽屉给骨架，不等响应落地才开。四态真状态：loading / error+retry / empty / 成功。
+export default function ExampleDetailDrawer({ open, detail, loading, error, onRetry, onClose }: {
+  open: boolean;                     // 由行操作立即置 true，与 detail 是否到位无关
+  detail?: Detail;                   // 到位 — 成功态；缺省 + !loading + !error = 空态
   loading?: boolean;
+  error?: boolean;                   // 请求失败 — 就地 Alert + 重试，不关抽屉
+  onRetry: () => void;
   onClose: () => void;
 }) {
   return (
-    <Drawer open={!!detail} onClose={onClose} width={480} title="示例详情">
+    <Drawer open={open} onClose={onClose} width={480} title="示例详情">
       {loading ? (
-        <Skeleton active />
+        <Skeleton active />           // 即开即骨架：当下反馈 = 已收到的状态
+      ) : error ? (
+        <Alert type="error" showIcon title="详情加载失败"
+          action={<Button size="small" onClick={onRetry}>重试</Button>} />
       ) : detail ? (
         <Descriptions column={1} bordered size="small">
           <Descriptions.Item label="名称">{detail.name}</Descriptions.Item>
           <Descriptions.Item label="状态">{detail.status}</Descriptions.Item>
         </Descriptions>
-      ) : null}
+      ) : (
+        <Empty />                  // 空态：实体没了/权限丢失 — 空白不可
+      )}
     </Drawer>
   );
 }
@@ -239,6 +285,7 @@ Review Loop 复查时以设计产物为对照：组件组成缺四态、布局�
   [engineering](engineering.md)。
 - 地图形态的图层与预算约束 → [map-layers](map-layers.md)。
 - 公开页面策略、转化结构、SEO 与上线清单 → [public-pages](public-pages.md)（条件加载）。
+- 状态转换的触发/反馈/中断回退 → [state-transitions](state-transitions.md)（条件加载）。
 - 场景 → 工作面映射 → [scenario-coverage](scenario-coverage.md)。
 
 ## 验证边界声明

@@ -46,7 +46,7 @@ from pathlib import Path
 LEVELS = ("ban", "hard", "discipline")
 ENFORCEMENTS = ("auto", "manual", "test")
 STATUSES = ("active", "deprecated")
-RELEASED_VERSIONS = ("1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0")
+RELEASED_VERSIONS = ("1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0")
 # 未定版新规则用哨兵 since="unreleased"，定版时回填实际版本号（诚实优于伪填）。
 SINCE_SENTINELS = ("unreleased",)
 REQUIRED_FIELDS = ("id", "summary", "level", "enforcement", "doc_anchor")

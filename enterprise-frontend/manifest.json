@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "skill": "enterprise-frontend",
-  "version": "1.6.0-dev",
+  "version": "1.7.0",
   "requires": {
     "python": ">=3.9",
     "bash": ">=3.2"

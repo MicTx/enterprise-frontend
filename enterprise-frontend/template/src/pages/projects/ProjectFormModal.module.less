@@ -1,0 +1,40 @@
+/* Ant owns the modal's portal/focus. CSS owns only the form's reversible visuals. */
+@media (prefers-reduced-motion: no-preference) {
+  .surface .mask {
+    opacity: 1;
+    transition: opacity var(--ant-motion-duration-mid) var(--ant-motion-ease-out);
+  }
+
+  .surface .panel {
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--ant-motion-duration-mid) var(--ant-motion-ease-out),
+      transform var(--ant-motion-duration-mid) var(--ant-motion-ease-out);
+  }
+
+  @starting-style {
+    .surface .panel,
+    .surface .mask {
+      opacity: 0;
+    }
+
+    .surface .panel {
+      transform: scale(0.96);
+    }
+  }
+}
+
+.surface.leaving .panel,
+.surface.leaving .mask {
+  opacity: 0;
+}
+
+.surface.leaving .panel {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .surface.leaving .panel {
+    transform: scale(0.96);
+  }
+}

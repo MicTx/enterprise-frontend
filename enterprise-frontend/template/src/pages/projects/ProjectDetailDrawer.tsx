@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FormattedMessage } from '@umijs/max';
 import { Alert, Button, Descriptions, Drawer, Skeleton, Tag } from 'antd';
 import dayjs from 'dayjs';
+import { memo, useEffect, useRef } from 'react';
 import { getProject, type Project } from '@/services/projects';
 import { queryKeys } from '@/services/queryKeys';
 
@@ -13,6 +14,10 @@ const STATUS_COLOR: Record<Project['status'], string | undefined> = {
 /**
  * 项目详情抽屉：Descriptions 分区只读（general-pages §CRUD 模式）。
  * 数据区块四态自承载：加载 Skeleton、错误 Alert+重试、空态（不打开）、内容即成功态。
+ *
+ * 关闭契约（experience-motion §3）：projectId 清空表示开始关闭。此刻必须
+ * 保住最后一次内容渲染，不能因 query 状态翻转回 pending 而闪骨架；
+ * onClose 仅由 Drawer 自身关闭控件/遮罩/Esc 触发，且总是回传父级。
  */
 export interface ProjectDetailDrawerProps {
   /** 详情目标 id；null = 关闭 */
@@ -20,17 +25,21 @@ export interface ProjectDetailDrawerProps {
   onClose: () => void;
 }
 
-export default function ProjectDetailDrawer({
-  projectId,
-  onClose,
-}: ProjectDetailDrawerProps) {
+// 抽屉与表单/列表同层挂载，memo 隔离：父组件因表体无关状态（编辑/删除弹层
+// 开合）重渲染时，关闭态下的抽屉不重跑 Descriptions/dayjs 格式化。
+function ProjectDetailDrawer({ projectId, onClose }: ProjectDetailDrawerProps) {
+  // 离场仍订阅同一条记录的缓存，而非回放上一条成功数据；关闭不再发请求。
+  const lastOpenedId = useRef<string | null>(null);
+  useEffect(() => {
+    if (projectId) lastOpenedId.current = projectId;
+  }, [projectId]);
+  const displayedId = projectId ?? lastOpenedId.current;
   const query = useQuery({
-    queryKey: queryKeys.project(projectId ?? ''),
-    queryFn: () => getProject(projectId as string),
+    queryKey: queryKeys.project(displayedId ?? ''),
+    queryFn: () => getProject(displayedId as string),
     enabled: !!projectId,
   });
-
-  const project = query.data;
+  const { data: project, isError, isPending } = query;
 
   return (
     <Drawer
@@ -42,11 +51,11 @@ export default function ProjectDetailDrawer({
           defaultMessage="项目详情"
         />
       }
-      width={520}
+      size={520}
       destroyOnHidden
     >
-      {query.isPending && <Skeleton active paragraph={{ rows: 6 }} />}
-      {query.isError && (
+      {isPending && <Skeleton active paragraph={{ rows: 6 }} />}
+      {isError && (
         <Alert
           type="error"
           showIcon
@@ -136,3 +145,5 @@ export default function ProjectDetailDrawer({
     </Drawer>
   );
 }
+
+export default memo(ProjectDetailDrawer);

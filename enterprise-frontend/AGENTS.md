@@ -16,6 +16,10 @@ Read `SKILL.md` for the full contract: eight-layer workflow, the conditional-loa
 由 `scripts/visual_baseline_check.py` 校验，fix-reverified 证据包由
 `scripts/visual_review_check.py` 校验；细则见 `references/visual-review.md`。
 
+状态转换/动效（显隐、移动缩放、内容替换、按压悬停、加载完成出错）为条件叠加工作面：
+仅命中时读取 `references/state-transitions.md`，纯静态与纯数据任务不读；流畅度以真
+浏览器测量为准，冻结动画的截图与 rAF 估算不作证据。
+
 每次改动另受两条全局硬约束：界面删减（`references/general-pages.md`）与三方体验账
 （`references/engineering.md`，UX / DX / AX 三方都变好、现有功能零破坏）。
 

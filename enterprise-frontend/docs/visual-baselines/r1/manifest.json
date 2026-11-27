@@ -86,5 +86,5 @@
     "engine": "Blink（headless shell）",
     "page_scale": "100%"
   },
-  "source_commit": "Private source revision omitted from the public snapshot"
+  "source_commit": "Private source revision omitted from this distribution"
 }

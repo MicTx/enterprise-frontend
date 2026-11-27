@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { FormattedMessage } from '@umijs/max';
-import { Alert, Button, Empty, Form, Input, Modal } from 'antd';
+import { Alert, Button, Form, Input, Modal } from 'antd';
 import PageLayout, { PageCard, PageCell } from '@/components/PageLayout';
 import PageShell from '@/components/PageShell';
 import { type LoginPayload, login } from '@/services/auth';
@@ -34,11 +34,12 @@ export default function Home() {
               <FormattedMessage id="home.cardTitle" defaultMessage="开始" />
             }
             content={
-              <Empty
-                description={
-                  <FormattedMessage id="home.empty" defaultMessage="尚无数据" />
-                }
-              />
+              <Button type="primary" href="/projects" disabled={loginOpen}>
+                <FormattedMessage
+                  id="home.viewProjects"
+                  defaultMessage="查看项目"
+                />
+              </Button>
             }
           />
         </PageCell>

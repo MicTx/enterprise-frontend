@@ -6,7 +6,13 @@ The format follows Keep a Changelog headings so the packaging step can extract v
 
 ## [Unreleased]
 
-This section is a preview, not part of the v1.6.0 release.
+## [1.7.0] - 2026-11-26
+
+### Changed
+
+- 技能在保留八层与四主场景的前提下，优先识别管理端文案、保稿、动效和静图验收请求；命中后按工作面直读首批必要规范，小修不扫全仓。时长沿用目标主题，静帧不能证明流畅度。公开页面章节、内容真实性与 `THIRD_PARTY_NOTICES.md` 的许可边界保持不变。
+- 新增同一技能内的 `design`、`review`、`revise` 入口，分别交付设计、只读审查及范围受限的修订与复验。显式 `design` 和 `review` 不因附带实现请求而写源码。
+- 项目模板保护未保存输入，删除默认安全取消；区分无匹配、加载与更新失败，窄屏保留名称列和主要操作。弹层、抽屉与骨架响应系统的减少动态效果偏好；示例、双语文案与运行时行为对齐。
 
 ### Added
 
@@ -25,7 +31,7 @@ This section is a preview, not part of the v1.6.0 release.
   content；新增组件单测与页面布局契约测试（业务页面不得直接 import antd Card、
   不得写页面级栅格类）。
 - **布局规则注册与行为夹具**：rule_registry 增 5 条布局硬约束（GP-LAYOUT-GRID /
-  CELL-CARD / CARD-CONTENT / HEIGHT / RESPONSIVE，since=unreleased 哨兵），
+  CELL-CARD / CARD-CONTENT / HEIGHT / RESPONSIVE，本版生效），
   rule-traceability 视图再生成；evals 增 3 个布局场景夹具（裸 div 拼页、
   一区域多卡、Card content 裸 div）与推导锚点；`docs/layout-research-2026-11.md`
   记录 Ant Design Pro / shadcn-admin / next-shadcn-dashboard-starter /

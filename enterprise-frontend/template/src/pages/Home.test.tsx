@@ -36,10 +36,14 @@ describe('Home', () => {
     window.history.replaceState(null, '', '/');
   });
 
-  it('渲染单卡片占位与空态，无 login 参数时不弹登录', () => {
+  it('无回跳目标的首页直接提供项目入口，不显示没有数据的误导文案', () => {
     renderHome();
     expect(screen.getByText('开始')).toBeInTheDocument();
-    expect(screen.getByText('尚无数据')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '查看项目' })).toHaveAttribute(
+      'href',
+      '/projects',
+    );
+    expect(screen.queryByText('尚无数据')).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 

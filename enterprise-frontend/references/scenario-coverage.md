@@ -1,7 +1,7 @@
 ---
-load_when: "SKILL.md Workflow 完成场景判定后读本篇，按场景取必读锚点与自查钩子、核对四场景覆盖缺口"
+load_when: "已判场景但未命中首批必读，或复合场景／收尾需核对覆盖缺口；按场景取必读锚点与自查钩子"
 rule_ids: []
-depends_on: ["layout-system.md","engineering.md","design-reasoning.md","general-pages.md","data-layer.md","design-tokens.md","testing-guide.md","public-pages.md","map-layers.md","map-interaction.md","visual-review.md"]
+depends_on: ["layout-system.md","engineering.md","design-reasoning.md","general-pages.md","data-layer.md","design-tokens.md","testing-guide.md","public-pages.md","map-layers.md","map-interaction.md","visual-review.md","state-transitions.md"]
 size_budget: 144
 ---
 
@@ -9,7 +9,7 @@ size_budget: 144
 
 > 四个核心场景 + 公开页面 / 视觉审查条件叠加 → 规范条目映射矩阵（顺序：地图工作台 →
 > 规范审查 → 存量页面修改 → 非地图 CRUD；公开页面与视觉审查为条件叠加，不改变四场景主分类）。
-> SKILL.md Workflow 判定场景后读本篇，按行取必读锚点与自查钩子。
+> 先执行 SKILL.md Workflow 的首批必读；未命中或需核对复合场景／收尾时，再按本篇取锚点与自查钩子。
 > 矩阵只做映射不复制条文——约束条文的单一真源在各规范文档与
 > [engineering](engineering.md) 禁令表。
 
@@ -26,7 +26,8 @@ size_budget: 144
 - 工作面之间不互斥：一个任务可同时命中多个工作面，逐行取用；地图场景额外叠加
   两篇地图文档（SKILL.md 路由表条件加载）；公开访客页面额外叠加公开页文档，中后台
   任务不读；截图像素级审查 / 视觉回归 / e2e 修改意见任务额外叠加视觉审查文档，
-  纯代码任务不读。
+  纯代码任务不读；命中状态转换 / 动效工作面（显隐、移动缩放、内容替换、按压
+  悬停、加载完成出错）额外叠加 state-transitions 文档，纯静态与纯数据任务不读。
 - 自查钩子中的 `<目标>` 代指本轮改动面路径（目录或文件）；规范审查场景的钩子
   即本仓工具（ban_scan）的执行命令。
 
@@ -111,6 +112,20 @@ size_budget: 144
 | 发现准入与记录 | [visual-review](references/visual-review.md#偏差判定) + [visual-review](references/visual-review.md#发现记录与-e2e-修改意见格式) | 准入四门（功能 / 无障碍 / 布局破损 / 违反设计约定）；感知色差双阈值与 AA 豁免；动态区域掩码清单化；还原度分层验收；**三级证据级别（observation / runtime-confirmed / fix-reverified）**；finding 强制字段与 fix 双分层；修复值走真源不发明新值 | — | finding 字段齐备性与「模糊表述」复查；掩码清单登记核对 |
 | 修复与复验闭环 | [visual-review](references/visual-review.md#修复复验闭环) | 同参数同环境重截；前后对比排除误报；基线不可原地覆盖；复验裁判一致性（同一观察空间）；重试两级协议（采集稳定 + 判定，混合结果 flaky）；落地改动照常过质量门与三方体验账 | B1–B7 全量（落地改动面） | `npm run lint && npm run test:ci`（目标仓质量门）+ 交付说明四行 + 复验对比证据（含重试记录）+ `python3 <skill-root>/scripts/visual_review_check.py <证据包>`（退出码 0） |
 | 响应式基线 | [visual-review](references/visual-review.md#响应式基线结构断言) | xl / lg / md / sm 四档逐图 `breakpoint` / `viewport` 与 PNG 实际尺寸一致；建立走 fix-reverified 证据包（verdict=pass、retries=pass）；r1 只读留存 | — | `python3 <skill-root>/scripts/visual_baseline_check.py --manifest docs/visual-baselines/r1/manifest.json --validate-only` + `python3 <skill-root>/scripts/visual_review_check.py docs/visual-baselines/r1/visual-review.json` |
+
+### 状态转换（条件叠加）
+
+仅在任务命中状态转换 / 动效工作面（元素显隐、移动缩放、内容/图标/数值替换、
+按压悬停、加载完成出错）时取用；不改变四个核心场景的判定，纯静态与纯数据
+任务不读本篇。用户控制规则（误关保留输入、防误操作、状态保留）属
+general-pages §操作反馈与用户控制，不在本节复制。
+
+| 工作面 | 必读锚点 | 关键约束条目 | 禁令子集（高发/侧重） | 自查钩子 |
+| --- | --- | --- | --- | --- |
+| 转换判定 | [state-transitions](references/state-transitions.md#状态转换判定程序) | 「触发 → 当下反馈 → 最终状态 → 中断/回退」四格判定；「不动」是合法决定；静默替换是缺陷 | — | 逐命中信号核对四格判定记录是否给出 |
+| 减动效 | [state-transitions](references/state-transitions.md#动效纪律) | `prefers-reduced-motion` 首帧即生效、运行中可切换；移除位移/缩放保留透明度变化 | — | `grep -rn -e "prefers-reduced-motion" <目标>`（降级路径抽查） |
+| 用户控制 | [general-pages](references/general-pages.md#操作反馈与用户控制) | 即时反馈、撤回、误关保留输入、防误操作、状态保留、双语一致 | — | `grep -rn -e "Modal.confirm" -e "isFieldsTouched" -e "confirmLoading" <目标>`（两态误关/防连点抽查） |
+| 流畅度证据 | [state-transitions](references/state-transitions.md#动效纪律) | 帧率/掉帧以真浏览器测量为准；冻结动画截图与 rAF 估算不能作证据 | — | 不以截图声称流畅度；运行证据归 visual-review 协议 |
 
 ## 覆盖缺口登记
 
